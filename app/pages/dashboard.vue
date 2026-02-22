@@ -240,7 +240,7 @@ const companiesWithIcons = computed(() => {
         v-for="stat in statCards"
         :key="stat.label"
         rounded="lg"
-        class="p-5"
+        class="min-w-0 p-5"
       >
         <div class="flex items-center gap-4">
           <div class="bg-primary-500/10 flex size-12 shrink-0 items-center justify-center rounded-lg">
@@ -264,7 +264,7 @@ const companiesWithIcons = computed(() => {
     <!-- Charts Row -->
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
       <!-- Cost Overview Chart -->
-      <BaseCard rounded="lg" class="p-5">
+      <BaseCard rounded="lg" class="min-w-0 p-5">
         <div class="mb-4 flex items-center justify-between">
           <h3 class="text-muted-800 dark:text-white text-lg font-semibold">
             Cost Overview
@@ -309,7 +309,7 @@ const companiesWithIcons = computed(() => {
       </BaseCard>
 
       <!-- Labs Summary Chart -->
-      <BaseCard rounded="lg" class="p-5">
+      <BaseCard rounded="lg" class="min-w-0 p-5">
         <div class="mb-4 flex items-center justify-between">
           <h3 class="text-muted-800 dark:text-white text-lg font-semibold">
             Labs Summary
