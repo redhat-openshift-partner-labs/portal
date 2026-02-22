@@ -119,6 +119,22 @@ const labsChartSeries = ref([
   { name: 'Created', data: [28, 35, 42, 38, 45, 52] },
   { name: 'Completed', data: [22, 30, 38, 35, 40, 48] }
 ])
+
+// Companies served data
+const companies = ref([
+  { name: 'Acme Corp', logo: 'ph:building-duotone' },
+  { name: 'TechFlow', logo: 'ph:cpu-duotone' },
+  { name: 'CloudNine', logo: 'ph:cloud-duotone' },
+  { name: 'DataDriven', logo: 'ph:chart-line-duotone' },
+  { name: 'SecureNet', logo: 'ph:shield-check-duotone' },
+  { name: 'InnovateLabs', logo: 'ph:lightbulb-duotone' },
+  { name: 'ScaleUp', logo: 'ph:rocket-duotone' },
+  { name: 'DevOps Pro', logo: 'ph:gear-duotone' },
+  { name: 'CloudStack', logo: 'ph:stack-duotone' },
+  { name: 'NetSolutions', logo: 'ph:network-duotone' },
+  { name: 'CodeCraft', logo: 'ph:code-duotone' },
+  { name: 'SystemsPlus', logo: 'ph:desktop-tower-duotone' }
+])
 </script>
 
 <template>
@@ -245,5 +261,66 @@ const labsChartSeries = ref([
         </ClientOnly>
       </BaseCard>
     </div>
+
+    <!-- Companies Served Ticker -->
+    <BaseCard rounded="lg" class="overflow-hidden p-4">
+      <p class="text-muted-500 dark:text-muted-400 mb-3 text-center text-sm font-medium">
+        Companies We Serve
+      </p>
+      <div class="ticker-container relative">
+        <div class="ticker-track flex gap-12">
+          <!-- First set of companies -->
+          <div
+            v-for="company in companies"
+            :key="company.name"
+            class="ticker-item flex shrink-0 items-center gap-3"
+          >
+            <div class="bg-primary-500/10 flex size-10 items-center justify-center rounded-lg">
+              <Icon :name="company.logo" class="text-primary-500 size-5" />
+            </div>
+            <span class="text-muted-700 dark:text-muted-300 whitespace-nowrap font-medium">
+              {{ company.name }}
+            </span>
+          </div>
+          <!-- Duplicate set for seamless loop -->
+          <div
+            v-for="company in companies"
+            :key="`${company.name}-dup`"
+            class="ticker-item flex shrink-0 items-center gap-3"
+          >
+            <div class="bg-primary-500/10 flex size-10 items-center justify-center rounded-lg">
+              <Icon :name="company.logo" class="text-primary-500 size-5" />
+            </div>
+            <span class="text-muted-700 dark:text-muted-300 whitespace-nowrap font-medium">
+              {{ company.name }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </BaseCard>
   </div>
 </template>
+
+<style scoped>
+.ticker-container {
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+
+.ticker-track {
+  animation: ticker 30s linear infinite;
+}
+
+@keyframes ticker {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.ticker-container:hover .ticker-track {
+  animation-play-state: paused;
+}
+</style>
