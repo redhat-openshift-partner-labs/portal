@@ -235,7 +235,7 @@ const companiesWithIcons = computed(() => {
     </div>
 
     <!-- Stat Cards -->
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="grid grid-cols-2 gap-4 xl:grid-cols-4">
       <BaseCard
         v-for="stat in statCards"
         :key="stat.label"
@@ -262,9 +262,9 @@ const companiesWithIcons = computed(() => {
     </div>
 
     <!-- Charts Row -->
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
       <!-- Cost Overview Chart -->
-      <BaseCard rounded="lg" class="min-w-0 p-5">
+      <BaseCard rounded="lg" class="min-w-0 overflow-hidden p-5">
         <div class="mb-4 flex items-center justify-between">
           <h3 class="text-muted-800 dark:text-white text-lg font-semibold">
             Cost Overview
@@ -309,7 +309,7 @@ const companiesWithIcons = computed(() => {
       </BaseCard>
 
       <!-- Labs Summary Chart -->
-      <BaseCard rounded="lg" class="min-w-0 p-5">
+      <BaseCard rounded="lg" class="min-w-0 overflow-hidden p-5">
         <div class="mb-4 flex items-center justify-between">
           <h3 class="text-muted-800 dark:text-white text-lg font-semibold">
             Labs Summary
