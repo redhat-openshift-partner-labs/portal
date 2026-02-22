@@ -1,0 +1,33 @@
+@import 'tailwindcss';
+@import '@shuriken-ui/nuxt';
+@import '#layers/@cssninja/tairo/theme.css';
+
+@theme {
+    --font-sans: 'Inter', sans-serif;
+    --font-alt: 'Karla', sans-serif;
+
+    --color-primary-50: var(--color-yellow-50);
+    --color-primary-100: var(--color-yellow-100);
+    --color-primary-200: var(--color-yellow-200);
+    --color-primary-300: var(--color-yellow-300);
+    --color-primary-400: var(--color-yellow-400);
+    --color-primary-500: var(--color-yellow-500);
+    --color-primary-600: var(--color-yellow-600);
+    --color-primary-700: var(--color-yellow-700);
+    --color-primary-800: var(--color-yellow-800);
+    --color-primary-900: var(--color-yellow-900);
+
+    --color-muted-50: var(--color-stone-50);
+    --color-muted-100: var(--color-stone-100);
+    --color-muted-200: var(--color-stone-200);
+    --color-muted-300: var(--color-stone-300);
+    --color-muted-400: var(--color-stone-400);
+    --color-muted-500: var(--color-stone-500);
+    --color-muted-600: var(--color-stone-600);
+    --color-muted-700: var(--color-stone-700);
+    --color-muted-800: var(--color-stone-800);
+    --color-muted-900: var(--color-stone-900);
+
+    --tairo-collapse-width-open: 16rem;
+    --tairo-collapse-width-collapsed: 4rem;
+}
