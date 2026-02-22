@@ -32,8 +32,11 @@ const costChartOptions = computed(() => ({
     id: 'cost-overview',
     type: 'area' as const,
     height: 280,
+    width: '100%',
     toolbar: { show: false },
-    zoom: { enabled: false }
+    zoom: { enabled: false },
+    redrawOnParentResize: true,
+    redrawOnWindowResize: true
   },
   colors: ['#0ea5e9', '#a855f7', '#22c55e'],
   stroke: {
@@ -97,7 +100,10 @@ const labsChartOptions = computed(() => ({
     id: 'labs-summary',
     type: 'bar' as const,
     height: 280,
-    toolbar: { show: false }
+    width: '100%',
+    toolbar: { show: false },
+    redrawOnParentResize: true,
+    redrawOnWindowResize: true
   },
   colors: ['#0ea5e9', '#22c55e'],
   plotOptions: {
@@ -293,13 +299,15 @@ const companiesWithIcons = computed(() => {
               </div>
             </div>
           </template>
-          <apexchart
-            v-else
-            type="area"
-            height="280"
-            :options="costChartOptions"
-            :series="costChartSeries"
-          />
+          <div v-else class="w-full">
+            <apexchart
+              type="area"
+              height="280"
+              width="100%"
+              :options="costChartOptions"
+              :series="costChartSeries"
+            />
+          </div>
           <template #fallback>
             <div class="bg-muted-100 dark:bg-muted-800 flex h-[280px] items-center justify-center rounded-lg">
               <p class="text-muted-400">Loading chart...</p>
@@ -342,13 +350,15 @@ const companiesWithIcons = computed(() => {
               </div>
             </div>
           </template>
-          <apexchart
-            v-else
-            type="bar"
-            height="280"
-            :options="labsChartOptions"
-            :series="labsChartSeries"
-          />
+          <div v-else class="w-full">
+            <apexchart
+              type="bar"
+              height="280"
+              width="100%"
+              :options="labsChartOptions"
+              :series="labsChartSeries"
+            />
+          </div>
           <template #fallback>
             <div class="bg-muted-100 dark:bg-muted-800 flex h-[280px] items-center justify-center rounded-lg">
               <p class="text-muted-400">Loading chart...</p>
@@ -421,6 +431,15 @@ const companiesWithIcons = computed(() => {
 </template>
 
 <style scoped>
+/* Constrain ApexCharts to prevent overflow */
+:deep(.apexcharts-canvas) {
+  max-width: 100% !important;
+}
+
+:deep(.apexcharts-svg) {
+  max-width: 100% !important;
+}
+
 .ticker-container {
   mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
   -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
