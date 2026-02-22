@@ -11,7 +11,7 @@ export interface RequestItem {
   cluster: string
   company: RequestCompany
   timezone: string
-  status: 'Pending' | 'Active' | 'Approved' | 'Running' | 'Hibernating'
+  status: 'Pending' | 'Active' | 'Approved' | 'Running' | 'Hibernating' | 'Denied' | 'Completed'
   startDate: string
   endDate: string
   notesCount: number

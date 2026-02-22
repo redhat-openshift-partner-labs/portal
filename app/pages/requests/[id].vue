@@ -5,6 +5,7 @@ const route = useRoute()
 const router = useRouter()
 
 const requestId = computed(() => Number(route.params.id))
+const fromArchive = computed(() => route.query.from === 'archive')
 
 definePageMeta({
   layout: 'default'
@@ -46,8 +47,18 @@ const daysRemaining = computed(() => {
   return Math.max(0, days)
 })
 
+// Check if request is archived (Denied or Completed)
+const isArchived = computed(() => {
+  if (!request.value) return false
+  return ['Denied', 'Completed'].includes(request.value.status)
+})
+
+// Back link based on where user came from
+const backLink = computed(() => fromArchive.value ? '/archive' : '/requests')
+const backLabel = computed(() => fromArchive.value ? 'Back to Archive' : 'Back to Requests')
+
 // Get status color
-const getStatusColor = (status: string): 'warning' | 'primary' | 'success' | 'info' | 'muted' => {
+const getStatusColor = (status: string): 'warning' | 'primary' | 'success' | 'info' | 'muted' | 'danger' => {
   switch (status) {
     case 'Pending':
       return 'warning'
@@ -59,6 +70,10 @@ const getStatusColor = (status: string): 'warning' | 'primary' | 'success' | 'in
       return 'info'
     case 'Hibernating':
       return 'muted'
+    case 'Denied':
+      return 'danger'
+    case 'Completed':
+      return 'success'
     default:
       return 'muted'
   }
@@ -103,11 +118,11 @@ const formatNoteDate = (dateStr: string) => {
     <!-- Back Navigation -->
     <div>
       <NuxtLink
-        to="/requests"
+        :to="backLink"
         class="text-muted-500 hover:text-primary-500 inline-flex items-center gap-2 transition-colors"
       >
         <Icon name="lucide:arrow-left" class="size-4" />
-        <span class="text-sm">Back to Requests</span>
+        <span class="text-sm">{{ backLabel }}</span>
       </NuxtLink>
     </div>
 
@@ -173,8 +188,8 @@ const formatNoteDate = (dateStr: string) => {
             </div>
           </div>
 
-          <!-- Extend Actions -->
-          <div class="flex items-center gap-2">
+          <!-- Extend Actions (hidden for archived requests) -->
+          <div v-if="!isArchived" class="flex items-center gap-2">
             <template v-if="extending">
               <Icon name="ph:spinner" class="text-primary-500 size-5 animate-spin" />
             </template>

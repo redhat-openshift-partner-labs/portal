@@ -113,7 +113,7 @@ const getReservationProgress = (startDate: string, endDate: string): number => {
 }
 
 // Get status color
-const getStatusColor = (status: string): 'warning' | 'primary' | 'success' | 'info' | 'muted' => {
+const getStatusColor = (status: string): 'warning' | 'primary' | 'success' | 'info' | 'muted' | 'danger' => {
   switch (status) {
     case 'Pending':
       return 'warning'
@@ -125,6 +125,10 @@ const getStatusColor = (status: string): 'warning' | 'primary' | 'success' | 'in
       return 'info'
     case 'Hibernating':
       return 'muted'
+    case 'Denied':
+      return 'danger'
+    case 'Completed':
+      return 'success'
     default:
       return 'muted'
   }

@@ -140,7 +140,7 @@ async function main() {
     'Australia/Sydney',
   ]
 
-  const statuses = ['Pending', 'Active', 'Approved', 'Running', 'Hibernating']
+  const statuses = ['Pending', 'Active', 'Approved', 'Running', 'Hibernating', 'Denied', 'Completed']
 
   const requests = await Promise.all(
     Array.from({ length: 15 }, (_, i) => {
