@@ -1,0 +1,166 @@
+// composables/useRequests.ts
+
+export interface RequestCompany {
+  id: number
+  name: string
+  logoUrl: string | null
+}
+
+export interface RequestItem {
+  id: number
+  cluster: string
+  company: RequestCompany
+  timezone: string
+  status: 'Pending' | 'Active' | 'Approved' | 'Running' | 'Hibernating'
+  startDate: string
+  endDate: string
+  notesCount: number
+}
+
+export interface NoteAuthor {
+  id: number
+  name: string
+  picture: string | null
+}
+
+export interface RequestNote {
+  id: number
+  content: string
+  author: NoteAuthor | null
+  createdAt: string
+}
+
+export interface RequestDetail extends Omit<RequestItem, 'notesCount'> {
+  createdAt: string
+  updatedAt: string
+  notes: RequestNote[]
+}
+
+export const useRequests = () => {
+  const requests = useState<RequestItem[]>('requests-list', () => [])
+  const pending = useState('requests-pending', () => false)
+  const error = useState<Error | null>('requests-error', () => null)
+
+  const refresh = async () => {
+    if (pending.value) return
+
+    pending.value = true
+    error.value = null
+
+    try {
+      requests.value = await $fetch<RequestItem[]>('/api/requests')
+    } catch (e) {
+      error.value = e as Error
+    } finally {
+      pending.value = false
+    }
+  }
+
+  const extendRequest = async (id: number, duration: '1w' | '2w' | '1mo') => {
+    const result = await $fetch<RequestItem>(`/api/requests/${id}/extend`, {
+      method: 'POST',
+      body: { duration },
+    })
+
+    // Update the request in the list
+    const index = requests.value.findIndex((r) => r.id === id)
+    if (index !== -1) {
+      const existingRequest = requests.value[index]
+      if (existingRequest) {
+        requests.value[index] = { ...existingRequest, endDate: result.endDate }
+      }
+    }
+
+    return result
+  }
+
+  const addNote = async (id: number, content: string) => {
+    const result = await $fetch<RequestNote>(`/api/requests/${id}/notes`, {
+      method: 'POST',
+      body: { content },
+    })
+
+    // Update notes count in the list
+    const index = requests.value.findIndex((r) => r.id === id)
+    if (index !== -1) {
+      const existingRequest = requests.value[index]
+      if (existingRequest) {
+        requests.value[index] = {
+          ...existingRequest,
+          notesCount: existingRequest.notesCount + 1,
+        }
+      }
+    }
+
+    return result
+  }
+
+  return {
+    requests: readonly(requests),
+    pending: readonly(pending),
+    error: readonly(error),
+    refresh,
+    extendRequest,
+    addNote,
+  }
+}
+
+export const useRequestDetail = (id: number | Ref<number>) => {
+  const resolvedId = toRef(id)
+  const request = useState<RequestDetail | null>(`request-detail-${toValue(id)}`, () => null)
+  const pending = useState(`request-detail-pending-${toValue(id)}`, () => false)
+  const error = useState<Error | null>(`request-detail-error-${toValue(id)}`, () => null)
+
+  const refresh = async () => {
+    if (pending.value) return
+
+    pending.value = true
+    error.value = null
+
+    try {
+      request.value = await $fetch<RequestDetail>(`/api/requests/${resolvedId.value}`)
+    } catch (e) {
+      error.value = e as Error
+    } finally {
+      pending.value = false
+    }
+  }
+
+  const extendRequest = async (duration: '1w' | '2w' | '1mo') => {
+    const result = await $fetch<RequestItem>(`/api/requests/${resolvedId.value}/extend`, {
+      method: 'POST',
+      body: { duration },
+    })
+
+    if (request.value) {
+      request.value = { ...request.value, endDate: result.endDate }
+    }
+
+    return result
+  }
+
+  const addNote = async (content: string) => {
+    const result = await $fetch<RequestNote>(`/api/requests/${resolvedId.value}/notes`, {
+      method: 'POST',
+      body: { content },
+    })
+
+    if (request.value) {
+      request.value = {
+        ...request.value,
+        notes: [result, ...request.value.notes],
+      }
+    }
+
+    return result
+  }
+
+  return {
+    request: readonly(request),
+    pending: readonly(pending),
+    error: readonly(error),
+    refresh,
+    extendRequest,
+    addNote,
+  }
+}
