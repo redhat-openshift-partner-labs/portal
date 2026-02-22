@@ -84,17 +84,43 @@ sequenceDiagram
 
 ```typescript
 // app/middleware/auth.global.ts
-export default defineNuxtRouteMiddleware((to) => {
-  // Skip if public route
-  if (to.path === '/' || to.path.startsWith('/auth')) {
+export default defineNuxtRouteMiddleware(async (to) => {
+  // Skip for API auth callbacks
+  if (to.path.startsWith('/api/auth/callback')) {
     return
   }
 
-  const { user } = useAuth()
-  const token = useCookie('auth_session')
+  const { user, init } = useAuth()
 
-  // If no cookie and no client state
-  if (!token.value && !user.value) {
+  // On client side, ensure user is initialized before checking auth
+  if (process.client) {
+    await init()
+  }
+
+  // Check authentication: on server use cookie, on client use user state
+  const isAuthenticated = process.server
+    ? !!useCookie('auth_session').value
+    : !!user.value
+
+  // If user is authenticated and visiting auth page, redirect to dashboard
+  if (to.path.startsWith('/auth')) {
+    if (isAuthenticated) {
+      return navigateTo('/dashboard')
+    }
+    return
+  }
+
+  // Special handling for home page: redirect based on auth status
+  if (to.path === '/') {
+    if (isAuthenticated) {
+      return navigateTo('/dashboard')
+    } else {
+      return navigateTo('/auth')
+    }
+  }
+
+  // For all other routes, require authentication
+  if (!isAuthenticated) {
     const redirectPath = to.fullPath
     return navigateTo(`/auth?redirect=${encodeURIComponent(redirectPath)}`)
   }
@@ -266,15 +292,30 @@ export default defineNuxtPlugin(async () => {
 
 ```typescript
 // app/composables/useAuth.ts
-const init = async () => {
-  if (user.value) return // Already initialized
+// Shared promise to prevent duplicate concurrent init calls
+const initPromise = useState<Promise<void> | null>('auth_init_promise', () => null)
 
-  try {
-    const data = await $fetch('/api/auth/me')
-    user.value = data
-  } catch {
-    user.value = null
+const init = async () => {
+  if (user.value) return
+
+  // If already initializing, wait for the existing promise
+  if (initPromise.value) {
+    return initPromise.value
   }
+
+  // Create and store the promise
+  initPromise.value = (async () => {
+    try {
+      const data = await $fetch<User>('/api/auth/me')
+      user.value = data
+    } catch {
+      user.value = null
+    } finally {
+      initPromise.value = null
+    }
+  })()
+
+  return initPromise.value
 }
 ```
 
@@ -360,10 +401,18 @@ const user = useState<User | null>('auth_user', () => null)
 
 **Logic Flow**:
 ```
-Is route public? → Yes → Allow
-                → No ↓
-Has cookie OR user state? → Yes → Allow
-                          → No → Redirect to /auth?redirect=...
+Is /api/auth/callback? → Yes → Allow
+                       → No ↓
+(Client) Initialize auth state
+                       ↓
+Is /auth page? → Yes → Is authenticated? → Yes → Redirect to /dashboard
+                                         → No → Allow
+             → No ↓
+Is home (/)? → Yes → Is authenticated? → Yes → Redirect to /dashboard
+                                       → No → Redirect to /auth
+           → No ↓
+Is authenticated? → Yes → Allow
+                  → No → Redirect to /auth?redirect=...
 ```
 
 ### 4. OAuth Callback (`server/api/auth/callback.get.ts`)
@@ -385,13 +434,13 @@ Has cookie OR user state? → Yes → Allow
 
 ```typescript
 // Create session cookie with JWT
-createSession(event, payload: Omit<SessionPayload, 'exp'>): void
+createSession(event: H3Event, payload: Omit<SessionPayload, 'exp'>): void
 
 // Get session from cookie (returns null if invalid)
-getSession(event): SessionPayload | null
+getAuthSession(event: H3Event): SessionPayload | null
 
 // Require auth (throws 401 if not authenticated)
-requireAuth(event): SessionPayload
+requireAuth(event: H3Event): SessionPayload
 ```
 
 ## Session Management
@@ -416,13 +465,16 @@ requireAuth(event): SessionPayload
 
 **Every API Request**:
 ```typescript
-export const getSession = (event) => {
+export const getAuthSession = (event: H3Event): SessionPayload | null => {
+  const config = useRuntimeConfig()
   const token = getCookie(event, 'auth_session')
+
   if (!token) return null
 
   try {
-    return jwt.verify(token, config.authSecret)
+    return jwt.verify(token, config.authSecret) as SessionPayload
   } catch {
+    // expired or invalid
     deleteCookie(event, 'auth_session')
     return null
   }
