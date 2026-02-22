@@ -1,0 +1,20 @@
+<script setup lang="ts">
+definePageMeta({
+  layout: 'default'
+})
+
+useHead({
+  title: 'Reports - OpenShift Partner Labs'
+})
+</script>
+
+<template>
+  <div class="p-6">
+    <h1 class="text-2xl font-bold text-muted-800 dark:text-white mb-4">
+      Reports
+    </h1>
+    <p class="text-muted-500 dark:text-muted-400">
+      Reports section coming soon.
+    </p>
+  </div>
+</template>

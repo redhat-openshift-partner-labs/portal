@@ -2,7 +2,7 @@
 const { user, logout } = useAuth()
 
 definePageMeta({
-  layout: 'empty'
+  layout: 'default'
 })
 
 useHead({
@@ -11,88 +11,47 @@ useHead({
 </script>
 
 <template>
-  <div class="container">
-    <h1>Dashboard</h1>
-    <p>Welcome to your protected dashboard!</p>
+  <div class="p-6">
+    <h1 class="text-2xl font-bold text-primary-500 mb-4">
+      Dashboard
+    </h1>
+    <p class="text-muted-500 dark:text-muted-400">
+      Welcome to your protected dashboard!
+    </p>
 
     <ClientOnly>
-      <div v-if="user" class="user-info">
-        <h2>User Information</h2>
-        <div class="user-card">
-          <img v-if="user.picture" :src="user.picture" alt="Profile picture" class="avatar">
-          <div class="user-details">
-            <p><strong>Name:</strong> {{ user.name }}</p>
-            <p><strong>Email:</strong> {{ user.email }}</p>
+      <div v-if="user" class="bg-muted-100 dark:bg-muted-800 p-6 rounded-lg mt-6">
+        <h2 class="text-xl font-semibold text-muted-800 dark:text-white mb-4">
+          User Information
+        </h2>
+        <div class="flex items-center gap-6 my-6">
+          <img
+            v-if="user.picture"
+            :src="user.picture"
+            alt="Profile picture"
+            class="size-20 rounded-full object-cover"
+          >
+          <div class="space-y-2">
+            <p class="text-muted-700 dark:text-muted-300">
+              <span class="font-semibold">Name:</span> {{ user.name }}
+            </p>
+            <p class="text-muted-700 dark:text-muted-300">
+              <span class="font-semibold">Email:</span> {{ user.email }}
+            </p>
           </div>
         </div>
-        <button @click="logout" class="logout-btn">Logout</button>
+        <button
+          class="bg-danger-500 hover:bg-danger-600 text-white px-6 py-3 rounded cursor-pointer transition-colors"
+          @click="logout"
+        >
+          Logout
+        </button>
       </div>
       <template #fallback>
-        <div class="user-info">
-          <p>Loading user information...</p>
+        <div class="bg-muted-100 dark:bg-muted-800 p-6 rounded-lg mt-6">
+          <p class="text-muted-500 dark:text-muted-400">Loading user information...</p>
         </div>
       </template>
     </ClientOnly>
   </div>
 </template>
-
-<style scoped>
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-family: system-ui, -apple-system, sans-serif;
-}
-
-h1 {
-  color: #00DC82;
-  margin-bottom: 1rem;
-}
-
-h2 {
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
-}
-
-.user-info {
-  background: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 8px;
-  margin-top: 2rem;
-}
-
-.user-card {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  margin: 1.5rem 0;
-}
-
-.avatar {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.user-details p {
-  margin: 0.5rem 0;
-  font-size: 1rem;
-}
-
-.logout-btn {
-  background: #dc3545;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-  margin-top: 1rem;
-}
-
-.logout-btn:hover {
-  background: #c82333;
-}
-</style>
