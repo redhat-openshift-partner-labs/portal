@@ -20,3 +20,5 @@ node_modules/
 .serena/
 .mcp.json
 claude-logs/
+.playwright-cli/
+.playwright/
