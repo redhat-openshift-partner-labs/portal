@@ -199,7 +199,7 @@ const handleCreateNote = (requestId: number) => {
         <TairoTableCell spaced>
           <div class="flex items-center gap-3">
             <BaseProgressCircle
-              :value="getReservationProgress(request.startDate, request.endDate)"
+              :model-value="getReservationProgress(request.startDate, request.endDate)"
               :size="40"
               :thickness="3"
             />

@@ -199,7 +199,7 @@ const formatNoteDate = (dateStr: string) => {
         <BaseCard rounded="lg" class="p-5">
           <div class="flex items-center gap-4">
             <BaseProgressCircle
-              :value="reservationProgress"
+              :model-value="reservationProgress"
               :size="64"
               :thickness="4"
             />
