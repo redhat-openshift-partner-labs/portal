@@ -1,3 +1,7 @@
+<script setup lang="ts">
+const { logout } = useAuth()
+</script>
+
 <template>
   <TairoCollapseLayout>
     <TairoCollapseSidebar>
@@ -6,24 +10,33 @@
         <TairoCollapseSidebarLink
           to="/dashboard"
           label="Dashboard"
-          icon="solar:chart-2-outline"
+          icon="ph:chart-line-duotone"
         />
         <TairoCollapseSidebarLink
-          to="/users"
-          label="Users"
-          icon="solar:users-group-rounded-outline"
+          to="/requests"
+          label="Requests"
+          icon="ph:git-pull-request-duotone"
         />
         <TairoCollapseSidebarLink
-          to="/reports"
-          label="Reports"
-          icon="solar:document-text-outline"
+          to="/docs"
+          label="Docs"
+          icon="ph:book-open-duotone"
         />
         <TairoCollapseSidebarLink
-          to="/settings"
-          label="Settings"
-          icon="solar:settings-outline"
+          to="/archive"
+          label="Archive"
+          icon="ph:archive-duotone"
         />
       </TairoCollapseSidebarLinks>
+      <div class="px-4 pb-4">
+        <button
+          class="text-muted-500 hover:text-primary-500 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors"
+          @click="logout"
+        >
+          <Icon name="ph:sign-out-duotone" class="size-5" />
+          <span>Logout</span>
+        </button>
+      </div>
     </TairoCollapseSidebar>
 
     <TairoCollapseContent>
