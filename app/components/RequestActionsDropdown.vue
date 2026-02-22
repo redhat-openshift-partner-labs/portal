@@ -27,6 +27,10 @@ const handleExtend = (duration: '1w' | '2w' | '1mo') => {
 const handleCreateNote = () => {
   emit('createNote')
 }
+
+const handleViewDetails = () => {
+  navigateTo(`/requests/${props.requestId}`)
+}
 </script>
 
 <template>
@@ -44,9 +48,8 @@ const handleCreateNote = () => {
         align="end"
       >
         <DropdownMenuItem
-          as="a"
-          :href="`/requests/${props.requestId}`"
           class="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-500 transition-colors hover:bg-muted-100 hover:text-muted-700 dark:text-muted-400 dark:hover:bg-muted-700 dark:hover:text-muted-200"
+          @click="handleViewDetails"
         >
           <Icon name="lucide:eye" class="size-4" />
           <span>Details</span>
