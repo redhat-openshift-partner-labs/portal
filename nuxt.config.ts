@@ -128,6 +128,13 @@ export default defineNuxtConfig({
   runtimeConfig: {
     googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
     authSecret: process.env.AUTH_SECRET,
+    db: {
+      host: process.env.DB_HOST || 'localhost',
+      port: process.env.DB_PORT || '5432',
+      name: process.env.DB_NAME || 'opdb',
+      user: process.env.DB_USER || 'postgres',
+      password: process.env.DB_PASSWORD || '',
+    },
     public: {
       // mapbox config
       mapboxToken: '', // set it via NUXT_PUBLIC_MAPBOX_TOKEN env

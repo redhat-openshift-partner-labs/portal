@@ -13,6 +13,7 @@
     "apexcharts": "^5.6.0",
     "jsonwebtoken": "^9.0.3",
     "nuxt": "^4.3.1",
+    "pg": "^8.18.0",
     "vue": "^3.5.28",
     "vue-router": "^4.6.4",
     "vue3-apexcharts": "^1.10.0"
@@ -26,6 +27,7 @@
     "@shuriken-ui/nuxt": "^4.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.3.0",
+    "@types/pg": "^8.16.0",
     "@vueuse/nuxt": "^14.2.1",
     "better-sqlite3": "^12.6.2",
     "tailwindcss": "^4.2.0",
