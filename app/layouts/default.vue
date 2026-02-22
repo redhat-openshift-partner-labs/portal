@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const { logout } = useAuth()
+const { isWarningVisible, secondsRemaining, stayLoggedIn } = useIdleTimeout()
 </script>
 
 <template>
@@ -42,5 +43,11 @@ const { logout } = useAuth()
     <TairoCollapseContent>
       <slot />
     </TairoCollapseContent>
+
+    <IdleTimeoutWarning
+      :open="isWarningVisible"
+      :seconds-remaining="secondsRemaining"
+      @stay-logged-in="stayLoggedIn"
+    />
   </TairoCollapseLayout>
 </template>
