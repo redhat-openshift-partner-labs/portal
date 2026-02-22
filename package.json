@@ -25,6 +25,7 @@
     "@prisma/adapter-pg": "^7.4.1",
     "@prisma/client": "^7.4.1",
     "apexcharts": "^5.6.0",
+    "date-fns": "^4.1.0",
     "dotenv": "^17.3.1",
     "jsonwebtoken": "^9.0.3",
     "nuxt": "^4.3.1",
