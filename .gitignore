@@ -1,0 +1,22 @@
+# Environment
+.env
+
+# IDE
+.idea/
+
+# Build output
+.nuxt/
+.output/
+dist/
+
+# Dependencies
+node_modules/
+
+# Local data
+.data/
+
+# AI/MCP metadata
+.claude/
+.serena/
+.mcp.json
+claude-logs/
