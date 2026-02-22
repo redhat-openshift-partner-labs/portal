@@ -78,6 +78,10 @@ export default defineNuxtConfig({
      * Load Tailwind CSS
      */
     '~/assets/main.css',
+    /**
+     * ApexCharts dark mode styles
+     */
+    '~/assets/apexcharts.css',
   ],
   fonts: {
     families: [
@@ -223,6 +227,8 @@ export default defineNuxtConfig({
         'klona',
         'ohash',
         'zod',
+        'apexcharts',
+        'vue3-apexcharts',
       ],
     },
   },
