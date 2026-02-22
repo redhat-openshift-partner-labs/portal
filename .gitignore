@@ -17,6 +17,9 @@ node_modules/
 prisma/dev.db
 prisma/dev.db-journal
 
+# Generated Prisma client
+generated/
+
 # AI/MCP metadata
 .claude/
 .serena/

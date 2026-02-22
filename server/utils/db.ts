@@ -1,16 +1,30 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '../../generated/prisma/client.js'
+import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
+import { PrismaPg } from '@prisma/adapter-pg'
 
-// Use a singleton pattern to avoid creating multiple Prisma clients
-// during hot reloads in development
 declare global {
-  // eslint-disable-next-line no-var
   var __prisma: PrismaClient | undefined
 }
 
-function createPrismaClient(): PrismaClient {
-  return new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+function createAdapter() {
+  const databaseUrl = process.env.DATABASE_URL || 'file:./prisma/dev.db'
+
+  // Use PostgreSQL adapter if URL starts with postgres/postgresql
+  if (databaseUrl.startsWith('postgres')) {
+    return new PrismaPg({
+      connectionString: databaseUrl,
+    })
+  }
+
+  // Default to SQLite for local development
+  return new PrismaBetterSqlite3({
+    url: databaseUrl,
   })
+}
+
+function createPrismaClient(): PrismaClient {
+  const adapter = createAdapter()
+  return new PrismaClient({ adapter })
 }
 
 export const prisma = globalThis.__prisma ?? createPrismaClient()
@@ -19,7 +33,6 @@ if (process.env.NODE_ENV !== 'production') {
   globalThis.__prisma = prisma
 }
 
-// For backwards compatibility, export a getDb function
 export function getDb(): PrismaClient {
   return prisma
 }
