@@ -1,21 +1,14 @@
-interface Company {
-  id: number
-  name: string
-  logo_url: string | null
-}
-
 export default defineEventHandler(async (event) => {
   requireAuth(event)
 
-  const companies = await query<Company>(`
-    SELECT id, name, logo_url
-    FROM companies
-    ORDER BY name
-  `)
+  const companies = await prisma.company.findMany({
+    orderBy: { name: 'asc' },
+    select: {
+      id: true,
+      name: true,
+      logoUrl: true,
+    },
+  })
 
-  return companies.map((company) => ({
-    id: company.id,
-    name: company.name,
-    logoUrl: company.logo_url,
-  }))
+  return companies
 })

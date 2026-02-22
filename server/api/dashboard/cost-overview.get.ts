@@ -1,36 +1,63 @@
-interface MonthlyCost {
-  month: number
-  total: string
-}
-
 export default defineEventHandler(async (event) => {
   requireAuth(event)
 
-  const thisYear = await query<MonthlyCost>(`
-    SELECT EXTRACT(MONTH FROM date) as month, SUM(cost) as total
-    FROM costs
-    WHERE date >= NOW() - INTERVAL '6 months'
-    GROUP BY month
-    ORDER BY month
-  `)
+  const now = new Date()
+  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
+  const eighteenMonthsAgo = new Date(now.getFullYear() - 1, now.getMonth() - 5, 1)
+  const twelveMonthsAgo = new Date(now.getFullYear() - 1, now.getMonth() + 1, 1)
 
-  const lastYear = await query<MonthlyCost>(`
-    SELECT EXTRACT(MONTH FROM date) as month, SUM(cost) as total
-    FROM costs
-    WHERE date >= NOW() - INTERVAL '18 months' AND date < NOW() - INTERVAL '12 months'
-    GROUP BY month
-    ORDER BY month
-  `)
-
-  // Convert to arrays of numbers for chart consumption
-  const thisYearData = thisYear.map((row) => Number(row.total) / 1000) // Convert to thousands
-  const lastYearData = lastYear.map((row) => Number(row.total) / 1000)
-
-  // Get month labels
-  const months = thisYear.map((row) => {
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    return monthNames[Number(row.month) - 1]
+  // Get costs for this year (last 6 months)
+  const thisYearCosts = await prisma.cost.findMany({
+    where: {
+      date: { gte: sixMonthsAgo },
+    },
+    select: {
+      amount: true,
+      date: true,
+    },
   })
+
+  // Get costs for last year (same 6 month period, one year ago)
+  const lastYearCosts = await prisma.cost.findMany({
+    where: {
+      date: {
+        gte: eighteenMonthsAgo,
+        lt: twelveMonthsAgo,
+      },
+    },
+    select: {
+      amount: true,
+      date: true,
+    },
+  })
+
+  // Group by month
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+  const thisYearByMonth = new Map<number, number>()
+  const lastYearByMonth = new Map<number, number>()
+
+  for (const cost of thisYearCosts) {
+    const month = cost.date.getMonth()
+    thisYearByMonth.set(month, (thisYearByMonth.get(month) || 0) + cost.amount)
+  }
+
+  for (const cost of lastYearCosts) {
+    const month = cost.date.getMonth()
+    lastYearByMonth.set(month, (lastYearByMonth.get(month) || 0) + cost.amount)
+  }
+
+  // Build ordered arrays for the last 6 months
+  const months: string[] = []
+  const thisYearData: number[] = []
+  const lastYearData: number[] = []
+
+  for (let i = 5; i >= 0; i--) {
+    const monthIndex = (now.getMonth() - i + 12) % 12
+    months.push(monthNames[monthIndex])
+    thisYearData.push(Math.round((thisYearByMonth.get(monthIndex) || 0) / 1000 * 10) / 10)
+    lastYearData.push(Math.round((lastYearByMonth.get(monthIndex) || 0) / 1000 * 10) / 10)
+  }
 
   return {
     thisYear: thisYearData,

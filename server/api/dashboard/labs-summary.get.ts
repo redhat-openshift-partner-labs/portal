@@ -1,40 +1,64 @@
-interface MonthlyLabs {
-  month: number
-  total: string
-}
-
 export default defineEventHandler(async (event) => {
   requireAuth(event)
 
-  const created = await query<MonthlyLabs>(`
-    SELECT EXTRACT(MONTH FROM created_at) as month, COUNT(*) as total
-    FROM labs
-    WHERE created_at >= NOW() - INTERVAL '6 months'
-    GROUP BY month
-    ORDER BY month
-  `)
+  const now = new Date()
+  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
 
-  const completed = await query<MonthlyLabs>(`
-    SELECT EXTRACT(MONTH FROM completed_at) as month, COUNT(*) as total
-    FROM labs
-    WHERE completed_at >= NOW() - INTERVAL '6 months' AND completed_at IS NOT NULL
-    GROUP BY month
-    ORDER BY month
-  `)
+  // Get labs created in the last 6 months
+  const createdLabs = await prisma.lab.findMany({
+    where: {
+      createdAt: { gte: sixMonthsAgo },
+    },
+    select: {
+      createdAt: true,
+    },
+  })
 
-  // Convert to arrays of numbers for chart consumption
-  const createdData = created.map((row) => Number(row.total))
-  const completedData = completed.map((row) => Number(row.total))
+  // Get labs completed in the last 6 months
+  const completedLabs = await prisma.lab.findMany({
+    where: {
+      completedAt: {
+        gte: sixMonthsAgo,
+        not: null,
+      },
+    },
+    select: {
+      completedAt: true,
+    },
+  })
 
-  // Calculate totals
+  // Group by month
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+  const createdByMonth = new Map<number, number>()
+  const completedByMonth = new Map<number, number>()
+
+  for (const lab of createdLabs) {
+    const month = lab.createdAt.getMonth()
+    createdByMonth.set(month, (createdByMonth.get(month) || 0) + 1)
+  }
+
+  for (const lab of completedLabs) {
+    if (lab.completedAt) {
+      const month = lab.completedAt.getMonth()
+      completedByMonth.set(month, (completedByMonth.get(month) || 0) + 1)
+    }
+  }
+
+  // Build ordered arrays for the last 6 months
+  const months: string[] = []
+  const createdData: number[] = []
+  const completedData: number[] = []
+
+  for (let i = 5; i >= 0; i--) {
+    const monthIndex = (now.getMonth() - i + 12) % 12
+    months.push(monthNames[monthIndex])
+    createdData.push(createdByMonth.get(monthIndex) || 0)
+    completedData.push(completedByMonth.get(monthIndex) || 0)
+  }
+
   const totalCreated = createdData.reduce((sum, val) => sum + val, 0)
   const totalCompleted = completedData.reduce((sum, val) => sum + val, 0)
-
-  // Get month labels
-  const months = created.map((row) => {
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    return monthNames[Number(row.month) - 1]
-  })
 
   return {
     created: createdData,

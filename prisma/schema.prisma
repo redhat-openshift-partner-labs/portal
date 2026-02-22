@@ -1,0 +1,72 @@
+// Prisma Schema for OpenShift Partner Labs Dashboard
+// Uses SQLite for local development, PostgreSQL for production
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Lab {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  status      String    @default("pending") // pending, active, completed, archived
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  completedAt DateTime? @map("completed_at")
+
+  sessions Session[]
+
+  @@map("labs")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String
+  picture   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  sessions Session[]
+
+  @@map("users")
+}
+
+model Session {
+  id          Int       @id @default(autoincrement())
+  labId       Int       @map("lab_id")
+  userId      Int       @map("user_id")
+  completed   Boolean   @default(false)
+  startedAt   DateTime  @default(now()) @map("started_at")
+  completedAt DateTime? @map("completed_at")
+
+  lab  Lab  @relation(fields: [labId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("sessions")
+}
+
+model Cost {
+  id        Int      @id @default(autoincrement())
+  amount    Float    @map("cost")
+  date      DateTime
+  category  String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("costs")
+}
+
+model Company {
+  id        Int      @id @default(autoincrement())
+  name      String
+  logoUrl   String?  @map("logo_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("companies")
+}

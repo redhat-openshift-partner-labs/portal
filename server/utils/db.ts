@@ -1,23 +1,25 @@
-import pg from 'pg'
+import { PrismaClient } from '@prisma/client'
 
-let pool: pg.Pool | null = null
-
-export function getDb(): pg.Pool {
-  if (!pool) {
-    const config = useRuntimeConfig()
-    pool = new pg.Pool({
-      host: config.db.host,
-      port: parseInt(config.db.port),
-      database: config.db.name,
-      user: config.db.user,
-      password: config.db.password,
-    })
-  }
-  return pool
+// Use a singleton pattern to avoid creating multiple Prisma clients
+// during hot reloads in development
+declare global {
+  // eslint-disable-next-line no-var
+  var __prisma: PrismaClient | undefined
 }
 
-export async function query<T>(sql: string, params?: unknown[]): Promise<T[]> {
-  const db = getDb()
-  const result = await db.query(sql, params)
-  return result.rows as T[]
+function createPrismaClient(): PrismaClient {
+  return new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  })
+}
+
+export const prisma = globalThis.__prisma ?? createPrismaClient()
+
+if (process.env.NODE_ENV !== 'production') {
+  globalThis.__prisma = prisma
+}
+
+// For backwards compatibility, export a getDb function
+export function getDb(): PrismaClient {
+  return prisma
 }
