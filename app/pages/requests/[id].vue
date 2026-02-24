@@ -434,14 +434,12 @@ const formatNoteDate = (dateStr: string) => {
                 :key="login.id"
                 class="border-muted-200 dark:border-muted-700 rounded-lg border p-3"
               >
-                <div class="flex items-center justify-between gap-2">
-                  <span class="text-muted-800 dark:text-white text-sm font-medium">
-                    {{ login.loginName || 'Unknown' }}
-                  </span>
-                  <span class="bg-primary-500/10 text-primary-600 dark:text-primary-400 rounded-full px-2 py-0.5 text-xs font-medium">
-                    {{ login.loginType || 'unknown' }}
-                  </span>
-                </div>
+                <p class="text-muted-800 dark:text-white text-sm font-medium">
+                  {{ login.loginName || 'Unknown' }}
+                </p>
+                <p class="text-muted-500 dark:text-muted-400 mt-1 text-xs">
+                  {{ login.loginType || 'unknown' }}
+                </p>
                 <p class="text-muted-400 mt-1 text-xs">
                   {{ login.accessTime ? formatDate(login.accessTime) : 'No access time' }}
                 </p>
