@@ -85,12 +85,13 @@ const costChartSeries = computed(() => [
 const costSummary = computed(() => {
   const thisYearTotal = (data.value?.costOverview?.thisYear ?? []).reduce((sum, val) => sum + val, 0)
   const lastYearTotal = (data.value?.costOverview?.lastYear ?? []).reduce((sum, val) => sum + val, 0)
-  const growth = lastYearTotal > 0 ? ((thisYearTotal - lastYearTotal) / lastYearTotal * 100) : 0
+  const activeLabs = data.value?.stats?.activeLabs || 0
+  const costPerLab = activeLabs > 0 ? (thisYearTotal / activeLabs) : 0
 
   return [
     { label: 'This Year', value: `$${thisYearTotal.toFixed(1)}k`, color: 'text-sky-500' },
     { label: 'Last Year', value: `$${lastYearTotal.toFixed(1)}k`, color: 'text-purple-500' },
-    { label: 'Growth', value: `${growth >= 0 ? '+' : ''}${growth.toFixed(1)}%`, color: growth >= 0 ? 'text-green-500' : 'text-red-500' }
+    { label: 'Cost/Lab', value: `$${costPerLab.toFixed(1)}k`, color: 'text-primary-500' }
   ]
 })
 
