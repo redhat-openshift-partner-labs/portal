@@ -285,7 +285,8 @@ const formatNoteDate = (dateStr: string) => {
       </div>
 
       <!-- Notes Section -->
-      <BaseCard rounded="lg" class="p-6">
+      <div class="grid grid-cols-12 gap-6">
+        <BaseCard rounded="lg" class="col-span-12 p-6 md:col-span-6">
         <div class="mb-4 flex items-center justify-between">
           <h2 class="text-muted-800 dark:text-white text-lg font-semibold">
             Notes
@@ -365,7 +366,8 @@ const formatNoteDate = (dateStr: string) => {
             </div>
           </div>
         </template>
-      </BaseCard>
+        </BaseCard>
+      </div>
     </template>
 
     <!-- Note Modal (for detail page) -->
