@@ -193,6 +193,11 @@ export default defineNuxtConfig({
     logging: {
       compressedSizes: false,
     },
+    // Disable prerendering during container builds (no DB available)
+    prerender: {
+      crawlLinks: false,
+      routes: [],
+    },
     // esbuild: {
     //   options: {
     //     target: 'esnext',

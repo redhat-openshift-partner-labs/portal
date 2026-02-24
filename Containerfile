@@ -43,9 +43,11 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copy source code
 COPY . .
 
+# Set dummy DATABASE_URL for build (PostgreSQL adapter selection)
+ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
+
 # Generate Prisma client for PostgreSQL production
-# DATABASE_URL is required by config but not used during generate
-RUN DATABASE_URL="postgresql://build:build@localhost:5432/build" pnpm db:pg:generate
+RUN pnpm db:pg:generate
 
 # Build the Nuxt application
 RUN pnpm build
