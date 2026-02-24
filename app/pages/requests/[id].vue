@@ -211,9 +211,9 @@ const formatNoteDate = (dateStr: string) => {
                 </BaseButton>
               </template>
             </template>
-            <!-- Edit Button (only for users with edit permission) -->
+            <!-- Edit Button (only for users with edit permission, not for archived requests) -->
             <BaseButton
-              v-if="canEdit"
+              v-if="canEdit && !isArchived"
               size="sm"
               color="default"
               @click="editModalOpen = true"
@@ -471,6 +471,7 @@ const formatNoteDate = (dateStr: string) => {
     <RequestNoteModal
       v-model:open="noteModalOpen"
       :request-id="request?.id ?? null"
+      :force-immutable="isArchived"
     />
 
     <!-- Edit Modal -->

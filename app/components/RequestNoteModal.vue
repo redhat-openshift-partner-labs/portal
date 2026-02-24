@@ -11,6 +11,7 @@ import {
 
 const props = defineProps<{
   requestId: number | null
+  forceImmutable?: boolean
 }>()
 
 const open = defineModel<boolean>('open', { default: false })
@@ -28,7 +29,7 @@ const handleSubmit = async () => {
 
   try {
     const { addNote } = useRequestDetail(props.requestId)
-    await addNote(noteContent.value.trim(), isImmutable.value)
+    await addNote(noteContent.value.trim(), props.forceImmutable || isImmutable.value)
     noteContent.value = ''
     isImmutable.value = false
     open.value = false
@@ -49,8 +50,10 @@ const handleCancel = () => {
 watch(open, (isOpen) => {
   if (!isOpen) {
     noteContent.value = ''
-    isImmutable.value = false
+    isImmutable.value = props.forceImmutable ?? false
     error.value = null
+  } else if (props.forceImmutable) {
+    isImmutable.value = true
   }
 })
 </script>
@@ -92,12 +95,17 @@ watch(open, (isOpen) => {
           <div class="mb-4">
             <BaseCheckbox
               v-model="isImmutable"
-              :disabled="submitting"
+              :disabled="submitting || props.forceImmutable"
               color="primary"
               label="Make immutable"
             />
             <p class="text-muted-400 mt-1 ms-7 text-xs">
-              Immutable notes cannot be edited after creation
+              <template v-if="props.forceImmutable">
+                Notes on archived requests are always immutable
+              </template>
+              <template v-else>
+                Immutable notes cannot be edited after creation
+              </template>
             </p>
           </div>
 

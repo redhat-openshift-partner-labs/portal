@@ -25,13 +25,17 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Request not found' })
   }
 
+  // Force immutable for archived requests (Denied or Completed)
+  const isArchived = ['Denied', 'Completed'].includes(lab.state)
+  const noteImmutable = isArchived ? true : (body.immutable ?? false)
+
   // Create note with userId as string (email) to match production schema
   const note = await prisma.note.create({
     data: {
       labId: Number(id),
       note: body.content.trim(),
       userId: session.email,
-      immutable: body.immutable ?? false,
+      immutable: noteImmutable,
     },
   })
 

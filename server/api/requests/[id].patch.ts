@@ -36,6 +36,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Request not found' })
   }
 
+  // Block edits for archived requests (Denied or Completed)
+  if (['Denied', 'Completed'].includes(existingLab.state)) {
+    throw createError({ statusCode: 403, message: 'Archived requests cannot be edited' })
+  }
+
   // Build update data
   const updateData: { state?: string; region?: string; hold?: boolean } = {}
   if (body.status !== undefined) {
