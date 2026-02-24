@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { differenceInDays, parseISO } from 'date-fns'
 
+const route = useRoute()
+
 definePageMeta({
   layout: 'default'
 })
@@ -11,6 +13,9 @@ useHead({
 
 const { requests, pending, error, refresh, extendRequest, addNote } = useRequests()
 const { canEdit } = useAuth()
+
+// Status filter from query param
+const statusFilter = computed(() => route.query.status as string | undefined)
 
 // Modal state
 const noteModalOpen = ref(false)
@@ -29,20 +34,29 @@ onMounted(() => {
   refresh()
 })
 
-// Filtered requests based on search query
+// Filtered requests based on status filter and search query
 const filteredRequests = computed(() => {
-  if (!searchQuery.value.trim()) {
-    return requests.value
+  let result = requests.value
+
+  // Apply status filter from query param
+  if (statusFilter.value === 'active') {
+    result = result.filter((request) => ['Running', 'Hibernating'].includes(request.status))
   }
-  const query = searchQuery.value.toLowerCase().trim()
-  return requests.value.filter((request) => {
-    return (
-      request.cluster.toLowerCase().includes(query) ||
-      request.company.name.toLowerCase().includes(query) ||
-      request.timezone.toLowerCase().includes(query) ||
-      request.status.toLowerCase().includes(query)
-    )
-  })
+
+  // Apply search query
+  if (searchQuery.value.trim()) {
+    const query = searchQuery.value.toLowerCase().trim()
+    result = result.filter((request) => {
+      return (
+        request.cluster.toLowerCase().includes(query) ||
+        request.company.name.toLowerCase().includes(query) ||
+        request.timezone.toLowerCase().includes(query) ||
+        request.status.toLowerCase().includes(query)
+      )
+    })
+  }
+
+  return result
 })
 
 // Pagination computed values
@@ -188,6 +202,23 @@ const handleEditUpdated = () => {
         />
         <span class="text-sm">Refresh</span>
       </button>
+    </div>
+
+    <!-- Active Filter Indicator -->
+    <div
+      v-if="statusFilter"
+      class="flex items-center gap-2 rounded-lg border border-primary-200 bg-primary-50 p-3 dark:border-primary-800 dark:bg-primary-900/20"
+    >
+      <Icon name="ph:funnel-duotone" class="size-5 text-primary-500" />
+      <p class="text-sm text-primary-700 dark:text-primary-400">
+        Showing only <strong>{{ statusFilter === 'active' ? 'Running & Hibernating' : statusFilter }}</strong> requests
+      </p>
+      <NuxtLink
+        to="/requests"
+        class="ml-auto text-sm font-medium text-primary-700 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-200"
+      >
+        Clear filter
+      </NuxtLink>
     </div>
 
     <!-- Search and Page Size Controls -->

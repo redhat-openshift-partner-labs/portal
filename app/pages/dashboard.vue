@@ -15,14 +15,14 @@ onMounted(() => {
   refresh()
 })
 
-// Stat cards configuration with icons
+// Stat cards configuration with icons and links
 const statCards = computed(() => {
   const stats = data.value?.stats
   return [
-    { label: 'Total Labs', value: stats?.totalLabs ?? 0, icon: 'ph:flask-duotone' },
-    { label: 'Active Labs', value: stats?.activeLabs ?? 0, icon: 'ph:play-circle-duotone' },
-    { label: 'Denied Labs', value: stats?.deniedLabs ?? 0, icon: 'ph:prohibit-duotone' },
-    { label: 'Completed Labs', value: stats?.completedLabs ?? 0, icon: 'ph:check-circle-duotone' }
+    { label: 'Total Labs', value: stats?.totalLabs ?? 0, icon: 'ph:flask-duotone', link: '/requests' },
+    { label: 'Active Labs', value: stats?.activeLabs ?? 0, icon: 'ph:play-circle-duotone', link: '/requests?status=active' },
+    { label: 'Denied Labs', value: stats?.deniedLabs ?? 0, icon: 'ph:prohibit-duotone', link: '/archive?status=Denied' },
+    { label: 'Completed Labs', value: stats?.completedLabs ?? 0, icon: 'ph:check-circle-duotone', link: '/archive?status=Completed' }
   ]
 })
 
@@ -243,29 +243,34 @@ const companiesWithIcons = computed(() => {
 
     <!-- Stat Cards -->
     <div class="grid grid-cols-2 gap-4 xl:grid-cols-4">
-      <BaseCard
+      <NuxtLink
         v-for="stat in statCards"
         :key="stat.label"
-        rounded="lg"
-        class="min-w-0 p-5"
+        :to="stat.link"
+        class="block"
       >
-        <div class="flex items-center gap-4">
-          <div class="bg-primary-500/10 flex size-12 shrink-0 items-center justify-center rounded-lg">
-            <Icon :name="stat.icon" class="text-primary-500 size-6" />
+        <BaseCard
+          rounded="lg"
+          class="min-w-0 p-5 transition-shadow hover:shadow-lg hover:ring-2 hover:ring-primary-500/20"
+        >
+          <div class="flex items-center gap-4">
+            <div class="bg-primary-500/10 flex size-12 shrink-0 items-center justify-center rounded-lg">
+              <Icon :name="stat.icon" class="text-primary-500 size-6" />
+            </div>
+            <div>
+              <p class="text-muted-500 dark:text-muted-400 text-sm">
+                {{ stat.label }}
+              </p>
+              <template v-if="pending && !data">
+                <div class="bg-muted-200 dark:bg-muted-700 mt-1 h-7 w-16 animate-pulse rounded" />
+              </template>
+              <p v-else class="text-muted-800 dark:text-white text-2xl font-semibold">
+                {{ stat.value.toLocaleString() }}
+              </p>
+            </div>
           </div>
-          <div>
-            <p class="text-muted-500 dark:text-muted-400 text-sm">
-              {{ stat.label }}
-            </p>
-            <template v-if="pending && !data">
-              <div class="bg-muted-200 dark:bg-muted-700 mt-1 h-7 w-16 animate-pulse rounded" />
-            </template>
-            <p v-else class="text-muted-800 dark:text-white text-2xl font-semibold">
-              {{ stat.value.toLocaleString() }}
-            </p>
-          </div>
-        </div>
-      </BaseCard>
+        </BaseCard>
+      </NuxtLink>
     </div>
 
     <!-- Charts Row -->
