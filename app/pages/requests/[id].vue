@@ -226,7 +226,7 @@ const formatNoteDate = (dateStr: string) => {
       </BaseCard>
 
       <!-- Stats Grid -->
-      <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
         <!-- Reservation Progress -->
         <BaseCard rounded="lg" class="p-5">
           <div class="flex items-center gap-4">
@@ -244,6 +244,23 @@ const formatNoteDate = (dateStr: string) => {
               </p>
               <p class="text-muted-400 text-xs">
                 {{ daysRemaining }} days remaining
+              </p>
+            </div>
+          </div>
+        </BaseCard>
+
+        <!-- Submitted -->
+        <BaseCard rounded="lg" class="p-5">
+          <div class="flex items-center gap-4">
+            <div class="flex size-14 shrink-0 items-center justify-center rounded-xl bg-blue-500/10">
+              <Icon name="ph:paper-plane-tilt-duotone" class="size-6 text-blue-500" />
+            </div>
+            <div>
+              <p class="text-muted-500 dark:text-muted-400 text-sm">
+                Submitted
+              </p>
+              <p class="text-muted-800 dark:text-white text-xl font-semibold">
+                {{ formatDate(request.createdAt) }}
               </p>
             </div>
           </div>
