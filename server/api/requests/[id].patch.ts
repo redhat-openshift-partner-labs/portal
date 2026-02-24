@@ -5,7 +5,7 @@ interface UpdateRequestBody {
 }
 
 // User-settable statuses (Running/Hibernating are set by hub cluster, not users)
-const USER_SETTABLE_STATUSES = ['Pending', 'Active', 'Approved', 'Denied', 'Completed']
+const USER_SETTABLE_STATUSES = ['Pending', 'Approved', 'Denied', 'Completed']
 
 export default defineEventHandler(async (event) => {
   await requireEditPermission(event)

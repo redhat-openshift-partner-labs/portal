@@ -20,7 +20,7 @@ const emit = defineEmits<{
 
 const open = defineModel<boolean>('open', { default: false })
 
-const VALID_STATUSES = ['Pending', 'Active', 'Approved', 'Denied', 'Completed']
+const VALID_STATUSES = ['Pending', 'Approved', 'Denied', 'Completed']
 
 const IANA_TIMEZONES = [
   { value: 'America/New_York', label: 'America/New_York (Eastern)' },

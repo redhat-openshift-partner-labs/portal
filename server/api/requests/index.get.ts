@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   const companyId = query.company ? Number(query.company) : undefined
 
   // Define status filters
-  const activeStatuses = ['Pending', 'Active', 'Approved', 'Running', 'Hibernating']
+  const activeStatuses = ['Pending', 'Approved', 'Running', 'Hibernating']
   const archivedStatuses = ['Denied', 'Completed']
 
   // Build where clause based on type and company filters

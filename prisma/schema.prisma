@@ -16,7 +16,7 @@ model Lab {
   id               Int       @id @default(autoincrement())
   clusterId        String    @map("cluster_id")
   generatedName    String    @unique @map("generated_name")
-  state            String    // Pending, Active, Approved, Running, Hibernating, Denied, Completed
+  state            String    // Pending, Approved, Running, Hibernating, Denied, Completed
   clusterName      String    @map("cluster_name")
   openshiftVersion String    @map("openshift_version")
   clusterSize      String    @map("cluster_size")

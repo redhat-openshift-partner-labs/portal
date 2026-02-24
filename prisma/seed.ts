@@ -97,7 +97,7 @@ async function main() {
   console.log(`Created ${versions.length} OpenShift version mappings`)
 
   // Create labs (merged with requests)
-  const states = ['Pending', 'Active', 'Approved', 'Running', 'Hibernating', 'Denied', 'Completed']
+  const states = ['Pending', 'Approved', 'Running', 'Hibernating', 'Denied', 'Completed']
   const cloudProviders = ['AWS', 'Azure', 'GCP', 'IBM']
   const regions = ['America/New_York', 'America/Los_Angeles', 'Europe/London', 'Asia/Singapore', 'Asia/Tokyo']
   const clusterSizes = ['small', 'medium', 'large']

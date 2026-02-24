@@ -116,8 +116,6 @@ const getStatusClasses = (status: string): string => {
   switch (status) {
     case 'Pending':
       return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20'
-    case 'Active':
-      return 'bg-primary-500/10 text-primary-600 dark:text-primary-400 ring-1 ring-inset ring-primary-500/20'
     case 'Approved':
       return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20'
     case 'Running':

@@ -3,7 +3,7 @@ export default defineEventHandler(async (event) => {
 
   const [totalLabs, activeLabs, deniedLabs, completedLabs] = await Promise.all([
     prisma.lab.count(),
-    prisma.lab.count({ where: { state: { in: ['Active', 'Running'] } } }),
+    prisma.lab.count({ where: { state: { in: ['Running', 'Hibernating'] } } }),
     prisma.lab.count({ where: { state: 'Denied' } }),
     prisma.lab.count({ where: { state: 'Completed' } }),
   ])
