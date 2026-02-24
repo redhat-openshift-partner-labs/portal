@@ -4,7 +4,11 @@ interface User {
     email: string
     name: string
     picture: string
+    group: string | null
 }
+
+export type UserGroup = 'oplmgr' | 'opldev'
+const EDIT_GROUPS: UserGroup[] = ['oplmgr', 'opldev']
 
 export const useAuth = () => {
     const user = useState<User | null>('auth_user', () => null)
@@ -64,5 +68,9 @@ export const useAuth = () => {
         navigateTo('/auth')
     }
 
-    return { user, init, login, logout }
+    const canEdit = computed(() => {
+        return user.value?.group != null && EDIT_GROUPS.includes(user.value.group as UserGroup)
+    })
+
+    return { user, init, login, logout, canEdit }
 }

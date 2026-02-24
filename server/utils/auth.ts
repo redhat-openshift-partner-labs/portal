@@ -46,3 +46,20 @@ export const requireAuth = (event: H3Event): SessionPayload => {
     }
     return session
 }
+
+const EDIT_GROUPS = ['oplmgr', 'opldev']
+
+export const requireEditPermission = async (event: H3Event): Promise<SessionPayload> => {
+    const session = requireAuth(event)
+
+    const user = await prisma.user.findUnique({
+        where: { email: session.email },
+        select: { group: true },
+    })
+
+    if (!user?.group || !EDIT_GROUPS.includes(user.group)) {
+        throw createError({ statusCode: 403, message: 'You do not have permission to edit' })
+    }
+
+    return session
+}

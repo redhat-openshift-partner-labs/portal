@@ -10,9 +10,11 @@ useHead({
 })
 
 const { requests, pending, error, refresh, extendRequest, addNote } = useRequests()
+const { canEdit } = useAuth()
 
 // Modal state
 const noteModalOpen = ref(false)
+const editModalOpen = ref(false)
 const selectedRequestId = ref<number | null>(null)
 const extending = ref<number | null>(null)
 
@@ -150,6 +152,17 @@ const handleExtend = async (requestId: number, duration: '3d' | '1w' | '2w' | '1
 const handleCreateNote = (requestId: number) => {
   selectedRequestId.value = requestId
   noteModalOpen.value = true
+}
+
+// Handle edit action
+const handleEdit = (requestId: number) => {
+  selectedRequestId.value = requestId
+  editModalOpen.value = true
+}
+
+// Handle edit modal update
+const handleEditUpdated = () => {
+  refresh()
 }
 </script>
 
@@ -369,6 +382,16 @@ const handleCreateNote = (requestId: number) => {
                 <Icon name="lucide:message-square-plus" class="size-4" />
                 <span>Note</span>
               </BaseButton>
+              <BaseButton
+                v-if="canEdit"
+                size="sm"
+                rounded="lg"
+                variant="default"
+                @click="handleEdit(request.id)"
+              >
+                <Icon name="lucide:pencil" class="size-4" />
+                <span>Edit</span>
+              </BaseButton>
             </div>
           </TairoTableCell>
         </TairoTableRow>
@@ -440,6 +463,13 @@ const handleCreateNote = (requestId: number) => {
     <RequestNoteModal
       v-model:open="noteModalOpen"
       :request-id="selectedRequestId"
+    />
+
+    <!-- Edit Modal -->
+    <RequestEditModal
+      v-model:open="editModalOpen"
+      :request-id="selectedRequestId"
+      @updated="handleEditUpdated"
     />
   </div>
 </template>

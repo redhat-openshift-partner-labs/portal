@@ -12,9 +12,11 @@ definePageMeta({
 })
 
 const { request, pending, error, refresh, extendRequest, addNote } = useRequestDetail(requestId)
+const { canEdit } = useAuth()
 
-// Note modal state
+// Modal state
 const noteModalOpen = ref(false)
+const editModalOpen = ref(false)
 const extending = ref(false)
 
 useHead({
@@ -189,25 +191,38 @@ const formatNoteDate = (dateStr: string) => {
             </div>
           </div>
 
-          <!-- Extend Actions (hidden for archived requests) -->
-          <div v-if="!isArchived" class="flex items-center gap-2">
-            <template v-if="extending">
-              <Icon name="ph:spinner" class="text-primary-500 size-5 animate-spin" />
+          <!-- Actions -->
+          <div class="flex items-center gap-2">
+            <!-- Extend Actions (hidden for archived requests) -->
+            <template v-if="!isArchived">
+              <template v-if="extending">
+                <Icon name="ph:spinner" class="text-primary-500 size-5 animate-spin" />
+              </template>
+              <template v-else>
+                <BaseButton size="sm" color="muted" @click="handleExtend('3d')">
+                  +3 Days
+                </BaseButton>
+                <BaseButton size="sm" color="muted" @click="handleExtend('1w')">
+                  +1 Week
+                </BaseButton>
+                <BaseButton size="sm" color="muted" @click="handleExtend('2w')">
+                  +2 Weeks
+                </BaseButton>
+                <BaseButton size="sm" color="primary" @click="handleExtend('1mo')">
+                  +1 Month
+                </BaseButton>
+              </template>
             </template>
-            <template v-else>
-              <BaseButton size="sm" color="muted" @click="handleExtend('3d')">
-                +3 Days
-              </BaseButton>
-              <BaseButton size="sm" color="muted" @click="handleExtend('1w')">
-                +1 Week
-              </BaseButton>
-              <BaseButton size="sm" color="muted" @click="handleExtend('2w')">
-                +2 Weeks
-              </BaseButton>
-              <BaseButton size="sm" color="primary" @click="handleExtend('1mo')">
-                +1 Month
-              </BaseButton>
-            </template>
+            <!-- Edit Button (only for users with edit permission) -->
+            <BaseButton
+              v-if="canEdit"
+              size="sm"
+              color="default"
+              @click="editModalOpen = true"
+            >
+              <Icon name="lucide:pencil" class="me-1 size-4" />
+              Edit
+            </BaseButton>
           </div>
         </div>
       </BaseCard>
@@ -359,6 +374,13 @@ const formatNoteDate = (dateStr: string) => {
     <RequestNoteModal
       v-model:open="noteModalOpen"
       :request-id="request?.id ?? null"
+    />
+
+    <!-- Edit Modal -->
+    <RequestEditModal
+      v-model:open="editModalOpen"
+      :request-id="request?.id ?? null"
+      @updated="refresh"
     />
   </div>
 </template>
