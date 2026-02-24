@@ -4,7 +4,7 @@ definePageMeta({
 })
 
 useHead({
-  title: 'Users - OpenShift Partner Labs'
+  title: 'Docs - OpenShift Partner Labs'
 })
 </script>
 
@@ -14,7 +14,7 @@ useHead({
       Users
     </h1>
     <p class="text-muted-500 dark:text-muted-400">
-      User management coming soon.
+      Documentation coming soon.
     </p>
   </div>
 </template>
