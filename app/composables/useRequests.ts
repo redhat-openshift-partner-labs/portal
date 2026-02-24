@@ -64,6 +64,7 @@ export interface RequestDetail extends Omit<RequestItem, 'notesCount'> {
   sponsor: string
   primaryContact: ContactInfo
   secondaryContact: ContactInfo
+  description: string
 }
 
 export const useRequests = () => {

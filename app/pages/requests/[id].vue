@@ -403,6 +403,23 @@ const formatNoteDate = (dateStr: string) => {
         </BaseCard>
       </div>
 
+      <!-- Description -->
+      <BaseCard v-if="request.description" rounded="lg" class="p-5">
+        <div class="flex gap-4">
+          <div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10">
+            <Icon name="ph:text-align-left-duotone" class="size-6 text-indigo-500" />
+          </div>
+          <div>
+            <p class="text-muted-500 dark:text-muted-400 mb-2 text-sm">
+              Description
+            </p>
+            <p class="text-muted-700 dark:text-muted-300 text-sm whitespace-pre-wrap">
+              {{ request.description }}
+            </p>
+          </div>
+        </div>
+      </BaseCard>
+
       <!-- Notes Section -->
       <div class="grid grid-cols-12 gap-6">
         <BaseCard rounded="lg" class="col-span-12 p-6 md:col-span-6">
