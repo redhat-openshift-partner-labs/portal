@@ -111,25 +111,25 @@ const getReservationProgress = (startDate: string, endDate: string): number => {
   return Math.round(Math.min(100, Math.max(0, (elapsedDays / totalDays) * 100)))
 }
 
-// Get status color
-const getStatusColor = (status: string): 'warning' | 'primary' | 'success' | 'info' | 'muted' | 'danger' => {
+// Get status classes for colored pills
+const getStatusClasses = (status: string): string => {
   switch (status) {
     case 'Pending':
-      return 'warning'
+      return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20'
     case 'Active':
-      return 'primary'
+      return 'bg-primary-500/10 text-primary-600 dark:text-primary-400 ring-1 ring-inset ring-primary-500/20'
     case 'Approved':
-      return 'success'
+      return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20'
     case 'Running':
-      return 'info'
+      return 'bg-sky-500/10 text-sky-600 dark:text-sky-400 ring-1 ring-inset ring-sky-500/20'
     case 'Hibernating':
-      return 'muted'
+      return 'bg-muted-500/10 text-muted-600 dark:text-muted-400 ring-1 ring-inset ring-muted-500/20'
     case 'Denied':
-      return 'danger'
+      return 'bg-rose-500/10 text-rose-600 dark:text-rose-400 ring-1 ring-inset ring-rose-500/20'
     case 'Completed':
-      return 'success'
+      return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20'
     default:
-      return 'muted'
+      return 'bg-muted-500/10 text-muted-600 dark:text-muted-400 ring-1 ring-inset ring-muted-500/20'
   }
 }
 
@@ -306,9 +306,10 @@ const handleCreateNote = (requestId: number) => {
           <!-- Status Column -->
           <TairoTableCell spaced>
             <BaseTag
-              :color="getStatusColor(request.status)"
+              variant="none"
               rounded="full"
               size="sm"
+              :class="getStatusClasses(request.status)"
             >
               {{ request.status }}
             </BaseTag>
