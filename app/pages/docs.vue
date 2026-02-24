@@ -11,7 +11,7 @@ useHead({
 <template>
   <div class="p-6">
     <h1 class="text-2xl font-bold text-muted-800 dark:text-white mb-4">
-      Users
+     Docs
     </h1>
     <p class="text-muted-500 dark:text-muted-400">
       Documentation coming soon.
