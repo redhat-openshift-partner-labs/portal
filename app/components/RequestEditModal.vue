@@ -208,9 +208,9 @@ watch(open, (isOpen) => {
           <!-- Notes Section -->
           <div v-if="notes.length > 0" class="mb-4">
             <label class="block text-sm font-medium text-muted-700 dark:text-muted-300 mb-2">
-              Notes
+              Notes ({{ notes.length }})
             </label>
-            <div class="space-y-3">
+            <div class="space-y-3 max-h-72 overflow-y-auto pr-1">
               <div
                 v-for="note in notes"
                 :key="note.id"
