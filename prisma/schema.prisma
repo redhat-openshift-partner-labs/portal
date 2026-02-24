@@ -96,6 +96,7 @@ model Note {
   requestId Int      @map("request_id")
   content   String
   authorId  Int?     @map("author_id")
+  immutable Boolean  @default(false)
   createdAt DateTime @default(now()) @map("created_at")
 
   request Request @relation(fields: [requestId], references: [id])

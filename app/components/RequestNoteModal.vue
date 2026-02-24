@@ -16,6 +16,7 @@ const props = defineProps<{
 const open = defineModel<boolean>('open', { default: false })
 
 const noteContent = ref('')
+const isImmutable = ref(false)
 const submitting = ref(false)
 const error = ref<string | null>(null)
 
@@ -27,8 +28,9 @@ const handleSubmit = async () => {
 
   try {
     const { addNote } = useRequestDetail(props.requestId)
-    await addNote(noteContent.value.trim())
+    await addNote(noteContent.value.trim(), isImmutable.value)
     noteContent.value = ''
+    isImmutable.value = false
     open.value = false
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Failed to add note'
@@ -39,6 +41,7 @@ const handleSubmit = async () => {
 
 const handleCancel = () => {
   noteContent.value = ''
+  isImmutable.value = false
   error.value = null
   open.value = false
 }
@@ -46,6 +49,7 @@ const handleCancel = () => {
 watch(open, (isOpen) => {
   if (!isOpen) {
     noteContent.value = ''
+    isImmutable.value = false
     error.value = null
   }
 })
@@ -83,6 +87,18 @@ watch(open, (isOpen) => {
               :rows="4"
               :disabled="submitting"
             />
+          </div>
+
+          <div class="mb-4">
+            <BaseCheckbox
+              v-model="isImmutable"
+              :disabled="submitting"
+              color="primary"
+              label="Make immutable"
+            />
+            <p class="text-muted-400 mt-1 ms-7 text-xs">
+              Immutable notes cannot be edited after creation
+            </p>
           </div>
 
           <div v-if="error" class="mb-4 rounded-lg bg-danger-100 p-3 text-sm text-danger-600 dark:bg-danger-500/20 dark:text-danger-400">

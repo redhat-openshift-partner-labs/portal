@@ -303,42 +303,48 @@ const formatNoteDate = (dateStr: string) => {
               :key="note.id"
               class="border-muted-200 dark:border-muted-700 rounded-lg border p-4"
             >
-              <div class="mb-2 flex items-center gap-3">
-                <template v-if="note.author">
-                  <img
-                    v-if="note.author.picture"
-                    :src="note.author.picture"
-                    :alt="note.author.name"
-                    class="size-8 rounded-full object-cover"
-                  >
-                  <div
-                    v-else
-                    class="bg-primary-500/10 text-primary-500 flex size-8 items-center justify-center rounded-full text-sm font-semibold"
-                  >
-                    {{ note.author.name.charAt(0) }}
-                  </div>
-                  <div>
-                    <p class="text-muted-800 dark:text-white text-sm font-medium">
-                      {{ note.author.name }}
-                    </p>
-                    <p class="text-muted-400 text-xs">
-                      {{ formatNoteDate(note.createdAt) }}
-                    </p>
-                  </div>
-                </template>
-                <template v-else>
-                  <div class="bg-muted-100 dark:bg-muted-700 flex size-8 items-center justify-center rounded-full">
-                    <Icon name="ph:user-duotone" class="text-muted-400 size-4" />
-                  </div>
-                  <div>
-                    <p class="text-muted-500 dark:text-muted-400 text-sm">
-                      Unknown Author
-                    </p>
-                    <p class="text-muted-400 text-xs">
-                      {{ formatNoteDate(note.createdAt) }}
-                    </p>
-                  </div>
-                </template>
+              <div class="mb-2 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <template v-if="note.author">
+                    <img
+                      v-if="note.author.picture"
+                      :src="note.author.picture"
+                      :alt="note.author.name"
+                      class="size-8 rounded-full object-cover"
+                    >
+                    <div
+                      v-else
+                      class="bg-primary-500/10 text-primary-500 flex size-8 items-center justify-center rounded-full text-sm font-semibold"
+                    >
+                      {{ note.author.name.charAt(0) }}
+                    </div>
+                    <div>
+                      <p class="text-muted-800 dark:text-white text-sm font-medium">
+                        {{ note.author.name }}
+                      </p>
+                      <p class="text-muted-400 text-xs">
+                        {{ formatNoteDate(note.createdAt) }}
+                      </p>
+                    </div>
+                  </template>
+                  <template v-else>
+                    <div class="bg-muted-100 dark:bg-muted-700 flex size-8 items-center justify-center rounded-full">
+                      <Icon name="ph:user-duotone" class="text-muted-400 size-4" />
+                    </div>
+                    <div>
+                      <p class="text-muted-500 dark:text-muted-400 text-sm">
+                        Unknown Author
+                      </p>
+                      <p class="text-muted-400 text-xs">
+                        {{ formatNoteDate(note.createdAt) }}
+                      </p>
+                    </div>
+                  </template>
+                </div>
+                <div v-if="note.immutable" class="flex items-center gap-1 text-muted-400" title="This note cannot be edited">
+                  <Icon name="lucide:lock" class="size-3.5" />
+                  <span class="text-xs">Immutable</span>
+                </div>
               </div>
               <p class="text-muted-600 dark:text-muted-300 text-sm">
                 {{ note.content }}

@@ -51,6 +51,7 @@ export default defineEventHandler(async (event) => {
       id: note.id,
       content: note.content,
       author: note.author,
+      immutable: note.immutable,
       createdAt: note.createdAt.toISOString(),
     })),
   }

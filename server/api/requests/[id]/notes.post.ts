@@ -1,5 +1,6 @@
 interface NoteBody {
   content: string
+  immutable?: boolean
 }
 
 export default defineEventHandler(async (event) => {
@@ -34,6 +35,7 @@ export default defineEventHandler(async (event) => {
       requestId: Number(id),
       content: body.content.trim(),
       authorId: user?.id ?? null,
+      immutable: body.immutable ?? false,
     },
     include: {
       author: {
@@ -50,6 +52,7 @@ export default defineEventHandler(async (event) => {
     id: note.id,
     content: note.content,
     author: note.author,
+    immutable: note.immutable,
     createdAt: note.createdAt.toISOString(),
   }
 })

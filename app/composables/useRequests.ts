@@ -27,6 +27,7 @@ export interface RequestNote {
   id: number
   content: string
   author: NoteAuthor | null
+  immutable: boolean
   createdAt: string
 }
 
@@ -74,10 +75,10 @@ export const useRequests = () => {
     return result
   }
 
-  const addNote = async (id: number, content: string) => {
+  const addNote = async (id: number, content: string, immutable = false) => {
     const result = await $fetch<RequestNote>(`/api/requests/${id}/notes`, {
       method: 'POST',
-      body: { content },
+      body: { content, immutable },
     })
 
     // Update notes count in the list
@@ -139,10 +140,10 @@ export const useRequestDetail = (id: number | Ref<number>) => {
     return result
   }
 
-  const addNote = async (content: string) => {
+  const addNote = async (content: string, immutable = false) => {
     const result = await $fetch<RequestNote>(`/api/requests/${resolvedId.value}/notes`, {
       method: 'POST',
-      body: { content },
+      body: { content, immutable },
     })
 
     if (request.value) {

@@ -22,10 +22,10 @@ export const useArchive = () => {
     }
   }
 
-  const addNote = async (id: number, content: string) => {
+  const addNote = async (id: number, content: string, immutable = false) => {
     const result = await $fetch<RequestNote>(`/api/requests/${id}/notes`, {
       method: 'POST',
-      body: { content },
+      body: { content, immutable },
     })
 
     // Update notes count in the list
