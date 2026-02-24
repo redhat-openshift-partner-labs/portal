@@ -67,7 +67,8 @@ const fetchRequest = async () => {
       notes: RequestNote[]
     }>(`/api/requests/${props.requestId}`)
 
-    status.value = data.status
+    // If status is Running/Hibernating (hub-managed), show placeholder instead
+    status.value = VALID_STATUSES.includes(data.status) ? data.status : ''
     timezone.value = data.timezone
     notes.value = data.notes.map((note) => ({
       ...note,
@@ -183,6 +184,9 @@ watch(open, (isOpen) => {
               :disabled="submitting"
               class="w-full rounded-lg border border-muted-300 bg-muted-50 px-3 py-2 text-sm text-muted-600 transition-colors focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-muted-700 dark:bg-muted-900 dark:text-muted-200"
             >
+              <option v-if="!VALID_STATUSES.includes(status)" value="" disabled>
+                Update Status
+              </option>
               <option v-for="s in VALID_STATUSES" :key="s" :value="s">
                 {{ s }}
               </option>
