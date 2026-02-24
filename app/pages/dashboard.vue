@@ -21,7 +21,7 @@ const statCards = computed(() => {
   return [
     { label: 'Total Labs', value: stats?.totalLabs ?? 0, icon: 'ph:flask-duotone' },
     { label: 'Active Labs', value: stats?.activeLabs ?? 0, icon: 'ph:play-circle-duotone' },
-    { label: 'Total Users', value: stats?.totalUsers ?? 0, icon: 'ph:users-duotone' },
+    { label: 'Denied Labs', value: stats?.deniedLabs ?? 0, icon: 'ph:prohibit-duotone' },
     { label: 'Completed Labs', value: stats?.completedLabs ?? 0, icon: 'ph:check-circle-duotone' }
   ]
 })
