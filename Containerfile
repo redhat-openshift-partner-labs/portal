@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Multi-stage Containerfile for Nuxt 4 application on Red Hat UBI
-# Build: podman build -t db4opl:latest -f Containerfile .
-# Run:   podman run -p 3000:3000 --env-file .env.production db4opl:latest
+# Build: podman build -t portal:latest -f Containerfile .
+# Run:   podman run -p 3000:3000 --env-file .env.production portal:latest
 
 # =============================================================================
 # Stage 1: Dependencies
@@ -51,12 +51,12 @@ RUN pnpm build
 FROM registry.access.redhat.com/ubi9/nodejs-22-minimal:latest AS production
 
 # Labels for OpenShift/Kubernetes
-LABEL name="db4opl" \
-      vendor="db4opl" \
+LABEL name="portal" \
+      vendor="redhat" \
       version="1.0.0" \
-      summary="Database for OPL - Nuxt application" \
+      summary="UI Portal for OpenShift Partner Labs" \
       description="Nuxt 4 application with PostgreSQL backend" \
-      io.k8s.display-name="db4opl" \
+      io.k8s.display-name="portal" \
       io.k8s.description="Nuxt 4 application with PostgreSQL backend" \
       io.openshift.tags="nodejs,nuxt,vue"
 
