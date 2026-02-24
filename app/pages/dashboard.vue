@@ -371,7 +371,7 @@ const companiesWithIcons = computed(() => {
     <!-- Companies Served Ticker -->
     <BaseCard rounded="lg" class="overflow-hidden p-4">
       <p class="text-muted-500 dark:text-muted-400 mb-3 text-center text-sm font-medium">
-        Companies We Serve
+        Partners Served
       </p>
       <template v-if="pending && !data">
         <div class="flex justify-center gap-12 overflow-hidden">

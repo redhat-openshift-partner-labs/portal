@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides context for AI assistants working on the opdb codebase.
+This file provides context for AI assistants.
 
 ## Git Policy
 - **NEVER push to remote repository** - User handles all pushes manually

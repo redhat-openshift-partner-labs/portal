@@ -14,6 +14,7 @@ node_modules/
 
 # Local data
 .data/
+/tmp
 prisma/dev.db
 prisma/dev.db-journal
 
