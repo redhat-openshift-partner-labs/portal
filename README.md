@@ -1,75 +1,168 @@
-# Nuxt Minimal Starter
+# OpenShift Partner Labs Dashboard
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+A modern web application for managing OpenShift cluster reservation requests across partner organizations. Built with Nuxt 4, Vue 3, and Tailwind CSS.
 
-## Setup
+```mermaid
+graph LR
+    subgraph Features
+        Dashboard["📊 Dashboard"]
+        Requests["📋 Requests"]
+        Archive["📁 Archive"]
+        Auth["🔐 Authentication"]
+    end
 
-Make sure to install dependencies:
+    Dashboard --> Stats["Statistics & Charts"]
+    Requests --> Manage["Manage Reservations"]
+    Archive --> History["View History"]
+    Auth --> Google["Google OAuth"]
+```
+
+## Quick Start
 
 ```bash
-# npm
-npm install
-
-# pnpm
+# Install dependencies
 pnpm install
 
-# yarn
-yarn install
+# Set up environment
+cp .env.example .env
+# Edit .env with your credentials
 
-# bun
-bun install
-```
+# Run database migrations
+pnpm db:migrate
+pnpm db:seed
 
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
+# Start development server
 pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-Build the application for production:
+## Tech Stack
 
-```bash
-# npm
-npm run build
+| Category | Technology |
+|----------|------------|
+| **Framework** | Nuxt 4.3 (Vue 3.5) |
+| **Language** | TypeScript 5.9 |
+| **Styling** | Tailwind CSS + LightningCSS |
+| **UI Components** | Shuriken UI + Tairo + Reka UI |
+| **Database** | Prisma ORM (SQLite / PostgreSQL) |
+| **Authentication** | Google OAuth + JWT |
+| **Charts** | ApexCharts |
+| **Icons** | Iconify (Phosphor, Lucide) |
 
-# pnpm
-pnpm build
+## Features
 
-# yarn
-yarn build
+- **Dashboard**: Real-time statistics, cost overview charts, labs summary
+- **Request Management**: View, filter, search, and manage lab requests
+- **Extensions**: Request reservation extensions with approval workflow
+- **Notes**: Add and manage notes on requests
+- **Archive**: View completed and denied requests
+- **Company View**: Filter requests by partner organization
+- **Multi-language**: English, French, Spanish, German, Arabic, Japanese
+- **Dark Mode**: Full dark mode support
+- **Idle Timeout**: Automatic session expiration for security
 
-# bun
-bun run build
+## Documentation
+
+Comprehensive documentation is available in the [`docs/`](./docs) folder:
+
+| Document | Description |
+|----------|-------------|
+| [User Guide](./docs/user-guide.md) | Complete guide for end users |
+| [Developer Guide](./docs/developer-guide.md) | Setup, conventions, and development workflow |
+| [API Reference](./docs/api-reference.md) | REST API documentation |
+| [Architecture](./docs/architecture.md) | System architecture and design patterns |
+| [Authentication](./docs/authentication.md) | OAuth flow and session management |
+| [Database](./docs/database.md) | Schema, models, and Prisma usage |
+| [Components](./docs/components.md) | UI component reference |
+
+## Project Structure
+
+```
+db4opl/
+├── app/                    # Main application code
+│   ├── pages/             # File-based routing
+│   ├── components/        # Vue components
+│   ├── composables/       # Reusable logic
+│   ├── layouts/           # Page layouts
+│   ├── middleware/        # Route guards
+│   └── plugins/           # App initialization
+├── server/                # Server-side code
+│   ├── api/              # API endpoints
+│   └── utils/            # Server utilities
+├── layers/tairo/         # Tairo UI layer
+├── prisma/               # Database schema
+├── i18n/                 # Translations
+├── docs/                 # Documentation
+└── public/               # Static assets
 ```
 
-Locally preview production build:
+## Commands
 
-```bash
-# npm
-npm run preview
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start development server |
+| `pnpm build` | Build for production |
+| `pnpm preview` | Preview production build |
+| `pnpm typecheck` | Run TypeScript checker |
+| `pnpm db:migrate` | Run database migrations |
+| `pnpm db:seed` | Seed database |
+| `pnpm db:studio` | Open Prisma Studio |
 
-# pnpm
-pnpm preview
+## Environment Variables
 
-# yarn
-yarn preview
+```env
+# Required
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+AUTH_SECRET=your-secure-secret
 
-# bun
-bun run preview
+# Application
+APP_URL=http://localhost:3000
+NUXT_PUBLIC_SITE_URL=http://localhost:3000
+
+# Optional
+NUXT_PUBLIC_MAPBOX_TOKEN=your-mapbox-token
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## Architecture
+
+```mermaid
+flowchart TB
+    subgraph Client["Browser"]
+        Vue["Vue 3 + Nuxt 4"]
+        Composables["Composables"]
+    end
+
+    subgraph Server["Nitro Server"]
+        API["REST API"]
+        Auth["Auth Layer"]
+    end
+
+    subgraph Data["Data Layer"]
+        Prisma["Prisma ORM"]
+        DB[(Database)]
+    end
+
+    subgraph External["External Services"]
+        Google["Google OAuth"]
+    end
+
+    Vue --> Composables
+    Composables --> API
+    API --> Auth
+    Auth --> Google
+    API --> Prisma
+    Prisma --> DB
+```
+
+## Contributing
+
+1. Create a feature branch from `main`
+2. Follow the coding conventions in [CLAUDE.md](./CLAUDE.md)
+3. Write tests for new features
+4. Submit a pull request
+
+## License
+
+Private - All rights reserved.
