@@ -301,6 +301,108 @@ const formatNoteDate = (dateStr: string) => {
         </BaseCard>
       </div>
 
+      <!-- Request Details -->
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <!-- OpenShift Version -->
+        <BaseCard rounded="lg" class="p-5">
+          <div class="flex items-center gap-4">
+            <div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-rose-500/10">
+              <Icon name="ph:cube-duotone" class="size-6 text-rose-500" />
+            </div>
+            <div>
+              <p class="text-muted-500 dark:text-muted-400 text-sm">
+                OpenShift Version
+              </p>
+              <p class="text-muted-800 dark:text-white text-lg font-semibold">
+                {{ request.openshiftVersion || 'N/A' }}
+              </p>
+            </div>
+          </div>
+        </BaseCard>
+
+        <!-- Request Type -->
+        <BaseCard rounded="lg" class="p-5">
+          <div class="flex items-center gap-4">
+            <div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
+              <Icon name="ph:tag-duotone" class="size-6 text-amber-500" />
+            </div>
+            <div>
+              <p class="text-muted-500 dark:text-muted-400 text-sm">
+                Request Type
+              </p>
+              <p class="text-muted-800 dark:text-white text-lg font-semibold">
+                {{ request.requestType || 'N/A' }}
+              </p>
+            </div>
+          </div>
+        </BaseCard>
+
+        <!-- Sponsor -->
+        <BaseCard rounded="lg" class="p-5">
+          <div class="flex items-center gap-4">
+            <div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-purple-500/10">
+              <Icon name="ph:handshake-duotone" class="size-6 text-purple-500" />
+            </div>
+            <div>
+              <p class="text-muted-500 dark:text-muted-400 text-sm">
+                Sponsor
+              </p>
+              <p class="text-muted-800 dark:text-white text-lg font-semibold">
+                {{ request.sponsor || 'N/A' }}
+              </p>
+            </div>
+          </div>
+        </BaseCard>
+
+        <!-- Primary Contact -->
+        <BaseCard rounded="lg" class="p-5">
+          <div class="flex items-center gap-4">
+            <div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-sky-500/10">
+              <Icon name="ph:user-duotone" class="size-6 text-sky-500" />
+            </div>
+            <div>
+              <p class="text-muted-500 dark:text-muted-400 text-sm">
+                Primary Contact
+              </p>
+              <p class="text-muted-800 dark:text-white text-lg font-semibold">
+                {{ request.primaryContact?.firstName }} {{ request.primaryContact?.lastName }}
+              </p>
+              <a
+                v-if="request.primaryContact?.email"
+                :href="`mailto:${request.primaryContact.email}`"
+                class="text-primary-500 hover:text-primary-600 text-sm"
+              >
+                {{ request.primaryContact.email }}
+              </a>
+            </div>
+          </div>
+        </BaseCard>
+
+        <!-- Secondary Contact -->
+        <BaseCard rounded="lg" class="p-5">
+          <div class="flex items-center gap-4">
+            <div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-teal-500/10">
+              <Icon name="ph:user-duotone" class="size-6 text-teal-500" />
+            </div>
+            <div>
+              <p class="text-muted-500 dark:text-muted-400 text-sm">
+                Secondary Contact
+              </p>
+              <p class="text-muted-800 dark:text-white text-lg font-semibold">
+                {{ request.secondaryContact?.firstName }} {{ request.secondaryContact?.lastName }}
+              </p>
+              <a
+                v-if="request.secondaryContact?.email"
+                :href="`mailto:${request.secondaryContact.email}`"
+                class="text-primary-500 hover:text-primary-600 text-sm"
+              >
+                {{ request.secondaryContact.email }}
+              </a>
+            </div>
+          </div>
+        </BaseCard>
+      </div>
+
       <!-- Notes Section -->
       <div class="grid grid-cols-12 gap-6">
         <BaseCard rounded="lg" class="col-span-12 p-6 md:col-span-6">

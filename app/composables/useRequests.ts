@@ -47,12 +47,23 @@ export interface ClusterLogin {
   accessTime: string | null
 }
 
+export interface ContactInfo {
+  firstName: string
+  lastName: string
+  email: string
+}
+
 export interface RequestDetail extends Omit<RequestItem, 'notesCount'> {
   createdAt: string
   updatedAt: string
   notes: RequestNote[]
   extensionHistory: ExtensionHistoryItem[]
   clusterLogins: ClusterLogin[]
+  openshiftVersion: string
+  requestType: string
+  sponsor: string
+  primaryContact: ContactInfo
+  secondaryContact: ContactInfo
 }
 
 export const useRequests = () => {
