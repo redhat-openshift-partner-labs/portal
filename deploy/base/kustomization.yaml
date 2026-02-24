@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: portal-base
+
+labels:
+  - pairs:
+      app.kubernetes.io/managed-by: kustomize
+    includeSelectors: false
+
+resources:
+  - deployment.yaml
+  - service.yaml
+  - route.yaml
+  - configmap.yaml
+  # Note: secret.yaml is excluded by default
+  # Apply secrets separately or use sealed-secrets/external-secrets

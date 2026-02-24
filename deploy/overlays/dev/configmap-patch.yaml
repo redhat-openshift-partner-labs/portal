@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: portal-config
+data:
+  NUXT_PUBLIC_SITE_URL: "https://portal-dev.apps.example.com"
+  APP_URL: "https://portal-dev.apps.example.com"

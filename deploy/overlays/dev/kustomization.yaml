@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: portal-dev
+
+namespace: opl-dev
+
+resources:
+  - ../../base
+
+labels:
+  - pairs:
+      app.kubernetes.io/environment: dev
+    includeSelectors: false
+
+patches:
+  - path: deployment-patch.yaml
+  - path: configmap-patch.yaml
+  - path: route-patch.yaml
+
+images:
+  - name: portal
+    newName: quay.io/opl/portal
+    newTag: dev
