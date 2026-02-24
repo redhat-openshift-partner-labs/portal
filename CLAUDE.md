@@ -51,16 +51,21 @@ pnpm run typecheck # Run TypeScript type checker
 pnpm db:migrate    # Run SQLite migrations
 pnpm db:seed       # Seed local database
 pnpm db:studio     # Open Prisma Studio (SQLite)
+pnpm prisma generate  # Generate client for SQLite
 
 # Production (PostgreSQL)
-pnpm db:pg:push    # Push schema to PostgreSQL (initial setup)
-pnpm db:pg:migrate # Create PostgreSQL migration
-pnpm db:pg:deploy  # Deploy migrations to production
-pnpm db:pg:studio  # Open Prisma Studio (PostgreSQL)
+pnpm db:pg:generate   # Generate client for PostgreSQL (required before dev/build)
+pnpm db:pg:push       # Push schema to PostgreSQL
+pnpm db:pg:push:sql   # Generate SQL for manual apply (workaround for connection issues)
+pnpm db:pg:migrate    # Create PostgreSQL migration
+pnpm db:pg:deploy     # Deploy migrations to production
+pnpm db:pg:studio     # Open Prisma Studio (PostgreSQL)
 
 # Validation
 pnpm db:validate   # Verify schemas are in sync
 ```
+
+**Note:** The Prisma client must be generated for the matching database. When switching between SQLite and PostgreSQL, regenerate the client first. See `docs/database.md` for the full workflow.
 
 ### Key Directories
 

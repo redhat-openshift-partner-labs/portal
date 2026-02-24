@@ -82,6 +82,19 @@ The application automatically selects the database adapter based on `DATABASE_UR
 
 This logic is implemented in `server/utils/db.ts`.
 
+**Important:** Prisma 7's driver adapters require the client to be generated from the matching schema. You must regenerate the client when switching between databases:
+
+```bash
+# For PostgreSQL (production)
+DATABASE_URL="postgresql://..." npx prisma generate --config=prisma.config.postgresql.ts
+
+# For SQLite (local development)
+npx prisma generate
+```
+
+The generated client is tied to the database provider at generation time. Running with a mismatched adapter will result in an error like:
+> "The Driver Adapter is not compatible with the provider specified in the Prisma schema."
+
 ## Entity Relationship Diagram
 
 ```mermaid
@@ -599,7 +612,9 @@ prisma/
 | `pnpm db:seed` | Seed local SQLite database |
 | `pnpm db:reset` | Reset SQLite database |
 | `pnpm db:studio` | Open Prisma Studio (SQLite) |
+| `pnpm db:pg:generate` | Generate Prisma client for PostgreSQL |
 | `pnpm db:pg:push` | Push schema to PostgreSQL |
+| `pnpm db:pg:push:sql` | Generate SQL for manual apply (workaround) |
 | `pnpm db:pg:migrate` | Create PostgreSQL migration |
 | `pnpm db:pg:deploy` | Deploy PostgreSQL migrations |
 | `pnpm db:pg:studio` | Open Prisma Studio (PostgreSQL) |
@@ -615,6 +630,32 @@ Run `pnpm db:validate` and compare the two schema files. Ensure all models, fiel
 2. Check network connectivity to the database host
 3. Verify credentials are correct
 4. Ensure the database exists
+
+#### "P1001: Can't reach database server" with `db:pg:push`
+
+The Prisma schema-engine binary sometimes fails to connect even when `psql` works. This is a known issue with port-forwarded connections or certain network configurations.
+
+**Workaround: Generate SQL and apply manually with psql**
+
+```bash
+# For initial setup (empty database):
+pnpm db:pg:push:sql > /tmp/schema.sql
+psql "$DATABASE_URL" -f /tmp/schema.sql
+
+# Or pipe directly:
+pnpm db:pg:push:sql | psql "$DATABASE_URL"
+
+# For incremental changes (diff against existing database):
+DATABASE_URL="postgresql://..." pnpm db:pg:push:sql --incremental > /tmp/migration.sql
+psql "$DATABASE_URL" -f /tmp/migration.sql
+```
+
+This bypasses the Prisma schema-engine's connection handling and uses `psql` which handles the connection correctly.
+
+**Why this happens:**
+- Prisma's schema-engine is a pre-compiled Rust binary with its own networking stack
+- It may have issues with certain SSL configurations, IPv4/IPv6 resolution, or PgBouncer setups
+- The runtime Prisma Client (used by your app) uses a different adapter (`@prisma/adapter-pg`) that works correctly
 
 #### "Prisma client out of sync"
 Regenerate the client after schema changes:
