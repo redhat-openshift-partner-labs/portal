@@ -65,6 +65,7 @@ export interface RequestDetail extends Omit<RequestItem, 'notesCount'> {
   primaryContact: ContactInfo
   secondaryContact: ContactInfo
   description: string
+  leaseTime: string
 }
 
 export const useRequests = () => {

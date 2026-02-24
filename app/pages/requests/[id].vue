@@ -337,6 +337,23 @@ const formatNoteDate = (dateStr: string) => {
           </div>
         </BaseCard>
 
+        <!-- Reservation (Lease Time) -->
+        <BaseCard rounded="lg" class="p-5">
+          <div class="flex items-center gap-4">
+            <div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-cyan-500/10">
+              <Icon name="ph:clock-duotone" class="size-6 text-cyan-500" />
+            </div>
+            <div>
+              <p class="text-muted-500 dark:text-muted-400 text-sm">
+                Reservation
+              </p>
+              <p class="text-muted-800 dark:text-white text-lg font-semibold">
+                {{ request.leaseTime || 'N/A' }}
+              </p>
+            </div>
+          </div>
+        </BaseCard>
+
         <!-- Sponsor -->
         <BaseCard rounded="lg" class="p-5">
           <div class="flex items-center gap-4">
