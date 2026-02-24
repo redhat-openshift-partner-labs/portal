@@ -48,7 +48,7 @@ const IANA_TIMEZONES = [
 // Form state
 const status = ref('')
 const timezone = ref('')
-const notes = ref<(RequestNote & { edited: boolean; newContent: string })[]>([])
+const notes = ref<(RequestNote & { edited: boolean; newContent: string; makeImmutable: boolean })[]>([])
 const loading = ref(false)
 const submitting = ref(false)
 const error = ref<string | null>(null)
@@ -74,6 +74,7 @@ const fetchRequest = async () => {
       ...note,
       edited: false,
       newContent: note.content,
+      makeImmutable: false,
     }))
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Failed to load request'
@@ -95,6 +96,13 @@ const handleNoteEdit = (noteId: number, content: string) => {
   }
 }
 
+const handleMakeImmutable = (noteId: number, value: boolean) => {
+  const note = notes.value.find((n) => n.id === noteId)
+  if (note) {
+    note.makeImmutable = value
+  }
+}
+
 const handleSubmit = async () => {
   if (!props.requestId) return
 
@@ -108,12 +116,21 @@ const handleSubmit = async () => {
       body: { status: status.value, timezone: timezone.value },
     })
 
-    // Update edited notes
-    const editedNotes = notes.value.filter((note) => note.edited && !note.immutable)
-    for (const note of editedNotes) {
+    // Update edited notes and notes marked to become immutable
+    const notesToUpdate = notes.value.filter(
+      (note) => (note.edited && !note.immutable) || (note.makeImmutable && !note.immutable)
+    )
+    for (const note of notesToUpdate) {
+      const body: { content?: string; immutable?: boolean } = {}
+      if (note.edited && !note.immutable) {
+        body.content = note.newContent
+      }
+      if (note.makeImmutable && !note.immutable) {
+        body.immutable = true
+      }
       await $fetch(`/api/requests/${props.requestId}/notes/${note.id}`, {
         method: 'PATCH',
-        body: { content: note.newContent },
+        body,
       })
     }
 
@@ -241,6 +258,15 @@ watch(open, (isOpen) => {
                   :class="{ 'opacity-60 cursor-not-allowed': note.immutable }"
                   @update:model-value="(val: string) => handleNoteEdit(note.id, val)"
                 />
+                <div v-if="!note.immutable" class="mt-2">
+                  <BaseCheckbox
+                    :model-value="note.makeImmutable"
+                    :disabled="submitting"
+                    color="primary"
+                    label="Make Immutable"
+                    @update:model-value="(val: boolean) => handleMakeImmutable(note.id, val)"
+                  />
+                </div>
                 <p v-if="note.immutable" class="mt-1 text-xs text-muted-400">
                   This note cannot be edited
                 </p>
