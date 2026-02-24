@@ -26,6 +26,11 @@ export default defineEventHandler(async (event) => {
           createdAt: 'desc',
         },
       },
+      audits: {
+        orderBy: {
+          accessTime: 'desc',
+        },
+      },
     },
   })
 
@@ -88,6 +93,12 @@ export default defineEventHandler(async (event) => {
       date: ext.date?.toISOString() ?? null,
       status: ext.status,
       createdAt: ext.createdAt?.toISOString() ?? null,
+    })),
+    clusterLogins: lab.audits.map((audit) => ({
+      id: audit.id,
+      loginName: audit.loginName,
+      loginType: audit.loginType,
+      accessTime: audit.accessTime?.toISOString() ?? null,
     })),
   }
 })

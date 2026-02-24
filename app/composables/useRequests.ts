@@ -31,10 +31,28 @@ export interface RequestNote {
   createdAt: string
 }
 
+export interface ExtensionHistoryItem {
+  id: number
+  extension: string | null
+  requestedBy: string | null
+  date: string | null
+  status: string | null
+  createdAt: string | null
+}
+
+export interface ClusterLogin {
+  id: number
+  loginName: string | null
+  loginType: string | null
+  accessTime: string | null
+}
+
 export interface RequestDetail extends Omit<RequestItem, 'notesCount'> {
   createdAt: string
   updatedAt: string
   notes: RequestNote[]
+  extensionHistory: ExtensionHistoryItem[]
+  clusterLogins: ClusterLogin[]
 }
 
 export const useRequests = () => {

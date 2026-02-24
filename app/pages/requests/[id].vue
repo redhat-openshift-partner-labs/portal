@@ -367,6 +367,98 @@ const formatNoteDate = (dateStr: string) => {
           </div>
         </template>
         </BaseCard>
+
+        <!-- Extensions Log -->
+        <BaseCard rounded="lg" class="col-span-12 p-6 md:col-span-3">
+          <h2 class="text-muted-800 dark:text-white mb-4 text-lg font-semibold">
+            Extension History
+          </h2>
+
+          <!-- Empty Extensions -->
+          <template v-if="!request.extensionHistory || request.extensionHistory.length === 0">
+            <div class="flex flex-col items-center justify-center gap-3 py-8">
+              <div class="bg-muted-100 dark:bg-muted-800 flex size-12 items-center justify-center rounded-full">
+                <Icon name="ph:calendar-plus-duotone" class="text-muted-400 size-6" />
+              </div>
+              <p class="text-muted-500 dark:text-muted-400 text-sm">
+                No extensions yet.
+              </p>
+            </div>
+          </template>
+
+          <!-- Extensions List -->
+          <template v-else>
+            <div class="space-y-3">
+              <div
+                v-for="ext in request.extensionHistory"
+                :key="ext.id"
+                class="border-muted-200 dark:border-muted-700 rounded-lg border p-3"
+              >
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-muted-800 dark:text-white text-sm font-medium">
+                    {{ ext.extension || 'Unknown' }}
+                  </span>
+                  <span
+                    :class="[
+                      'rounded-full px-2 py-0.5 text-xs font-medium',
+                      ext.status === 'approved' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-muted-500/10 text-muted-600 dark:text-muted-400'
+                    ]"
+                  >
+                    {{ ext.status || 'pending' }}
+                  </span>
+                </div>
+                <p class="text-muted-500 dark:text-muted-400 mt-1 text-xs">
+                  {{ ext.requestedBy || 'Unknown user' }}
+                </p>
+                <p class="text-muted-400 mt-1 text-xs">
+                  {{ ext.date ? formatDate(ext.date) : 'No date' }}
+                </p>
+              </div>
+            </div>
+          </template>
+        </BaseCard>
+
+        <!-- Cluster Logins Log -->
+        <BaseCard rounded="lg" class="col-span-12 p-6 md:col-span-3">
+          <h2 class="text-muted-800 dark:text-white mb-4 text-lg font-semibold">
+            Cluster Logins
+          </h2>
+
+          <!-- Empty Logins -->
+          <template v-if="!request.clusterLogins || request.clusterLogins.length === 0">
+            <div class="flex flex-col items-center justify-center gap-3 py-8">
+              <div class="bg-muted-100 dark:bg-muted-800 flex size-12 items-center justify-center rounded-full">
+                <Icon name="ph:sign-in-duotone" class="text-muted-400 size-6" />
+              </div>
+              <p class="text-muted-500 dark:text-muted-400 text-sm">
+                No logins recorded.
+              </p>
+            </div>
+          </template>
+
+          <!-- Logins List -->
+          <template v-else>
+            <div class="space-y-3">
+              <div
+                v-for="login in request.clusterLogins"
+                :key="login.id"
+                class="border-muted-200 dark:border-muted-700 rounded-lg border p-3"
+              >
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-muted-800 dark:text-white text-sm font-medium">
+                    {{ login.loginName || 'Unknown' }}
+                  </span>
+                  <span class="bg-primary-500/10 text-primary-600 dark:text-primary-400 rounded-full px-2 py-0.5 text-xs font-medium">
+                    {{ login.loginType || 'unknown' }}
+                  </span>
+                </div>
+                <p class="text-muted-400 mt-1 text-xs">
+                  {{ login.accessTime ? formatDate(login.accessTime) : 'No access time' }}
+                </p>
+              </div>
+            </div>
+          </template>
+        </BaseCard>
       </div>
     </template>
 
