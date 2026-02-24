@@ -198,6 +198,13 @@ export default defineNuxtConfig({
       crawlLinks: false,
       routes: [],
     },
+    // Externalize SQLite adapter - not needed in production (PostgreSQL only)
+    externals: {
+      external: [
+        'better-sqlite3',
+        '@prisma/adapter-better-sqlite3',
+      ],
+    },
     // esbuild: {
     //   options: {
     //     target: 'esnext',

@@ -1,25 +1,36 @@
 import { PrismaClient } from '../../generated/prisma/client.js'
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
-import { PrismaPg } from '@prisma/adapter-pg'
 
 declare global {
   var __prisma: PrismaClient | undefined
 }
 
 function createAdapter() {
-  const databaseUrl = process.env.DATABASE_URL || 'file:./prisma/dev.db'
+  const databaseUrl = process.env.DATABASE_URL || ''
+  const isProduction = process.env.NODE_ENV === 'production'
 
-  // Use PostgreSQL adapter if URL starts with postgres/postgresql
-  if (databaseUrl.startsWith('postgres')) {
-    return new PrismaPg({
-      connectionString: databaseUrl,
-    })
+  // In production, always use PostgreSQL
+  if (isProduction) {
+    // Dynamic import to ensure proper bundling
+    const { PrismaPg } = require('@prisma/adapter-pg')
+
+    // Build proper connection string if only hostname was provided
+    let connectionString = databaseUrl
+    if (!databaseUrl.startsWith('postgres') && !databaseUrl.includes('://')) {
+      // Assume it's just a hostname, build full connection string
+      connectionString = `postgresql://postgres:postgres@${databaseUrl}:5432/portal`
+    }
+    return new PrismaPg({ connectionString })
   }
 
-  // Default to SQLite for local development
-  return new PrismaBetterSqlite3({
-    url: databaseUrl,
-  })
+  // Development: check URL format
+  if (databaseUrl.startsWith('postgres')) {
+    const { PrismaPg } = require('@prisma/adapter-pg')
+    return new PrismaPg({ connectionString: databaseUrl })
+  }
+
+  // Local development with SQLite
+  const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3')
+  return new PrismaBetterSqlite3({ url: databaseUrl || 'file:./prisma/dev.db' })
 }
 
 function createPrismaClient(): PrismaClient {
