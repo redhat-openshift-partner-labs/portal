@@ -4,7 +4,8 @@ interface UpdateRequestBody {
   hold?: boolean
 }
 
-const VALID_STATUSES = ['Pending', 'Active', 'Approved', 'Running', 'Hibernating', 'Denied', 'Completed']
+// User-settable statuses (Running/Hibernating are set by hub cluster, not users)
+const USER_SETTABLE_STATUSES = ['Pending', 'Active', 'Approved', 'Denied', 'Completed']
 
 export default defineEventHandler(async (event) => {
   await requireEditPermission(event)
@@ -17,8 +18,8 @@ export default defineEventHandler(async (event) => {
   const body = await readBody<UpdateRequestBody>(event)
 
   // Validate status if provided
-  if (body.status !== undefined && !VALID_STATUSES.includes(body.status)) {
-    throw createError({ statusCode: 400, message: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}` })
+  if (body.status !== undefined && !USER_SETTABLE_STATUSES.includes(body.status)) {
+    throw createError({ statusCode: 400, message: `Invalid status. Must be one of: ${USER_SETTABLE_STATUSES.join(', ')}` })
   }
 
   // Validate timezone if provided
