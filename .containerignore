@@ -1,0 +1,62 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+.output/
+.nuxt/
+dist/
+
+# Development files
+.git/
+.gitignore
+*.md
+!README.md
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Environment files (should be mounted at runtime)
+.env
+.env.*
+!.env.example
+
+# Local development database
+prisma/dev.db
+prisma/dev.db-journal
+
+# Test files
+coverage/
+*.test.ts
+*.spec.ts
+__tests__/
+tests/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker/Container files
+Containerfile
+Dockerfile
+docker-compose*.yml
+.dockerignore
+.containerignore
+
+# Tairo component metadata workspace (dev only)
+tairo-component-meta/
+
+# Documentation (not needed in runtime)
+docs/
+
+# Scripts (dev utilities)
+scripts/
