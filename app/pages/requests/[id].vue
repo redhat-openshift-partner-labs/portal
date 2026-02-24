@@ -80,7 +80,7 @@ const getStatusClasses = (status: string): string => {
 }
 
 // Handle extend
-const handleExtend = async (duration: '1w' | '2w' | '1mo') => {
+const handleExtend = async (duration: '3d' | '1w' | '2w' | '1mo') => {
   extending.value = true
   try {
     await extendRequest(duration)
@@ -195,6 +195,9 @@ const formatNoteDate = (dateStr: string) => {
               <Icon name="ph:spinner" class="text-primary-500 size-5 animate-spin" />
             </template>
             <template v-else>
+              <BaseButton size="sm" color="muted" @click="handleExtend('3d')">
+                +3 Days
+              </BaseButton>
               <BaseButton size="sm" color="muted" @click="handleExtend('1w')">
                 +1 Week
               </BaseButton>

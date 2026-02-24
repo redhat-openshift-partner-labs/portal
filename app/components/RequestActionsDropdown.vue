@@ -16,11 +16,11 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  extend: [duration: '1w' | '2w' | '1mo']
+  extend: [duration: '3d' | '1w' | '2w' | '1mo']
   createNote: []
 }>()
 
-const handleExtend = (duration: '1w' | '2w' | '1mo') => {
+const handleExtend = (duration: '3d' | '1w' | '2w' | '1mo') => {
   emit('extend', duration)
 }
 

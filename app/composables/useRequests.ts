@@ -56,7 +56,7 @@ export const useRequests = () => {
     }
   }
 
-  const extendRequest = async (id: number, duration: '1w' | '2w' | '1mo') => {
+  const extendRequest = async (id: number, duration: '3d' | '1w' | '2w' | '1mo') => {
     const result = await $fetch<RequestItem>(`/api/requests/${id}/extend`, {
       method: 'POST',
       body: { duration },
@@ -126,7 +126,7 @@ export const useRequestDetail = (id: number | Ref<number>) => {
     }
   }
 
-  const extendRequest = async (duration: '1w' | '2w' | '1mo') => {
+  const extendRequest = async (duration: '3d' | '1w' | '2w' | '1mo') => {
     const result = await $fetch<RequestItem>(`/api/requests/${resolvedId.value}/extend`, {
       method: 'POST',
       body: { duration },

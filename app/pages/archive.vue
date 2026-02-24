@@ -261,39 +261,50 @@ const handleCreateNote = (requestId: number) => {
     <template v-else>
       <TairoTable rounded="lg">
         <template #header>
-          <TairoTableHeading uppercase class="w-1/4 ps-4">
-            Cluster
+          <TairoTableHeading uppercase class="ps-4">
+            Cluster Name
           </TairoTableHeading>
-          <TairoTableHeading uppercase class="w-1/6">
+          <TairoTableHeading uppercase>
+            Company
+          </TairoTableHeading>
+          <TairoTableHeading uppercase>
             TimeZone
           </TairoTableHeading>
-          <TairoTableHeading uppercase class="w-1/6">
+          <TairoTableHeading uppercase>
             Status
           </TairoTableHeading>
-          <TairoTableHeading uppercase class="w-1/4">
+          <TairoTableHeading uppercase>
             Reservation
           </TairoTableHeading>
-          <TairoTableHeading uppercase class="w-20 pe-4 text-end">
+          <TairoTableHeading uppercase class="pe-4 text-end">
             Action
           </TairoTableHeading>
         </template>
 
         <TairoTableRow v-for="request in paginatedRequests" :key="request.id">
-          <!-- Cluster Column -->
+          <!-- Cluster Name Column -->
           <TairoTableCell spaced class="ps-4">
             <div class="flex items-center gap-3">
               <div class="bg-primary-500/10 flex size-10 shrink-0 items-center justify-center rounded-lg">
                 <Icon name="ph:cube-duotone" class="text-primary-500 size-5" />
               </div>
-              <div class="min-w-0">
-                <p class="text-muted-800 dark:text-white truncate font-medium">
-                  {{ request.cluster }}
-                </p>
-                <p class="text-muted-500 dark:text-muted-400 truncate text-xs">
-                  {{ request.company.name }}
-                </p>
-              </div>
+              <NuxtLink
+                :to="`/requests/${request.id}?from=archive`"
+                class="text-muted-800 dark:text-white hover:text-primary-500 dark:hover:text-primary-400 truncate font-medium underline decoration-muted-300 underline-offset-2 transition-colors hover:decoration-primary-500 dark:decoration-muted-600 dark:hover:decoration-primary-400"
+              >
+                {{ request.cluster }}
+              </NuxtLink>
             </div>
+          </TairoTableCell>
+
+          <!-- Company Column -->
+          <TairoTableCell spaced>
+            <NuxtLink
+              :to="`/companies/${request.company.id}/requests`"
+              class="text-muted-600 dark:text-muted-300 hover:text-primary-500 dark:hover:text-primary-400 truncate underline decoration-muted-300 underline-offset-2 transition-colors hover:decoration-primary-500 dark:decoration-muted-600 dark:hover:decoration-primary-400"
+            >
+              {{ request.company.name }}
+            </NuxtLink>
           </TairoTableCell>
 
           <!-- TimeZone Column -->
@@ -331,11 +342,16 @@ const handleCreateNote = (requestId: number) => {
 
           <!-- Action Column -->
           <TairoTableCell spaced class="pe-4 text-end">
-            <div class="relative flex justify-end">
-              <ArchiveActionsDropdown
-                :request-id="request.id"
-                @create-note="handleCreateNote(request.id)"
-              />
+            <div class="flex items-center justify-end">
+              <BaseButton
+                size="sm"
+                rounded="lg"
+                variant="default"
+                @click="handleCreateNote(request.id)"
+              >
+                <Icon name="lucide:message-square-plus" class="size-4" />
+                <span>Note</span>
+              </BaseButton>
             </div>
           </TairoTableCell>
         </TairoTableRow>
