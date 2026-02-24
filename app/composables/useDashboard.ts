@@ -4,7 +4,7 @@ export interface DashboardStats {
   totalLabs: number
   activeLabs: number
   totalUsers: number
-  completedSessions: number
+  completedLabs: number
 }
 
 export interface CostOverview {

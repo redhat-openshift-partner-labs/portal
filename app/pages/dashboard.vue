@@ -22,7 +22,7 @@ const statCards = computed(() => {
     { label: 'Total Labs', value: stats?.totalLabs ?? 0, icon: 'ph:flask-duotone' },
     { label: 'Active Labs', value: stats?.activeLabs ?? 0, icon: 'ph:play-circle-duotone' },
     { label: 'Total Users', value: stats?.totalUsers ?? 0, icon: 'ph:users-duotone' },
-    { label: 'Completed Sessions', value: stats?.completedSessions ?? 0, icon: 'ph:check-circle-duotone' }
+    { label: 'Completed Labs', value: stats?.completedLabs ?? 0, icon: 'ph:check-circle-duotone' }
   ]
 })
 

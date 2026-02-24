@@ -21,11 +21,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Note content is required' })
   }
 
-  // Verify note exists and belongs to the request
+  // Verify note exists and belongs to the lab
   const existingNote = await prisma.note.findFirst({
     where: {
       id: Number(noteId),
-      requestId: Number(requestId),
+      labId: Number(requestId),
     },
   })
 
@@ -41,23 +41,14 @@ export default defineEventHandler(async (event) => {
   const note = await prisma.note.update({
     where: { id: Number(noteId) },
     data: {
-      content: body.content.trim(),
-    },
-    include: {
-      author: {
-        select: {
-          id: true,
-          name: true,
-          picture: true,
-        },
-      },
+      note: body.content.trim(),
     },
   })
 
   return {
     id: note.id,
-    content: note.content,
-    author: note.author,
+    content: note.note,
+    author: note.userId ? { name: note.userId } : null,
     immutable: note.immutable,
     createdAt: note.createdAt.toISOString(),
   }

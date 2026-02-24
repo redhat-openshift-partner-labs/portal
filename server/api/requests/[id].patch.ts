@@ -1,6 +1,7 @@
 interface UpdateRequestBody {
   status?: string
   timezone?: string
+  hold?: boolean
 }
 
 const VALID_STATUSES = ['Pending', 'Active', 'Approved', 'Running', 'Hibernating', 'Denied', 'Completed']
@@ -25,36 +26,39 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Invalid timezone' })
   }
 
-  // Verify request exists
-  const existingRequest = await prisma.request.findUnique({
+  // Verify lab exists
+  const existingLab = await prisma.lab.findUnique({
     where: { id: Number(id) },
   })
 
-  if (!existingRequest) {
+  if (!existingLab) {
     throw createError({ statusCode: 404, message: 'Request not found' })
   }
 
   // Build update data
-  const updateData: { status?: string; timezone?: string } = {}
+  const updateData: { state?: string; region?: string; hold?: boolean } = {}
   if (body.status !== undefined) {
-    updateData.status = body.status
+    updateData.state = body.status
   }
   if (body.timezone !== undefined) {
-    updateData.timezone = body.timezone.trim()
+    updateData.region = body.timezone.trim()
+  }
+  if (body.hold !== undefined) {
+    updateData.hold = body.hold
   }
 
   if (Object.keys(updateData).length === 0) {
     throw createError({ statusCode: 400, message: 'No valid fields to update' })
   }
 
-  const request = await prisma.request.update({
+  const lab = await prisma.lab.update({
     where: { id: Number(id) },
     data: updateData,
     include: {
       company: {
         select: {
           id: true,
-          name: true,
+          companyName: true,
           logoUrl: true,
         },
       },
@@ -62,12 +66,19 @@ export default defineEventHandler(async (event) => {
   })
 
   return {
-    id: request.id,
-    cluster: request.cluster,
-    company: request.company,
-    timezone: request.timezone,
-    status: request.status,
-    startDate: request.startDate.toISOString(),
-    endDate: request.endDate.toISOString(),
+    id: lab.id,
+    cluster: lab.clusterName,
+    generatedName: lab.generatedName,
+    company: lab.company ? {
+      id: lab.company.id,
+      name: lab.company.companyName,
+      logoUrl: lab.company.logoUrl,
+    } : null,
+    companyName: lab.companyName,
+    timezone: lab.region,
+    status: lab.state,
+    startDate: lab.startDate.toISOString(),
+    endDate: lab.endDate.toISOString(),
+    hold: lab.hold,
   }
 })

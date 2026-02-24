@@ -1,5 +1,5 @@
 // Prisma Schema for OpenShift Partner Labs Dashboard
-// Uses SQLite for local development, PostgreSQL for production
+// Aligned with production MySQL schema
 
 generator client {
   provider = "prisma-client"
@@ -10,98 +10,144 @@ datasource db {
   provider = "sqlite"
 }
 
+// Main lab/request entity - matches production `labs` table
+// In production, labs table IS the request (no separate Request table)
 model Lab {
-  id          Int       @id @default(autoincrement())
-  name        String
-  description String?
-  status      String    @default("pending") // pending, active, completed, archived
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  completedAt DateTime? @map("completed_at")
+  id               Int       @id @default(autoincrement())
+  clusterId        String    @map("cluster_id")
+  generatedName    String    @unique @map("generated_name")
+  state            String    // Pending, Active, Approved, Running, Hibernating, Denied, Completed
+  clusterName      String    @map("cluster_name")
+  openshiftVersion String    @map("openshift_version")
+  clusterSize      String    @map("cluster_size")
+  companyName      String    @map("company_name")
+  companyId        Int?      @map("company_id")
+  requestType      String    @map("request_type")
+  partner          Boolean   @default(false)
+  sponsor          String
+  cloudProvider    String    @map("cloud_provider")
+  primaryFirst     String    @map("primary_first")
+  primaryLast      String    @map("primary_last")
+  primaryEmail     String    @map("primary_email")
+  secondaryFirst   String    @map("secondary_first")
+  secondaryLast    String    @map("secondary_last")
+  secondaryEmail   String    @map("secondary_email")
+  region           String
+  alwaysOn         Boolean   @default(false) @map("always_on")
+  projectName      String    @map("project_name")
+  leaseTime        String    @map("lease_time")
+  description      String
+  notes            String    @default("") // Internal notes text field
+  startDate        DateTime  @map("start_date")
+  endDate          DateTime  @map("end_date")
+  hold             Boolean   @default(false)
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
 
-  sessions Session[]
+  // Relations
+  company           Company?            @relation(fields: [companyId], references: [id])
+  noteRecords       Note[]
+  audits            Audit[]
+  extensionRequests ExtensionRequest[]
 
   @@map("labs")
 }
 
 model User {
   id        Int      @id @default(autoincrement())
+  userId    String?  @map("user_id")
+  firstName String?  @map("first_name")
+  lastName  String?  @map("last_name")
+  fullName  String?  @map("full_name")
   email     String   @unique
-  name      String
   picture   String?
+  admin     Boolean  @default(false)
   group     String?  // oplmgr, opldev, or null for regular users
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  sessions Session[]
-  notes    Note[]
-
   @@map("users")
 }
 
-model Session {
-  id          Int       @id @default(autoincrement())
-  labId       Int       @map("lab_id")
-  userId      Int       @map("user_id")
-  completed   Boolean   @default(false)
-  startedAt   DateTime  @default(now()) @map("started_at")
-  completedAt DateTime? @map("completed_at")
-
-  lab  Lab  @relation(fields: [labId], references: [id])
-  user User @relation(fields: [userId], references: [id])
-
-  @@map("sessions")
-}
-
-model Cost {
+model CloudCost {
   id        Int      @id @default(autoincrement())
-  amount    Float    @map("cost")
-  date      DateTime
-  category  String?
-  createdAt DateTime @default(now()) @map("created_at")
-
-  @@map("costs")
-}
-
-model Company {
-  id        Int      @id @default(autoincrement())
-  name      String
-  logoUrl   String?  @map("logo_url")
+  month     Int
+  year      Int
+  provider  String?
+  cost      Float
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  requests Request[]
+  @@map("cloudcosts")
+}
+
+model Company {
+  id          Int      @id @default(autoincrement())
+  companyName String   @unique @map("company_name")
+  curated     Boolean  @default(false)
+  logoUrl     String?  @map("logo_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  labs Lab[]
 
   @@map("companies")
 }
 
-model Request {
+model Note {
   id        Int      @id @default(autoincrement())
-  cluster   String
-  companyId Int      @map("company_id")
-  timezone  String
-  status    String   @default("Pending") // Pending, Active, Approved, Running, Hibernating
-  startDate DateTime @map("start_date")
-  endDate   DateTime @map("end_date")
+  labId     Int      @map("lab_id")
+  userId    String?  @map("user_id") // String to match production (stores email or user identifier)
+  note      String   // Renamed from content to match production
+  immutable Boolean  @default(false) // Adding to production per plan decision
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  company Company @relation(fields: [companyId], references: [id])
-  notes   Note[]
-
-  @@map("requests")
-}
-
-model Note {
-  id        Int      @id @default(autoincrement())
-  requestId Int      @map("request_id")
-  content   String
-  authorId  Int?     @map("author_id")
-  immutable Boolean  @default(false)
-  createdAt DateTime @default(now()) @map("created_at")
-
-  request Request @relation(fields: [requestId], references: [id])
-  author  User?   @relation(fields: [authorId], references: [id])
+  lab Lab @relation(fields: [labId], references: [id], onDelete: Cascade)
 
   @@map("notes")
+}
+
+// Audit trail for lab access - matches production `audits` table
+model Audit {
+  id            Int       @id @default(autoincrement())
+  generatedName String?   @map("generated_name")
+  accessTime    DateTime? @map("access_time")
+  loginName     String?   @map("login_name")
+  loginType     String?   @map("login_type")
+  createdAt     DateTime? @map("created_at")
+  updatedAt     DateTime? @map("updated_at")
+
+  lab Lab? @relation(fields: [generatedName], references: [generatedName], onDelete: Cascade)
+
+  @@map("audits")
+}
+
+// Extension request history - matches production `regexts` table
+model ExtensionRequest {
+  id          Int       @id @default(autoincrement())
+  labId       Int?      @map("lab_id")
+  extension   String?   // Duration like "3d", "1w", "2w", "1mo"
+  currentUser String?   @map("current_user")
+  date        DateTime?
+  status      String?   // "Pending", "Approved", "Denied"
+  createdAt   DateTime? @map("created_at")
+  updatedAt   DateTime? @map("updated_at")
+
+  lab Lab? @relation(fields: [labId], references: [id])
+
+  @@map("regexts")
+}
+
+// OpenShift version compatibility mapping
+model OpenshiftVersionMapping {
+  id       Int      @id @default(autoincrement())
+  name     String?  @unique
+  location String?
+  rosa     Boolean? @default(false)
+  aro      Boolean? @default(false)
+  gro      Boolean? @default(false)
+  roks     Boolean? @default(false)
+
+  @@map("openshift_version_mappings")
 }

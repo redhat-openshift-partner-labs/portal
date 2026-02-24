@@ -16,42 +16,29 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Note content is required' })
   }
 
-  // Verify request exists
-  const request = await prisma.request.findUnique({
+  // Verify lab exists
+  const lab = await prisma.lab.findUnique({
     where: { id: Number(id) },
   })
 
-  if (!request) {
+  if (!lab) {
     throw createError({ statusCode: 404, message: 'Request not found' })
   }
 
-  // Find the user by email from session
-  const user = await prisma.user.findUnique({
-    where: { email: session.email },
-  })
-
+  // Create note with userId as string (email) to match production schema
   const note = await prisma.note.create({
     data: {
-      requestId: Number(id),
-      content: body.content.trim(),
-      authorId: user?.id ?? null,
+      labId: Number(id),
+      note: body.content.trim(),
+      userId: session.email,
       immutable: body.immutable ?? false,
-    },
-    include: {
-      author: {
-        select: {
-          id: true,
-          name: true,
-          picture: true,
-        },
-      },
     },
   })
 
   return {
     id: note.id,
-    content: note.content,
-    author: note.author,
+    content: note.note,
+    author: { name: note.userId },
     immutable: note.immutable,
     createdAt: note.createdAt.toISOString(),
   }

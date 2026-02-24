@@ -11,24 +11,24 @@ export default defineEventHandler(async (event) => {
 
   // Build where clause based on type and company filters
   const whereClause = {
-    ...(type === 'active' ? { status: { in: activeStatuses } } : {}),
-    ...(type === 'archived' ? { status: { in: archivedStatuses } } : {}),
+    ...(type === 'active' ? { state: { in: activeStatuses } } : {}),
+    ...(type === 'archived' ? { state: { in: archivedStatuses } } : {}),
     ...(companyId ? { companyId } : {}),
   }
 
-  const requests = await prisma.request.findMany({
+  const labs = await prisma.lab.findMany({
     where: whereClause,
     include: {
       company: {
         select: {
           id: true,
-          name: true,
+          companyName: true,
           logoUrl: true,
         },
       },
       _count: {
         select: {
-          notes: true,
+          noteRecords: true,
         },
       },
     },
@@ -37,14 +37,24 @@ export default defineEventHandler(async (event) => {
     },
   })
 
-  return requests.map((request) => ({
-    id: request.id,
-    cluster: request.cluster,
-    company: request.company,
-    timezone: request.timezone,
-    status: request.status,
-    startDate: request.startDate.toISOString(),
-    endDate: request.endDate.toISOString(),
-    notesCount: request._count.notes,
+  // Map to request-like response for frontend compatibility
+  return labs.map((lab) => ({
+    id: lab.id,
+    cluster: lab.clusterName,
+    generatedName: lab.generatedName,
+    company: lab.company ? {
+      id: lab.company.id,
+      name: lab.company.companyName,
+      logoUrl: lab.company.logoUrl,
+    } : null,
+    companyName: lab.companyName,
+    timezone: lab.region, // Map region to timezone for compatibility
+    status: lab.state,
+    startDate: lab.startDate.toISOString(),
+    endDate: lab.endDate.toISOString(),
+    notesCount: lab._count.noteRecords,
+    cloudProvider: lab.cloudProvider,
+    openshiftVersion: lab.openshiftVersion,
+    clusterSize: lab.clusterSize,
   }))
 })

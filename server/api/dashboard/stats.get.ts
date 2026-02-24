@@ -1,17 +1,17 @@
 export default defineEventHandler(async (event) => {
   requireAuth(event)
 
-  const [totalLabs, activeLabs, totalUsers, completedSessions] = await Promise.all([
+  const [totalLabs, activeLabs, totalUsers, completedLabs] = await Promise.all([
     prisma.lab.count(),
-    prisma.lab.count({ where: { status: 'active' } }),
+    prisma.lab.count({ where: { state: { in: ['Active', 'Running'] } } }),
     prisma.user.count(),
-    prisma.session.count({ where: { completed: true } }),
+    prisma.lab.count({ where: { state: 'Completed' } }),
   ])
 
   return {
     totalLabs,
     activeLabs,
     totalUsers,
-    completedSessions,
+    completedLabs,
   }
 })

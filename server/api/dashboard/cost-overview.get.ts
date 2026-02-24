@@ -2,32 +2,28 @@ export default defineEventHandler(async (event) => {
   requireAuth(event)
 
   const now = new Date()
-  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
-  const eighteenMonthsAgo = new Date(now.getFullYear() - 1, now.getMonth() - 5, 1)
-  const twelveMonthsAgo = new Date(now.getFullYear() - 1, now.getMonth() + 1, 1)
+  const currentYear = now.getFullYear()
+  const lastYear = currentYear - 1
 
   // Get costs for this year (last 6 months)
-  const thisYearCosts = await prisma.cost.findMany({
+  const thisYearCosts = await prisma.cloudCost.findMany({
     where: {
-      date: { gte: sixMonthsAgo },
+      year: currentYear,
     },
     select: {
-      amount: true,
-      date: true,
+      cost: true,
+      month: true,
     },
   })
 
   // Get costs for last year (same 6 month period, one year ago)
-  const lastYearCosts = await prisma.cost.findMany({
+  const lastYearCosts = await prisma.cloudCost.findMany({
     where: {
-      date: {
-        gte: eighteenMonthsAgo,
-        lt: twelveMonthsAgo,
-      },
+      year: lastYear,
     },
     select: {
-      amount: true,
-      date: true,
+      cost: true,
+      month: true,
     },
   })
 
@@ -38,13 +34,18 @@ export default defineEventHandler(async (event) => {
   const lastYearByMonth = new Map<number, number>()
 
   for (const cost of thisYearCosts) {
-    const month = cost.date.getMonth()
-    thisYearByMonth.set(month, (thisYearByMonth.get(month) || 0) + cost.amount)
+    if (cost.month !== null) {
+      // Month is 1-indexed in production
+      const monthIndex = cost.month - 1
+      thisYearByMonth.set(monthIndex, (thisYearByMonth.get(monthIndex) || 0) + cost.cost)
+    }
   }
 
   for (const cost of lastYearCosts) {
-    const month = cost.date.getMonth()
-    lastYearByMonth.set(month, (lastYearByMonth.get(month) || 0) + cost.amount)
+    if (cost.month !== null) {
+      const monthIndex = cost.month - 1
+      lastYearByMonth.set(monthIndex, (lastYearByMonth.get(monthIndex) || 0) + cost.cost)
+    }
   }
 
   // Build ordered arrays for the last 6 months
@@ -54,7 +55,7 @@ export default defineEventHandler(async (event) => {
 
   for (let i = 5; i >= 0; i--) {
     const monthIndex = (now.getMonth() - i + 12) % 12
-    months.push(monthNames[monthIndex])
+    months.push(monthNames[monthIndex] ?? '')
     thisYearData.push(Math.round((thisYearByMonth.get(monthIndex) || 0) / 1000 * 10) / 10)
     lastYearData.push(Math.round((lastYearByMonth.get(monthIndex) || 0) / 1000 * 10) / 10)
   }

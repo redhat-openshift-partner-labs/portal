@@ -14,16 +14,14 @@ export default defineEventHandler(async (event) => {
     },
   })
 
-  // Get labs completed in the last 6 months
+  // Get labs completed in the last 6 months (state = 'Completed')
   const completedLabs = await prisma.lab.findMany({
     where: {
-      completedAt: {
-        gte: sixMonthsAgo,
-        not: null,
-      },
+      state: 'Completed',
+      updatedAt: { gte: sixMonthsAgo },
     },
     select: {
-      completedAt: true,
+      updatedAt: true,
     },
   })
 
@@ -39,8 +37,8 @@ export default defineEventHandler(async (event) => {
   }
 
   for (const lab of completedLabs) {
-    if (lab.completedAt) {
-      const month = lab.completedAt.getMonth()
+    if (lab.updatedAt) {
+      const month = lab.updatedAt.getMonth()
       completedByMonth.set(month, (completedByMonth.get(month) || 0) + 1)
     }
   }
@@ -52,7 +50,7 @@ export default defineEventHandler(async (event) => {
 
   for (let i = 5; i >= 0; i--) {
     const monthIndex = (now.getMonth() - i + 12) % 12
-    months.push(monthNames[monthIndex])
+    months.push(monthNames[monthIndex] ?? '')
     createdData.push(createdByMonth.get(monthIndex) || 0)
     completedData.push(completedByMonth.get(monthIndex) || 0)
   }

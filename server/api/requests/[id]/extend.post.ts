@@ -3,7 +3,7 @@ interface ExtendBody {
 }
 
 export default defineEventHandler(async (event) => {
-  requireAuth(event)
+  const session = requireAuth(event)
 
   const id = getRouterParam(event, 'id')
   if (!id || isNaN(Number(id))) {
@@ -15,16 +15,16 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Invalid duration. Must be 3d, 1w, 2w, or 1mo' })
   }
 
-  const request = await prisma.request.findUnique({
+  const lab = await prisma.lab.findUnique({
     where: { id: Number(id) },
   })
 
-  if (!request) {
+  if (!lab) {
     throw createError({ statusCode: 404, message: 'Request not found' })
   }
 
   // Calculate new end date based on duration
-  const currentEndDate = new Date(request.endDate)
+  const currentEndDate = new Date(lab.endDate)
   let daysToAdd = 0
 
   switch (body.duration) {
@@ -45,29 +45,47 @@ export default defineEventHandler(async (event) => {
   const newEndDate = new Date(currentEndDate)
   newEndDate.setDate(newEndDate.getDate() + daysToAdd)
 
-  const updatedRequest = await prisma.request.update({
-    where: { id: Number(id) },
-    data: {
-      endDate: newEndDate,
-    },
-    include: {
-      company: {
-        select: {
-          id: true,
-          name: true,
-          logoUrl: true,
+  // Update lab and create extension request record in a transaction
+  const [updatedLab] = await prisma.$transaction([
+    prisma.lab.update({
+      where: { id: Number(id) },
+      data: {
+        endDate: newEndDate,
+      },
+      include: {
+        company: {
+          select: {
+            id: true,
+            companyName: true,
+            logoUrl: true,
+          },
         },
       },
-    },
-  })
+    }),
+    prisma.extensionRequest.create({
+      data: {
+        labId: Number(id),
+        extension: body.duration,
+        currentUser: session.email,
+        date: new Date(),
+        status: 'Approved', // Auto-approved in this context
+      },
+    }),
+  ])
 
   return {
-    id: updatedRequest.id,
-    cluster: updatedRequest.cluster,
-    company: updatedRequest.company,
-    timezone: updatedRequest.timezone,
-    status: updatedRequest.status,
-    startDate: updatedRequest.startDate.toISOString(),
-    endDate: updatedRequest.endDate.toISOString(),
+    id: updatedLab.id,
+    cluster: updatedLab.clusterName,
+    generatedName: updatedLab.generatedName,
+    company: updatedLab.company ? {
+      id: updatedLab.company.id,
+      name: updatedLab.company.companyName,
+      logoUrl: updatedLab.company.logoUrl,
+    } : null,
+    companyName: updatedLab.companyName,
+    timezone: updatedLab.region,
+    status: updatedLab.state,
+    startDate: updatedLab.startDate.toISOString(),
+    endDate: updatedLab.endDate.toISOString(),
   }
 })

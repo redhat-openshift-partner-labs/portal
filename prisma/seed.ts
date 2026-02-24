@@ -1,171 +1,193 @@
 import { PrismaClient } from '../generated/prisma/client.js'
 import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
+import { randomUUID } from 'crypto'
 
 const adapter = new PrismaBetterSqlite3({
   url: process.env.DATABASE_URL || 'file:./prisma/dev.db'
 })
 const prisma = new PrismaClient({ adapter })
 
+// Helper to generate random lab name
+function generateLabName(): string {
+  const adjectives = ['swift', 'bright', 'calm', 'deep', 'eager', 'fair', 'keen', 'prime', 'true', 'wise']
+  const nouns = ['lab', 'cloud', 'stack', 'node', 'core', 'zone', 'hub', 'pod', 'grid', 'mesh']
+  const adj = adjectives[Math.floor(Math.random() * adjectives.length)]
+  const noun = nouns[Math.floor(Math.random() * nouns.length)]
+  const num = Math.floor(Math.random() * 9000) + 1000
+  return `${adj}-${noun}-${num}`
+}
+
 async function main() {
   console.log('Seeding database...')
 
   // Clear existing data (in order of dependencies)
+  await prisma.audit.deleteMany()
+  await prisma.extensionRequest.deleteMany()
   await prisma.note.deleteMany()
-  await prisma.request.deleteMany()
-  await prisma.session.deleteMany()
-  await prisma.cost.deleteMany()
   await prisma.lab.deleteMany()
+  await prisma.cloudCost.deleteMany()
   await prisma.user.deleteMany()
   await prisma.company.deleteMany()
+  await prisma.openshiftVersionMapping.deleteMany()
 
   // Create companies
-  const companies = await Promise.all([
-    prisma.company.create({ data: { name: 'Acme Corp' } }),
-    prisma.company.create({ data: { name: 'TechFlow' } }),
-    prisma.company.create({ data: { name: 'CloudNine' } }),
-    prisma.company.create({ data: { name: 'DataDriven' } }),
-    prisma.company.create({ data: { name: 'SecureNet' } }),
-    prisma.company.create({ data: { name: 'InnovateLabs' } }),
-    prisma.company.create({ data: { name: 'ScaleUp' } }),
-    prisma.company.create({ data: { name: 'DevOps Pro' } }),
-    prisma.company.create({ data: { name: 'CloudStack' } }),
-    prisma.company.create({ data: { name: 'NetSolutions' } }),
-    prisma.company.create({ data: { name: 'CodeCraft' } }),
-    prisma.company.create({ data: { name: 'SystemsPlus' } }),
-  ])
+  const companyData = [
+    { companyName: 'Acme Corp', curated: true },
+    { companyName: 'TechFlow', curated: true },
+    { companyName: 'CloudNine', curated: false },
+    { companyName: 'DataDriven', curated: true },
+    { companyName: 'SecureNet', curated: false },
+    { companyName: 'InnovateLabs', curated: true },
+    { companyName: 'ScaleUp', curated: false },
+    { companyName: 'DevOps Pro', curated: true },
+    { companyName: 'CloudStack', curated: false },
+    { companyName: 'NetSolutions', curated: true },
+    { companyName: 'CodeCraft', curated: false },
+    { companyName: 'SystemsPlus', curated: true },
+  ]
+
+  const companies = await Promise.all(
+    companyData.map((c) => prisma.company.create({ data: c }))
+  )
   console.log(`Created ${companies.length} companies`)
 
-  // Create users
+  // Create users with firstName, lastName, fullName
+  const userNames = [
+    { firstName: 'John', lastName: 'Smith' },
+    { firstName: 'Sarah', lastName: 'Johnson' },
+    { firstName: 'Michael', lastName: 'Williams' },
+    { firstName: 'Emily', lastName: 'Brown' },
+    { firstName: 'David', lastName: 'Jones' },
+    { firstName: 'Lisa', lastName: 'Garcia' },
+    { firstName: 'James', lastName: 'Miller' },
+    { firstName: 'Jennifer', lastName: 'Davis' },
+    { firstName: 'Robert', lastName: 'Martinez' },
+    { firstName: 'Maria', lastName: 'Anderson' },
+  ]
+
   const users = await Promise.all(
-    Array.from({ length: 50 }, (_, i) =>
+    userNames.map((u, i) =>
       prisma.user.create({
         data: {
-          email: `user${i + 1}@example.com`,
-          name: `User ${i + 1}`,
+          userId: `user-${i + 1}`,
+          email: `${u.firstName.toLowerCase()}.${u.lastName.toLowerCase()}@example.com`,
+          firstName: u.firstName,
+          lastName: u.lastName,
+          fullName: `${u.firstName} ${u.lastName}`,
+          admin: i < 2, // First two users are admins
+          group: i === 0 ? 'oplmgr' : i === 1 ? 'opldev' : null,
         },
       })
     )
   )
   console.log(`Created ${users.length} users`)
 
-  // Create labs
-  const labStatuses = ['pending', 'active', 'completed', 'archived']
+  // Create OpenShift version mappings
+  const versions = [
+    { name: '4.14.0', location: 'stable', rosa: true, aro: true, gro: false, roks: true },
+    { name: '4.14.1', location: 'stable', rosa: true, aro: true, gro: true, roks: true },
+    { name: '4.15.0', location: 'stable', rosa: true, aro: false, gro: true, roks: true },
+    { name: '4.15.1', location: 'stable', rosa: true, aro: true, gro: true, roks: true },
+    { name: '4.16.0', location: 'candidate', rosa: true, aro: false, gro: false, roks: false },
+  ]
+
+  await Promise.all(
+    versions.map((v) => prisma.openshiftVersionMapping.create({ data: v }))
+  )
+  console.log(`Created ${versions.length} OpenShift version mappings`)
+
+  // Create labs (merged with requests)
+  const states = ['Pending', 'Active', 'Approved', 'Running', 'Hibernating', 'Denied', 'Completed']
+  const cloudProviders = ['AWS', 'Azure', 'GCP', 'IBM']
+  const regions = ['us-e', 'us-w', 'eu-w', 'ap-se', 'ap-ne']
+  const clusterSizes = ['small', 'medium', 'large']
+  const requestTypes = ['POC', 'Demo', 'Training', 'Dev']
+  const leaseOptions = ['1w', '2w', '1m', '3m']
+  const openshiftVersions = ['4.14.0', '4.14.1', '4.15.0', '4.15.1']
+
   const now = new Date()
+  const generatedNames = new Set<string>()
 
   const labs = await Promise.all(
-    Array.from({ length: 100 }, (_, i) => {
-      const status = labStatuses[Math.floor(Math.random() * labStatuses.length)]
-      const createdMonthsAgo = Math.floor(Math.random() * 12)
-      const createdAt = new Date(now.getFullYear(), now.getMonth() - createdMonthsAgo, Math.floor(Math.random() * 28) + 1)
-      const completedAt = status === 'completed'
-        ? new Date(createdAt.getTime() + Math.random() * 30 * 24 * 60 * 60 * 1000)
-        : null
+    Array.from({ length: 50 }, (_, i) => {
+      const company = companies[Math.floor(Math.random() * companies.length)]!
+      const state = states[Math.floor(Math.random() * states.length)]!
+      const startDaysAgo = Math.floor(Math.random() * 60) + 1
+      const durationDays = Math.floor(Math.random() * 90) + 14
+      const startDate = new Date(now.getTime() - startDaysAgo * 24 * 60 * 60 * 1000)
+      const endDate = new Date(startDate.getTime() + durationDays * 24 * 60 * 60 * 1000)
+
+      // Ensure unique generated name
+      let genName = generateLabName()
+      while (generatedNames.has(genName)) {
+        genName = generateLabName()
+      }
+      generatedNames.add(genName)
+
+      const primaryUser = users[Math.floor(Math.random() * users.length)]!
+      const secondaryUser = users[Math.floor(Math.random() * users.length)]!
 
       return prisma.lab.create({
         data: {
-          name: `Lab ${i + 1}: OpenShift Workshop`,
-          description: `Workshop covering OpenShift fundamentals and deployment`,
-          status,
-          createdAt,
-          completedAt,
+          clusterId: randomUUID(),
+          generatedName: genName,
+          state,
+          clusterName: `opl-${genName}`,
+          openshiftVersion: openshiftVersions[Math.floor(Math.random() * openshiftVersions.length)]!,
+          clusterSize: clusterSizes[Math.floor(Math.random() * clusterSizes.length)]!,
+          companyName: company.companyName,
+          companyId: company.id,
+          requestType: requestTypes[Math.floor(Math.random() * requestTypes.length)]!,
+          partner: Math.random() > 0.3,
+          sponsor: users[Math.floor(Math.random() * users.length)]!.fullName || 'Unknown Sponsor',
+          cloudProvider: cloudProviders[Math.floor(Math.random() * cloudProviders.length)]!,
+          primaryFirst: primaryUser.firstName || 'Primary',
+          primaryLast: primaryUser.lastName || 'Contact',
+          primaryEmail: primaryUser.email,
+          secondaryFirst: secondaryUser.firstName || 'Secondary',
+          secondaryLast: secondaryUser.lastName || 'Contact',
+          secondaryEmail: secondaryUser.email,
+          region: regions[Math.floor(Math.random() * regions.length)]!,
+          alwaysOn: Math.random() > 0.7,
+          projectName: `project-${genName}`,
+          leaseTime: leaseOptions[Math.floor(Math.random() * leaseOptions.length)]!,
+          description: `Lab environment for ${company.companyName} - ${requestTypes[Math.floor(Math.random() * requestTypes.length)]} use case`,
+          notes: Math.random() > 0.5 ? 'Internal notes for this lab' : '',
+          startDate,
+          endDate,
+          hold: Math.random() > 0.9,
+          createdAt: startDate,
         },
       })
     })
   )
   console.log(`Created ${labs.length} labs`)
 
-  // Create sessions
-  const sessions = await Promise.all(
-    Array.from({ length: 200 }, (_, i) => {
-      const user = users[Math.floor(Math.random() * users.length)]
-      const lab = labs[Math.floor(Math.random() * labs.length)]
-      const completed = Math.random() > 0.3
-      const startedMonthsAgo = Math.floor(Math.random() * 6)
-      const startedAt = new Date(now.getFullYear(), now.getMonth() - startedMonthsAgo, Math.floor(Math.random() * 28) + 1)
-      const completedAt = completed
-        ? new Date(startedAt.getTime() + Math.random() * 4 * 60 * 60 * 1000)
-        : null
-
-      return prisma.session.create({
-        data: {
-          userId: user.id,
-          labId: lab.id,
-          completed,
-          startedAt,
-          completedAt,
-        },
-      })
-    })
-  )
-  console.log(`Created ${sessions.length} sessions`)
-
-  // Create costs for the last 18 months
-  const costs = await Promise.all(
+  // Create CloudCost records for the last 18 months
+  const cloudCosts = await Promise.all(
     Array.from({ length: 18 }, (_, monthsAgo) => {
-      const date = new Date(now.getFullYear(), now.getMonth() - monthsAgo, 15)
-      // Random cost between $20k and $60k
-      const amount = 20000 + Math.random() * 40000
+      const date = new Date(now.getFullYear(), now.getMonth() - monthsAgo, 1)
+      const month = date.getMonth() + 1 // 1-indexed month
+      const year = date.getFullYear()
 
-      return prisma.cost.create({
-        data: {
-          amount,
-          date,
-          category: 'infrastructure',
-        },
-      })
+      // Create cost records for each provider
+      return Promise.all(
+        cloudProviders.map((provider) =>
+          prisma.cloudCost.create({
+            data: {
+              month,
+              year,
+              provider,
+              cost: 5000 + Math.random() * 15000, // $5k to $20k per provider
+            },
+          })
+        )
+      )
     })
   )
-  console.log(`Created ${costs.length} cost records`)
+  console.log(`Created ${cloudCosts.flat().length} cloud cost records`)
 
-  // Create requests
-  const clusterNames = [
-    'opl-prod-east',
-    'opl-staging-west',
-    'opl-dev-central',
-    'opl-test-north',
-    'opl-demo-south',
-    'opl-sandbox-eu',
-    'opl-workshop-apac',
-    'opl-training-us',
-  ]
-
-  const timezones = [
-    'America/New_York',
-    'America/Los_Angeles',
-    'America/Chicago',
-    'Europe/London',
-    'Europe/Paris',
-    'Asia/Tokyo',
-    'Asia/Singapore',
-    'Australia/Sydney',
-  ]
-
-  const statuses = ['Pending', 'Active', 'Approved', 'Running', 'Hibernating', 'Denied', 'Completed']
-
-  const requests = await Promise.all(
-    Array.from({ length: 15 }, (_, i) => {
-      const company = companies[Math.floor(Math.random() * companies.length)]
-      const status = statuses[Math.floor(Math.random() * statuses.length)]
-      const startDaysAgo = Math.floor(Math.random() * 30) + 1
-      const durationDays = Math.floor(Math.random() * 60) + 14
-      const startDate = new Date(now.getTime() - startDaysAgo * 24 * 60 * 60 * 1000)
-      const endDate = new Date(startDate.getTime() + durationDays * 24 * 60 * 60 * 1000)
-
-      return prisma.request.create({
-        data: {
-          cluster: clusterNames[Math.floor(Math.random() * clusterNames.length)] || 'opl-cluster',
-          companyId: company.id,
-          timezone: timezones[Math.floor(Math.random() * timezones.length)] || 'UTC',
-          status,
-          startDate,
-          endDate,
-        },
-      })
-    })
-  )
-  console.log(`Created ${requests.length} requests`)
-
-  // Create notes for some requests
+  // Create notes for labs
   const noteContents = [
     'Initial setup completed successfully.',
     'Cluster is ready for workshop participants.',
@@ -178,24 +200,67 @@ async function main() {
   ]
 
   const notes = await Promise.all(
-    Array.from({ length: 25 }, (_, i) => {
-      const request = requests[Math.floor(Math.random() * requests.length)]
-      const user = users[Math.floor(Math.random() * users.length)]
-      const content = noteContents[Math.floor(Math.random() * noteContents.length)] || 'Note content'
+    Array.from({ length: 40 }, () => {
+      const lab = labs[Math.floor(Math.random() * labs.length)]!
+      const user = users[Math.floor(Math.random() * users.length)]!
+      const content = noteContents[Math.floor(Math.random() * noteContents.length)]!
       const createdDaysAgo = Math.floor(Math.random() * 14)
       const createdAt = new Date(now.getTime() - createdDaysAgo * 24 * 60 * 60 * 1000)
 
       return prisma.note.create({
         data: {
-          requestId: request.id,
-          content,
-          authorId: Math.random() > 0.2 ? user.id : null,
+          labId: lab.id,
+          note: content,
+          userId: user.email,
+          immutable: Math.random() > 0.8,
           createdAt,
         },
       })
     })
   )
   console.log(`Created ${notes.length} notes`)
+
+  // Create some extension requests
+  const extensionRequests = await Promise.all(
+    Array.from({ length: 20 }, () => {
+      const lab = labs[Math.floor(Math.random() * labs.length)]!
+      const user = users[Math.floor(Math.random() * users.length)]!
+      const extensions = ['3d', '1w', '2w', '1mo']
+      const statuses = ['Pending', 'Approved', 'Denied']
+      const createdDaysAgo = Math.floor(Math.random() * 30)
+
+      return prisma.extensionRequest.create({
+        data: {
+          labId: lab.id,
+          extension: extensions[Math.floor(Math.random() * extensions.length)],
+          currentUser: user.email,
+          date: new Date(now.getTime() - createdDaysAgo * 24 * 60 * 60 * 1000),
+          status: statuses[Math.floor(Math.random() * statuses.length)],
+        },
+      })
+    })
+  )
+  console.log(`Created ${extensionRequests.length} extension requests`)
+
+  // Create some audit records
+  const audits = await Promise.all(
+    Array.from({ length: 100 }, () => {
+      const lab = labs[Math.floor(Math.random() * labs.length)]!
+      const user = users[Math.floor(Math.random() * users.length)]!
+      const loginTypes = ['console', 'api', 'oc-cli']
+      const accessDaysAgo = Math.floor(Math.random() * 30)
+
+      return prisma.audit.create({
+        data: {
+          generatedName: lab.generatedName,
+          accessTime: new Date(now.getTime() - accessDaysAgo * 24 * 60 * 60 * 1000),
+          loginName: user.email,
+          loginType: loginTypes[Math.floor(Math.random() * loginTypes.length)],
+        },
+      })
+    })
+  )
+  console.log(`Created ${audits.length} audit records`)
 
   console.log('Database seeded successfully!')
 }
