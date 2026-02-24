@@ -19,8 +19,6 @@ const noteContent = ref('')
 const submitting = ref(false)
 const error = ref<string | null>(null)
 
-const { addNote } = useRequests()
-
 const handleSubmit = async () => {
   if (!props.requestId || !noteContent.value.trim()) return
 
@@ -28,7 +26,8 @@ const handleSubmit = async () => {
   error.value = null
 
   try {
-    await addNote(props.requestId, noteContent.value.trim())
+    const { addNote } = useRequestDetail(props.requestId)
+    await addNote(noteContent.value.trim())
     noteContent.value = ''
     open.value = false
   } catch (e) {
