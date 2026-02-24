@@ -44,6 +44,24 @@ pnpm run generate  # Static site generation
 pnpm run typecheck # Run TypeScript type checker
 ```
 
+### Database Commands
+
+```bash
+# Local development (SQLite)
+pnpm db:migrate    # Run SQLite migrations
+pnpm db:seed       # Seed local database
+pnpm db:studio     # Open Prisma Studio (SQLite)
+
+# Production (PostgreSQL)
+pnpm db:pg:push    # Push schema to PostgreSQL (initial setup)
+pnpm db:pg:migrate # Create PostgreSQL migration
+pnpm db:pg:deploy  # Deploy migrations to production
+pnpm db:pg:studio  # Open Prisma Studio (PostgreSQL)
+
+# Validation
+pnpm db:validate   # Verify schemas are in sync
+```
+
 ### Key Directories
 
 ```

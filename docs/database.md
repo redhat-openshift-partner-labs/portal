@@ -14,29 +14,63 @@
 
 ## Overview
 
-The application uses **Prisma ORM** with support for both SQLite (development) and PostgreSQL (production). The schema is designed to track OpenShift lab reservations, partner companies, user notes, and audit trails.
+The application uses **Prisma ORM** with a dual-schema approach to support both SQLite (development) and PostgreSQL (production). The schema is designed to track OpenShift lab reservations, partner companies, user notes, and audit trails.
 
 ### Database Providers
 
-| Environment | Provider | Configuration |
-|-------------|----------|---------------|
-| Development | SQLite | Local file-based |
-| Production | PostgreSQL | Cloud-hosted |
+| Environment | Provider | Schema File | Migrations |
+|-------------|----------|-------------|------------|
+| Development | SQLite | `prisma/schema.prisma` | `prisma/migrations/` |
+| Production | PostgreSQL | `prisma/schema.postgresql.prisma` | `prisma/migrations-pg/` |
 
-### Configuration
+### Dual-Schema Architecture
 
+```mermaid
+graph TB
+    subgraph "Local Development"
+        A[Developer] --> B[SQLite]
+        B --> C[schema.prisma]
+        C --> D[prisma/migrations/]
+    end
+
+    subgraph "Production"
+        E[Application] --> F[PostgreSQL]
+        F --> G[schema.postgresql.prisma]
+        G --> H[prisma/migrations-pg/]
+    end
+
+    I[Prisma Client] --> B
+    I --> F
+```
+
+Both schema files contain **identical model definitions**. Only the `datasource` block differs. Use `pnpm db:validate` to verify schemas are in sync.
+
+### Configuration Files
+
+**SQLite (Local Development):**
 ```prisma
 // prisma/schema.prisma
-
-generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
-}
-
 datasource db {
-  provider = "sqlite"  // or "postgresql" for production
+  provider = "sqlite"
 }
 ```
+
+**PostgreSQL (Production):**
+```prisma
+// prisma/schema.postgresql.prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+```
+
+### Runtime Database Selection
+
+The application automatically selects the database adapter based on `DATABASE_URL`:
+- **PostgreSQL**: If `DATABASE_URL` starts with `postgresql://` or `postgres://`
+- **SQLite**: Otherwise (uses local `prisma/dev.db`)
+
+This logic is implemented in `server/utils/db.ts`.
 
 ## Entity Relationship Diagram
 
@@ -467,46 +501,117 @@ const costs = await db.cloudCost.findMany({
 
 ## Migrations
 
-### Creating a Migration
+### Schema Changes Workflow
+
+When modifying the database schema, you must update **both** schema files to keep them in sync:
+
+1. **Edit both schema files**
+   - `prisma/schema.prisma` (SQLite)
+   - `prisma/schema.postgresql.prisma` (PostgreSQL)
+
+2. **Validate schemas are in sync**
+   ```bash
+   pnpm db:validate
+   ```
+
+3. **Run local migration (SQLite)**
+   ```bash
+   pnpm db:migrate --name your_migration_name
+   ```
+
+4. **Run production migration (PostgreSQL)**
+   ```bash
+   DATABASE_URL="postgresql://..." pnpm db:pg:migrate --name your_migration_name
+   ```
+
+### SQLite Migrations (Local Development)
 
 ```bash
-# Make schema changes in prisma/schema.prisma
-# Then run:
+# Create and apply migration
 pnpm db:migrate
 
-# This will:
-# 1. Generate migration SQL
-# 2. Apply to database
-# 3. Regenerate Prisma Client
+# Reset database (WARNING: destroys all data)
+pnpm db:reset
+
+# Open Prisma Studio
+pnpm db:studio
+```
+
+### PostgreSQL Migrations (Production)
+
+**Initial Setup (Fresh Database):**
+```bash
+# Set the production DATABASE_URL
+export DATABASE_URL="postgresql://user:password@host:5432/database?schema=public"
+
+# Push schema directly (no migration history)
+pnpm db:pg:push
+
+# Generate Prisma client
+pnpm prisma generate --schema=prisma/schema.postgresql.prisma
+```
+
+**After Initial Setup:**
+```bash
+# Create a new migration
+DATABASE_URL="postgresql://..." pnpm db:pg:migrate --name add_new_field
+
+# Deploy migrations to production
+DATABASE_URL="postgresql://..." pnpm db:pg:deploy
+
+# Open Prisma Studio for production
+DATABASE_URL="postgresql://..." pnpm db:pg:studio
 ```
 
 ### Migration Files
 
-Migrations are stored in `prisma/migrations/`:
-
 ```
 prisma/
-├── migrations/
+├── schema.prisma              # SQLite schema (local development)
+├── schema.postgresql.prisma   # PostgreSQL schema (production)
+├── migrations/                # SQLite migration history
 │   ├── 20240115_init/
 │   │   └── migration.sql
-│   ├── 20240120_add_notes/
-│   │   └── migration.sql
 │   └── migration_lock.toml
-└── schema.prisma
+├── migrations-pg/             # PostgreSQL migration history
+│   └── .gitkeep
+├── dev.db                     # SQLite database (gitignored)
+└── seed.ts                    # Database seeding script
 ```
 
-### Reset Database
+### Commands Reference
 
+| Command | Description |
+|---------|-------------|
+| `pnpm db:migrate` | Run SQLite migrations (local dev) |
+| `pnpm db:seed` | Seed local SQLite database |
+| `pnpm db:reset` | Reset SQLite database |
+| `pnpm db:studio` | Open Prisma Studio (SQLite) |
+| `pnpm db:pg:push` | Push schema to PostgreSQL |
+| `pnpm db:pg:migrate` | Create PostgreSQL migration |
+| `pnpm db:pg:deploy` | Deploy PostgreSQL migrations |
+| `pnpm db:pg:studio` | Open Prisma Studio (PostgreSQL) |
+| `pnpm db:validate` | Verify schemas are in sync |
+
+### Troubleshooting
+
+#### "Schema mismatch detected"
+Run `pnpm db:validate` and compare the two schema files. Ensure all models, fields, and relations are identical.
+
+#### "Cannot connect to PostgreSQL"
+1. Verify `DATABASE_URL` is set correctly
+2. Check network connectivity to the database host
+3. Verify credentials are correct
+4. Ensure the database exists
+
+#### "Prisma client out of sync"
+Regenerate the client after schema changes:
 ```bash
-# WARNING: Destroys all data
-pnpm db:reset
-```
+# For SQLite
+pnpm prisma generate
 
-### View Data
-
-```bash
-# Open Prisma Studio
-pnpm db:studio
+# For PostgreSQL
+pnpm prisma generate --schema=prisma/schema.postgresql.prisma
 ```
 
 ## Seeding

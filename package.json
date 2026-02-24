@@ -18,7 +18,12 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma migrate reset",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:pg:push": "prisma db push --schema=prisma/schema.postgresql.prisma",
+    "db:pg:migrate": "prisma migrate dev --schema=prisma/schema.postgresql.prisma",
+    "db:pg:deploy": "prisma migrate deploy --schema=prisma/schema.postgresql.prisma",
+    "db:pg:studio": "prisma studio --schema=prisma/schema.postgresql.prisma",
+    "db:validate": "tsx scripts/validate-schemas.ts"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.4.1",
