@@ -146,13 +146,17 @@ export const useRequestDetail = (id: number | Ref<number>) => {
   }
 
   const extendRequest = async (duration: '3d' | '1w' | '2w' | '1mo') => {
-    const result = await $fetch<RequestItem>(`/api/requests/${resolvedId.value}/extend`, {
+    const result = await $fetch<RequestItem & { extension: ExtensionHistoryItem }>(`/api/requests/${resolvedId.value}/extend`, {
       method: 'POST',
       body: { duration },
     })
 
     if (request.value) {
-      request.value = { ...request.value, endDate: result.endDate }
+      request.value = {
+        ...request.value,
+        endDate: result.endDate,
+        extensionHistory: [result.extension, ...request.value.extensionHistory],
+      }
     }
 
     return result

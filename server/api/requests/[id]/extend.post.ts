@@ -46,7 +46,7 @@ export default defineEventHandler(async (event) => {
   newEndDate.setDate(newEndDate.getDate() + daysToAdd)
 
   // Update lab and create extension request record in a transaction
-  const [updatedLab] = await prisma.$transaction([
+  const [updatedLab, extensionRecord] = await prisma.$transaction([
     prisma.lab.update({
       where: { id: Number(id) },
       data: {
@@ -87,5 +87,13 @@ export default defineEventHandler(async (event) => {
     status: updatedLab.state,
     startDate: updatedLab.startDate.toISOString(),
     endDate: updatedLab.endDate.toISOString(),
+    extension: {
+      id: extensionRecord.id,
+      extension: extensionRecord.extension,
+      requestedBy: extensionRecord.currentUser,
+      date: extensionRecord.date?.toISOString() ?? null,
+      status: extensionRecord.status,
+      createdAt: extensionRecord.createdAt?.toISOString() ?? null,
+    },
   }
 })
