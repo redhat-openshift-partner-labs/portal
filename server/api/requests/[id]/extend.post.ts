@@ -1,5 +1,5 @@
 interface ExtendBody {
-  duration: '1w' | '2w' | '1mo'
+  duration: '3d' | '1w' | '2w' | '1mo'
 }
 
 export default defineEventHandler(async (event) => {
@@ -11,8 +11,8 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = await readBody<ExtendBody>(event)
-  if (!body.duration || !['1w', '2w', '1mo'].includes(body.duration)) {
-    throw createError({ statusCode: 400, message: 'Invalid duration. Must be 1w, 2w, or 1mo' })
+  if (!body.duration || !['3d', '1w', '2w', '1mo'].includes(body.duration)) {
+    throw createError({ statusCode: 400, message: 'Invalid duration. Must be 3d, 1w, 2w, or 1mo' })
   }
 
   const request = await prisma.request.findUnique({
@@ -28,6 +28,9 @@ export default defineEventHandler(async (event) => {
   let daysToAdd = 0
 
   switch (body.duration) {
+    case '3d':
+      daysToAdd = 3
+      break
     case '1w':
       daysToAdd = 7
       break

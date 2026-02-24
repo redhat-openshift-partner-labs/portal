@@ -3,17 +3,18 @@ export default defineEventHandler(async (event) => {
 
   const query = getQuery(event)
   const type = query.type as 'active' | 'archived' | undefined
+  const companyId = query.company ? Number(query.company) : undefined
 
   // Define status filters
   const activeStatuses = ['Pending', 'Active', 'Approved', 'Running', 'Hibernating']
   const archivedStatuses = ['Denied', 'Completed']
 
-  // Build where clause based on type filter
-  const whereClause = type === 'active'
-    ? { status: { in: activeStatuses } }
-    : type === 'archived'
-      ? { status: { in: archivedStatuses } }
-      : {}
+  // Build where clause based on type and company filters
+  const whereClause = {
+    ...(type === 'active' ? { status: { in: activeStatuses } } : {}),
+    ...(type === 'archived' ? { status: { in: archivedStatuses } } : {}),
+    ...(companyId ? { companyId } : {}),
+  }
 
   const requests = await prisma.request.findMany({
     where: whereClause,
