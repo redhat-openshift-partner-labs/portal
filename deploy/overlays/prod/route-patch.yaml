@@ -3,4 +3,4 @@ kind: Route
 metadata:
   name: portal
 spec:
-  host: portal.apps.example.com
+  host: portal.apps.admin.openshiftpartnerlabs.com

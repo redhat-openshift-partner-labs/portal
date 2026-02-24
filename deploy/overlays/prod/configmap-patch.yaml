@@ -3,5 +3,5 @@ kind: ConfigMap
 metadata:
   name: portal-config
 data:
-  NUXT_PUBLIC_SITE_URL: "https://portal.apps.example.com"
-  APP_URL: "https://portal.apps.example.com"
+  NUXT_PUBLIC_SITE_URL: "https://portal.apps.admin.openshiftpartnerlabs.com"
+  APP_URL: "https://portal.apps.admin.openshiftpartnerlabs.com"
