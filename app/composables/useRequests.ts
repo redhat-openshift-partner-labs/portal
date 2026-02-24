@@ -48,7 +48,7 @@ export const useRequests = () => {
     error.value = null
 
     try {
-      requests.value = await $fetch<RequestItem[]>('/api/requests')
+      requests.value = await $fetch<RequestItem[]>('/api/requests?type=active')
     } catch (e) {
       error.value = e as Error
     } finally {
