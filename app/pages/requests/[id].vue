@@ -394,19 +394,9 @@ const formatNoteDate = (dateStr: string) => {
                 :key="ext.id"
                 class="border-muted-200 dark:border-muted-700 rounded-lg border p-3"
               >
-                <div class="flex items-center justify-between gap-2">
-                  <span class="text-muted-800 dark:text-white text-sm font-medium">
-                    {{ ext.extension || 'Unknown' }}
-                  </span>
-                  <span
-                    :class="[
-                      'rounded-full px-2 py-0.5 text-xs font-medium',
-                      ext.status === 'approved' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-muted-500/10 text-muted-600 dark:text-muted-400'
-                    ]"
-                  >
-                    {{ ext.status || 'pending' }}
-                  </span>
-                </div>
+                <p class="text-muted-800 dark:text-white text-sm font-medium">
+                  {{ ext.extension || 'Unknown' }}
+                </p>
                 <p class="text-muted-500 dark:text-muted-400 mt-1 text-xs">
                   {{ ext.requestedBy || 'Unknown user' }}
                 </p>
