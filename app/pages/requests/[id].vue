@@ -328,7 +328,7 @@ const formatNoteDate = (dateStr: string) => {
 
         <!-- Notes List -->
         <template v-else>
-          <div class="space-y-4">
+          <div class="max-h-[400px] space-y-4 overflow-y-auto">
             <div
               v-for="note in request.notes"
               :key="note.id"
@@ -405,7 +405,7 @@ const formatNoteDate = (dateStr: string) => {
 
           <!-- Extensions List -->
           <template v-else>
-            <div class="space-y-3">
+            <div class="max-h-[320px] space-y-3 overflow-y-auto">
               <div
                 v-for="ext in request.extensionHistory"
                 :key="ext.id"
@@ -445,7 +445,7 @@ const formatNoteDate = (dateStr: string) => {
 
           <!-- Logins List -->
           <template v-else>
-            <div class="space-y-3">
+            <div class="max-h-[320px] space-y-3 overflow-y-auto">
               <div
                 v-for="login in request.clusterLogins"
                 :key="login.id"
