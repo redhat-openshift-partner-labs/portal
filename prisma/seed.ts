@@ -99,7 +99,7 @@ async function main() {
   // Create labs (merged with requests)
   const states = ['Pending', 'Active', 'Approved', 'Running', 'Hibernating', 'Denied', 'Completed']
   const cloudProviders = ['AWS', 'Azure', 'GCP', 'IBM']
-  const regions = ['us-e', 'us-w', 'eu-w', 'ap-se', 'ap-ne']
+  const regions = ['America/New_York', 'America/Los_Angeles', 'Europe/London', 'Asia/Singapore', 'Asia/Tokyo']
   const clusterSizes = ['small', 'medium', 'large']
   const requestTypes = ['POC', 'Demo', 'Training', 'Dev']
   const leaseOptions = ['1w', '2w', '1m', '3m']

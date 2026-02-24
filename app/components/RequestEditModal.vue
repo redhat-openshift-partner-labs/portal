@@ -22,6 +22,29 @@ const open = defineModel<boolean>('open', { default: false })
 
 const VALID_STATUSES = ['Pending', 'Active', 'Approved', 'Running', 'Hibernating', 'Denied', 'Completed']
 
+const IANA_TIMEZONES = [
+  { value: 'America/New_York', label: 'America/New_York (Eastern)' },
+  { value: 'America/Chicago', label: 'America/Chicago (Central)' },
+  { value: 'America/Denver', label: 'America/Denver (Mountain)' },
+  { value: 'America/Los_Angeles', label: 'America/Los_Angeles (Pacific)' },
+  { value: 'America/Anchorage', label: 'America/Anchorage (Alaska)' },
+  { value: 'Pacific/Honolulu', label: 'Pacific/Honolulu (Hawaii)' },
+  { value: 'Europe/London', label: 'Europe/London (GMT/BST)' },
+  { value: 'Europe/Paris', label: 'Europe/Paris (CET)' },
+  { value: 'Europe/Berlin', label: 'Europe/Berlin (CET)' },
+  { value: 'Asia/Tokyo', label: 'Asia/Tokyo (JST)' },
+  { value: 'Asia/Singapore', label: 'Asia/Singapore (SGT)' },
+  { value: 'Asia/Shanghai', label: 'Asia/Shanghai (CST)' },
+  { value: 'Asia/Kolkata', label: 'Asia/Kolkata (IST)' },
+  { value: 'Asia/Dubai', label: 'Asia/Dubai (GST)' },
+  { value: 'Australia/Sydney', label: 'Australia/Sydney (AEST)' },
+  { value: 'Australia/Perth', label: 'Australia/Perth (AWST)' },
+  { value: 'Pacific/Auckland', label: 'Pacific/Auckland (NZST)' },
+  { value: 'America/Sao_Paulo', label: 'America/Sao_Paulo (BRT)' },
+  { value: 'Africa/Johannesburg', label: 'Africa/Johannesburg (SAST)' },
+  { value: 'UTC', label: 'UTC (Coordinated Universal Time)' },
+]
+
 // Form state
 const status = ref('')
 const timezone = ref('')
@@ -171,11 +194,15 @@ watch(open, (isOpen) => {
             <label class="block text-sm font-medium text-muted-700 dark:text-muted-300 mb-2">
               Timezone
             </label>
-            <BaseInput
+            <select
               v-model="timezone"
-              placeholder="Enter timezone..."
               :disabled="submitting"
-            />
+              class="w-full rounded-lg border border-muted-300 bg-muted-50 px-3 py-2 text-sm text-muted-600 transition-colors focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-muted-700 dark:bg-muted-900 dark:text-muted-200"
+            >
+              <option v-for="tz in IANA_TIMEZONES" :key="tz.value" :value="tz.value">
+                {{ tz.label }}
+              </option>
+            </select>
           </div>
 
           <!-- Notes Section -->
