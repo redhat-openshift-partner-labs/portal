@@ -47,21 +47,31 @@ Both schema files contain **identical model definitions**. Only the `datasource`
 
 ### Configuration Files
 
-**SQLite (Local Development):**
-```prisma
-// prisma/schema.prisma
-datasource db {
-  provider = "sqlite"
-}
+Prisma 7 uses separate config files for each database provider:
+
+| Config File | Schema | Migrations | Purpose |
+|-------------|--------|------------|---------|
+| `prisma.config.ts` | `prisma/schema.prisma` | `prisma/migrations/` | Local development (SQLite) |
+| `prisma.config.postgresql.ts` | `prisma/schema.postgresql.prisma` | `prisma/migrations-pg/` | Production (PostgreSQL) |
+
+**SQLite Config (Local Development):**
+```typescript
+// prisma.config.ts
+export default defineConfig({
+  schema: 'prisma/schema.prisma',
+  migrations: { path: 'prisma/migrations' },
+  datasource: { url: env('DATABASE_URL') },
+})
 ```
 
-**PostgreSQL (Production):**
-```prisma
-// prisma/schema.postgresql.prisma
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
+**PostgreSQL Config (Production):**
+```typescript
+// prisma.config.postgresql.ts
+export default defineConfig({
+  schema: 'prisma/schema.postgresql.prisma',
+  migrations: { path: 'prisma/migrations-pg' },
+  datasource: { url: env('DATABASE_URL') },
+})
 ```
 
 ### Runtime Database Selection
@@ -566,6 +576,8 @@ DATABASE_URL="postgresql://..." pnpm db:pg:studio
 ### Migration Files
 
 ```
+prisma.config.ts               # SQLite config (local development)
+prisma.config.postgresql.ts    # PostgreSQL config (production)
 prisma/
 ├── schema.prisma              # SQLite schema (local development)
 ├── schema.postgresql.prisma   # PostgreSQL schema (production)
