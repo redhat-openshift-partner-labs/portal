@@ -10,6 +10,9 @@ FROM registry.access.redhat.com/ubi9/nodejs-22:latest AS deps
 
 USER 0
 
+# Install build tools for native modules (better-sqlite3)
+RUN dnf install -y gcc-c++ make python3 && dnf clean all
+
 # Install pnpm
 RUN npm install -g pnpm@9
 
@@ -19,6 +22,7 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 
 # Install all dependencies (including devDependencies for build)
+# Rebuild native modules for this platform
 RUN pnpm install --frozen-lockfile
 
 # =============================================================================
