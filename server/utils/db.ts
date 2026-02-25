@@ -18,7 +18,14 @@ async function createAdapter() {
     if (!databaseUrl.startsWith('postgres') && !databaseUrl.includes('://')) {
       connectionString = `postgresql://postgres:postgres@${databaseUrl}:5432/portal`
     }
-    return new PrismaPg({ connectionString })
+
+    // Enable SSL for production PostgreSQL connections
+    // Use rejectUnauthorized: false for self-signed certificates
+    // For strict SSL validation, set NODE_EXTRA_CA_CERTS or use --use-openssl-ca
+    return new PrismaPg({
+      connectionString,
+      ssl: isProduction ? { rejectUnauthorized: false } : undefined,
+    })
   }
 
   // Local development with SQLite
