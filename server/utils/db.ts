@@ -12,6 +12,7 @@ async function createAdapter() {
   // In production, always use PostgreSQL
   if (isProduction || databaseUrl.startsWith('postgres')) {
     const { PrismaPg } = await import('@prisma/adapter-pg')
+    const { Pool } = await import('pg')
 
     // Build proper connection string if only hostname was provided
     let connectionString = databaseUrl
@@ -19,13 +20,21 @@ async function createAdapter() {
       connectionString = `postgresql://postgres:postgres@${databaseUrl}:5432/portal`
     }
 
-    // Enable SSL for production PostgreSQL connections
-    // Use rejectUnauthorized: false for self-signed certificates
-    // For strict SSL validation, set NODE_EXTRA_CA_CERTS or use --use-openssl-ca
-    return new PrismaPg({
+    // Extract schema from connection string (e.g., ?schema=portaladmin)
+    // Default to 'public' if not specified
+    const url = new URL(connectionString)
+    const schema = url.searchParams.get('schema') || 'public'
+
+    // Create pg Pool with explicit search_path
+    // This is required because @prisma/adapter-pg ignores the ?schema= parameter
+    // See: https://github.com/prisma/prisma/issues/28611
+    const pool = new Pool({
       connectionString,
       ssl: isProduction ? { rejectUnauthorized: false } : undefined,
+      options: `-c search_path="${schema}"`,
     })
+
+    return new PrismaPg(pool, { schema })
   }
 
   // Local development with SQLite
