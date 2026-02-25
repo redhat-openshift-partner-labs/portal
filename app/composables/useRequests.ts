@@ -9,6 +9,7 @@ export interface RequestCompany {
 export interface RequestItem {
   id: number
   cluster: string
+  generatedName: string
   company: RequestCompany
   timezone: string
   status: 'Pending' | 'Approved' | 'Running' | 'Hibernating' | 'Denied' | 'Completed'

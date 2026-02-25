@@ -49,7 +49,7 @@ const filteredRequests = computed(() => {
   const query = searchQuery.value.toLowerCase().trim()
   return requests.value.filter((request) => {
     return (
-      request.cluster.toLowerCase().includes(query) ||
+      request.generatedName.toLowerCase().includes(query) ||
       request.timezone.toLowerCase().includes(query) ||
       request.status.toLowerCase().includes(query)
     )
@@ -277,7 +277,7 @@ const handleEditUpdated = () => {
                     :to="`/requests/${request.id}`"
                     class="text-muted-800 dark:text-white hover:text-primary-500 dark:hover:text-primary-400 truncate font-medium underline decoration-muted-300 underline-offset-2 transition-colors hover:decoration-primary-500 dark:decoration-muted-600 dark:hover:decoration-primary-400"
                   >
-                    {{ request.cluster }}
+                    {{ request.generatedName }}
                   </NuxtLink>
                 </div>
               </TairoTableCell>
@@ -396,7 +396,7 @@ const handleEditUpdated = () => {
                     :to="`/requests/${request.id}`"
                     class="text-muted-800 dark:text-white hover:text-primary-500 dark:hover:text-primary-400 truncate font-medium underline decoration-muted-300 underline-offset-2 transition-colors hover:decoration-primary-500 dark:decoration-muted-600 dark:hover:decoration-primary-400"
                   >
-                    {{ request.cluster }}
+                    {{ request.generatedName }}
                   </NuxtLink>
                 </div>
               </TairoTableCell>
