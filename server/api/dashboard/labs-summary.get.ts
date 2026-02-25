@@ -1,11 +1,15 @@
+import { getDb } from '../../utils/db'
+
 export default defineEventHandler(async (event) => {
   requireAuth(event)
 
   const now = new Date()
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
 
+  const db = await getDb()
+
   // Get labs created in the last 6 months
-  const createdLabs = await prisma.lab.findMany({
+  const createdLabs = await db.lab.findMany({
     where: {
       createdAt: { gte: sixMonthsAgo },
     },
@@ -15,7 +19,7 @@ export default defineEventHandler(async (event) => {
   })
 
   // Get labs completed in the last 6 months (state = 'Completed')
-  const completedLabs = await prisma.lab.findMany({
+  const completedLabs = await db.lab.findMany({
     where: {
       state: 'Completed',
       updatedAt: { gte: sixMonthsAgo },

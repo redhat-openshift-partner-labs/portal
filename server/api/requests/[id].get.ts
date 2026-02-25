@@ -1,3 +1,5 @@
+import { getDb } from '../../utils/db'
+
 export default defineEventHandler(async (event) => {
   requireAuth(event)
 
@@ -6,7 +8,8 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Invalid request ID' })
   }
 
-  const lab = await prisma.lab.findUnique({
+  const db = await getDb()
+  const lab = await db.lab.findUnique({
     where: { id: Number(id) },
     include: {
       company: {

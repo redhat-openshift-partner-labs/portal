@@ -1,3 +1,5 @@
+import { getDb } from '../../utils/db'
+
 export default defineEventHandler(async (event) => {
   requireAuth(event)
 
@@ -5,8 +7,10 @@ export default defineEventHandler(async (event) => {
   const currentYear = now.getFullYear()
   const lastYear = currentYear - 1
 
+  const db = await getDb()
+
   // Get costs for this year (last 6 months)
-  const thisYearCosts = await prisma.cloudCost.findMany({
+  const thisYearCosts = await db.cloudCost.findMany({
     where: {
       year: currentYear,
     },
@@ -17,7 +21,7 @@ export default defineEventHandler(async (event) => {
   })
 
   // Get costs for last year (same 6 month period, one year ago)
-  const lastYearCosts = await prisma.cloudCost.findMany({
+  const lastYearCosts = await db.cloudCost.findMany({
     where: {
       year: lastYear,
     },

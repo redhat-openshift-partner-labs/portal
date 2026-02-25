@@ -1,7 +1,10 @@
+import { getDb } from '../../utils/db'
+
 export default defineEventHandler(async (event) => {
   requireAuth(event)
 
-  const companies = await prisma.company.findMany({
+  const db = await getDb()
+  const companies = await db.company.findMany({
     orderBy: { companyName: 'asc' },
     select: {
       id: true,

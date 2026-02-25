@@ -1,3 +1,5 @@
+import { getDb } from '../../../../utils/db'
+
 interface UpdateNoteBody {
   content?: string
   immutable?: boolean
@@ -31,8 +33,10 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Note content cannot be empty' })
   }
 
+  const db = await getDb()
+
   // Verify note exists and belongs to the lab
-  const existingNote = await prisma.note.findFirst({
+  const existingNote = await db.note.findFirst({
     where: {
       id: Number(noteId),
       labId: Number(requestId),
@@ -58,7 +62,7 @@ export default defineEventHandler(async (event) => {
     updateData.immutable = body.immutable
   }
 
-  const note = await prisma.note.update({
+  const note = await db.note.update({
     where: { id: Number(noteId) },
     data: updateData,
   })

@@ -1,3 +1,5 @@
+import { getDb } from '../../utils/db'
+
 interface UpdateRequestBody {
   status?: string
   timezone?: string
@@ -27,8 +29,10 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Invalid timezone' })
   }
 
+  const db = await getDb()
+
   // Verify lab exists
-  const existingLab = await prisma.lab.findUnique({
+  const existingLab = await db.lab.findUnique({
     where: { id: Number(id) },
   })
 
@@ -57,7 +61,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'No valid fields to update' })
   }
 
-  const lab = await prisma.lab.update({
+  const lab = await db.lab.update({
     where: { id: Number(id) },
     data: updateData,
     include: {

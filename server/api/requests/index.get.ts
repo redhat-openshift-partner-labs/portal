@@ -1,3 +1,5 @@
+import { getDb } from '../../utils/db'
+
 export default defineEventHandler(async (event) => {
   requireAuth(event)
 
@@ -16,7 +18,8 @@ export default defineEventHandler(async (event) => {
     ...(companyId ? { companyId } : {}),
   }
 
-  const labs = await prisma.lab.findMany({
+  const db = await getDb()
+  const labs = await db.lab.findMany({
     where: whereClause,
     include: {
       company: {

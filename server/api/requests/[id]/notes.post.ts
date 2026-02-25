@@ -1,3 +1,5 @@
+import { getDb } from '../../../utils/db'
+
 interface NoteBody {
   content: string
   immutable?: boolean
@@ -16,8 +18,10 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Note content is required' })
   }
 
+  const db = await getDb()
+
   // Verify lab exists
-  const lab = await prisma.lab.findUnique({
+  const lab = await db.lab.findUnique({
     where: { id: Number(id) },
   })
 
@@ -30,7 +34,7 @@ export default defineEventHandler(async (event) => {
   const noteImmutable = isArchived ? true : (body.immutable ?? false)
 
   // Create note with userId as string (email) to match production schema
-  const note = await prisma.note.create({
+  const note = await db.note.create({
     data: {
       labId: Number(id),
       note: body.content.trim(),

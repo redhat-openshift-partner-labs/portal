@@ -1,9 +1,12 @@
 // server/api/auth/me.get.ts
+import { getDb } from '../../utils/db'
+
 export default defineEventHandler(async (event) => {
   const session = requireAuth(event)
 
   // Fetch user's group from database
-  const user = await prisma.user.findUnique({
+  const db = await getDb()
+  const user = await db.user.findUnique({
     where: { email: session.email },
     select: { group: true },
   })

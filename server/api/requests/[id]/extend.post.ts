@@ -1,3 +1,5 @@
+import { getDb } from '../../../utils/db'
+
 interface ExtendBody {
   duration: '3d' | '1w' | '2w' | '1mo'
 }
@@ -15,7 +17,9 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Invalid duration. Must be 3d, 1w, 2w, or 1mo' })
   }
 
-  const lab = await prisma.lab.findUnique({
+  const db = await getDb()
+
+  const lab = await db.lab.findUnique({
     where: { id: Number(id) },
   })
 
@@ -46,8 +50,8 @@ export default defineEventHandler(async (event) => {
   newEndDate.setDate(newEndDate.getDate() + daysToAdd)
 
   // Update lab and create extension request record in a transaction
-  const [updatedLab, extensionRecord] = await prisma.$transaction([
-    prisma.lab.update({
+  const [updatedLab, extensionRecord] = await db.$transaction([
+    db.lab.update({
       where: { id: Number(id) },
       data: {
         endDate: newEndDate,
@@ -62,7 +66,7 @@ export default defineEventHandler(async (event) => {
         },
       },
     }),
-    prisma.extensionRequest.create({
+    db.extensionRequest.create({
       data: {
         labId: Number(id),
         extension: body.duration,

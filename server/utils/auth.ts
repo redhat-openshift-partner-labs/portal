@@ -1,6 +1,7 @@
 // server/utils/auth.ts
 import { H3Event } from 'h3'
 import jwt from 'jsonwebtoken'
+import { getDb } from './db'
 
 interface SessionPayload {
     sub: string
@@ -52,7 +53,8 @@ const EDIT_GROUPS = ['oplmgr', 'opldev']
 export const requireEditPermission = async (event: H3Event): Promise<SessionPayload> => {
     const session = requireAuth(event)
 
-    const user = await prisma.user.findUnique({
+    const db = await getDb()
+    const user = await db.user.findUnique({
         where: { email: session.email },
         select: { group: true },
     })
