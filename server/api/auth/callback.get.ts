@@ -1,4 +1,6 @@
 // server/api/auth/callback.get.ts
+import { getDb } from '../../utils/db'
+
 export default defineEventHandler(async (event) => {
   const { code, error, state } = getQuery(event)
   const config = useRuntimeConfig()
@@ -46,6 +48,27 @@ export default defineEventHandler(async (event) => {
   const payload = JSON.parse(
     Buffer.from(tokens.id_token.split('.')[1], 'base64').toString()
   )
+
+  // Upsert user in database - create if new, update profile if existing
+  const db = await getDb()
+  await db.user.upsert({
+    where: { email: payload.email },
+    create: {
+      userId: payload.sub,
+      email: payload.email,
+      fullName: payload.name,
+      firstName: payload.given_name,
+      lastName: payload.family_name,
+      picture: payload.picture,
+    },
+    update: {
+      userId: payload.sub,
+      fullName: payload.name,
+      firstName: payload.given_name,
+      lastName: payload.family_name,
+      picture: payload.picture,
+    },
+  })
 
   // create our session
   createSession(event, {
