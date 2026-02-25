@@ -18,6 +18,8 @@ const { canEdit } = useAuth()
 const noteModalOpen = ref(false)
 const editModalOpen = ref(false)
 const extending = ref(false)
+const extensionConfirmModalOpen = ref(false)
+const pendingExtensionDuration = ref<'3d' | '1w' | '2w' | '1mo' | null>(null)
 
 useHead({
   title: computed(() => request.value ? `${request.value.cluster} - Requests` : 'Request Details')
@@ -79,16 +81,30 @@ const getStatusClasses = (status: string): string => {
   }
 }
 
-// Handle extend
-const handleExtend = async (duration: '3d' | '1w' | '2w' | '1mo') => {
+// Initiate extension - show confirmation modal
+const initiateExtend = (duration: '3d' | '1w' | '2w' | '1mo') => {
+  pendingExtensionDuration.value = duration
+  extensionConfirmModalOpen.value = true
+}
+
+// Handle confirmed extension
+const handleExtendConfirmed = async () => {
+  if (!pendingExtensionDuration.value) return
+
   extending.value = true
   try {
-    await extendRequest(duration)
+    await extendRequest(pendingExtensionDuration.value)
   } catch (e) {
     console.error('Failed to extend:', e)
   } finally {
     extending.value = false
+    pendingExtensionDuration.value = null
   }
+}
+
+// Handle extension cancelled
+const handleExtendCancelled = () => {
+  pendingExtensionDuration.value = null
 }
 
 // Handle add note
@@ -197,16 +213,16 @@ const formatNoteDate = (dateStr: string) => {
                 <Icon name="ph:spinner" class="text-primary-500 size-5 animate-spin" />
               </template>
               <template v-else>
-                <BaseButton size="sm" color="muted" @click="handleExtend('3d')">
+                <BaseButton size="sm" color="muted" @click="initiateExtend('3d')">
                   +3 Days
                 </BaseButton>
-                <BaseButton size="sm" color="muted" @click="handleExtend('1w')">
+                <BaseButton size="sm" color="muted" @click="initiateExtend('1w')">
                   +1 Week
                 </BaseButton>
-                <BaseButton size="sm" color="muted" @click="handleExtend('2w')">
+                <BaseButton size="sm" color="muted" @click="initiateExtend('2w')">
                   +2 Weeks
                 </BaseButton>
-                <BaseButton size="sm" color="primary" @click="handleExtend('1mo')">
+                <BaseButton size="sm" color="primary" @click="initiateExtend('1mo')">
                   +1 Month
                 </BaseButton>
               </template>
@@ -615,6 +631,14 @@ const formatNoteDate = (dateStr: string) => {
       v-model:open="editModalOpen"
       :request-id="request?.id ?? null"
       @updated="refresh"
+    />
+
+    <!-- Extension Confirmation Modal -->
+    <RequestExtensionConfirmModal
+      v-model:open="extensionConfirmModalOpen"
+      :duration="pendingExtensionDuration"
+      @confirm="handleExtendConfirmed"
+      @cancel="handleExtendCancelled"
     />
   </div>
 </template>
