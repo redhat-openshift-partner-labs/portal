@@ -26,8 +26,11 @@ useHead({
 // Modal state
 const noteModalOpen = ref(false)
 const editModalOpen = ref(false)
+const extensionConfirmModalOpen = ref(false)
 const selectedRequestId = ref<number | null>(null)
 const extending = ref<number | null>(null)
+const pendingExtensionRequestId = ref<number | null>(null)
+const pendingExtensionDuration = ref<'3d' | '1w' | '2w' | '1mo' | null>(null)
 
 // Search state
 const searchQuery = ref('')
@@ -96,16 +99,33 @@ const getStatusClasses = (status: string): string => {
   }
 }
 
-// Handle extend action
-const handleExtend = async (requestId: number, duration: '3d' | '1w' | '2w' | '1mo') => {
-  extending.value = requestId
+// Initiate extension - show confirmation modal
+const initiateExtend = (requestId: number, duration: '3d' | '1w' | '2w' | '1mo') => {
+  pendingExtensionRequestId.value = requestId
+  pendingExtensionDuration.value = duration
+  extensionConfirmModalOpen.value = true
+}
+
+// Handle confirmed extension
+const handleExtendConfirmed = async () => {
+  if (!pendingExtensionRequestId.value || !pendingExtensionDuration.value) return
+
+  extending.value = pendingExtensionRequestId.value
   try {
-    await extendRequest(requestId, duration)
+    await extendRequest(pendingExtensionRequestId.value, pendingExtensionDuration.value)
   } catch (e) {
     console.error('Failed to extend request:', e)
   } finally {
     extending.value = null
+    pendingExtensionRequestId.value = null
+    pendingExtensionDuration.value = null
   }
+}
+
+// Handle extension cancelled
+const handleExtendCancelled = () => {
+  pendingExtensionRequestId.value = null
+  pendingExtensionDuration.value = null
 }
 
 // Handle create note action
@@ -320,7 +340,7 @@ const handleEditUpdated = () => {
                 <div class="flex items-center justify-end gap-2">
                   <ExtendButton
                     :loading="extending === request.id"
-                    @extend="(duration) => handleExtend(request.id, duration)"
+                    @extend="(duration) => initiateExtend(request.id, duration)"
                   />
                   <BaseButton
                     v-if="canEdit"
@@ -483,6 +503,14 @@ const handleEditUpdated = () => {
       v-model:open="editModalOpen"
       :request-id="selectedRequestId"
       @updated="handleEditUpdated"
+    />
+
+    <!-- Extension Confirmation Modal -->
+    <RequestExtensionConfirmModal
+      v-model:open="extensionConfirmModalOpen"
+      :duration="pendingExtensionDuration"
+      @confirm="handleExtendConfirmed"
+      @cancel="handleExtendCancelled"
     />
   </div>
 </template>
