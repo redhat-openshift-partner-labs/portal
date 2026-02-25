@@ -73,7 +73,7 @@ model CloudCost {
   id        Int      @id @default(autoincrement())
   month     Int
   year      Int
-  provider  String?
+  provider  String   // Required to match production
   cost      Float
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -118,7 +118,7 @@ model Audit {
   createdAt     DateTime? @map("created_at")
   updatedAt     DateTime? @map("updated_at")
 
-  lab Lab? @relation(fields: [generatedName], references: [generatedName], onDelete: Cascade)
+  lab Lab? @relation(fields: [generatedName], references: [generatedName]) // No cascade to match production
 
   @@map("audits")
 }
@@ -141,13 +141,15 @@ model ExtensionRequest {
 
 // OpenShift version compatibility mapping
 model OpenshiftVersionMapping {
-  id       Int      @id @default(autoincrement())
-  name     String?  @unique
-  location String?
-  rosa     Boolean? @default(false)
-  aro      Boolean? @default(false)
-  gro      Boolean? @default(false)
-  roks     Boolean? @default(false)
+  id        Int       @id @default(autoincrement())
+  name      String?   @unique
+  location  String?
+  rosa      Boolean?  @default(false)
+  aro       Boolean?  @default(false)
+  gro       Boolean?  @default(false)
+  roks      Boolean?  @default(false)
+  createdAt DateTime? @map("created_at")
+  updatedAt DateTime? @map("updated_at")
 
   @@map("openshift_version_mappings")
 }
