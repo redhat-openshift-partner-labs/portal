@@ -15,7 +15,7 @@ export interface RequestItem {
   status: 'Pending' | 'Approved' | 'Running' | 'Hibernating' | 'Denied' | 'Completed'
   startDate: string
   endDate: string
-  updatedAt: string
+  completedAt: string | null
   notesCount: number
   requestType: string
 }

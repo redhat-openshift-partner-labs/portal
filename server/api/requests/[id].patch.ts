@@ -52,9 +52,13 @@ export default defineEventHandler(async (event) => {
   }
 
   // Build update data
-  const updateData: { state?: string; region?: string; hold?: boolean; openshiftVersion?: string } = {}
+  const updateData: { state?: string; region?: string; hold?: boolean; openshiftVersion?: string; completedAt?: Date | null } = {}
   if (body.status !== undefined) {
     updateData.state = body.status
+    // Set completedAt when status changes to Completed
+    if (body.status === 'Completed') {
+      updateData.completedAt = new Date()
+    }
   }
   if (body.timezone !== undefined) {
     updateData.region = body.timezone.trim()

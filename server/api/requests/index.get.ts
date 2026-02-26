@@ -55,7 +55,7 @@ export default defineEventHandler(async (event) => {
     status: lab.state,
     startDate: lab.startDate.toISOString(),
     endDate: lab.endDate.toISOString(),
-    updatedAt: lab.updatedAt.toISOString(),
+    completedAt: lab.completedAt?.toISOString() ?? null,
     notesCount: lab._count.noteRecords,
     cloudProvider: lab.cloudProvider,
     openshiftVersion: lab.openshiftVersion,

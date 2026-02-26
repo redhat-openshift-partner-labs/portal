@@ -124,12 +124,14 @@ const getPlannedDuration = (startDate: string, endDate: string): number => {
   return Math.max(0, differenceInDays(end, start))
 }
 
-// Calculate actual duration (start to completion/update date)
-const getActualDuration = (startDate: string, updatedAt: string, status: string): number | null => {
+// Calculate actual duration (start to completion date)
+const getActualDuration = (startDate: string, completedAt: string | null, status: string): number | null => {
   // For Denied requests, there was no actual reservation
   if (status === 'Denied') return null
+  // For Completed requests without completedAt (legacy data), return null
+  if (!completedAt) return null
   const start = parseISO(startDate)
-  const completed = parseISO(updatedAt)
+  const completed = parseISO(completedAt)
   return Math.max(0, differenceInDays(completed, start))
 }
 
@@ -393,8 +395,8 @@ const handleCreateNote = (requestId: number) => {
                 {{ formatDuration(getPlannedDuration(request.startDate, request.endDate)) }}
               </span>
               <span class="text-muted-400 dark:text-muted-500 text-xs">
-                <template v-if="getActualDuration(request.startDate, request.updatedAt, request.status) !== null">
-                  {{ formatDuration(getActualDuration(request.startDate, request.updatedAt, request.status)!) }}
+                <template v-if="getActualDuration(request.startDate, request.completedAt, request.status) !== null">
+                  {{ formatDuration(getActualDuration(request.startDate, request.completedAt, request.status)!) }}
                 </template>
                 <template v-else>
                   N/A
