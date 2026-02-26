@@ -65,6 +65,9 @@ export const useAuth = () => {
     const logout = async () => {
         await $fetch('/api/auth/logout', { method: 'POST' })
         user.value = null
+        // Clear client-side session data
+        const sessionData = useState<Record<string, unknown> | null>('session_data')
+        sessionData.value = null
         navigateTo('/auth')
     }
 
