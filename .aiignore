@@ -3,3 +3,64 @@
 
 # IDE
 .idea/
+.vscode/
+
+# Build outputs
+.nuxt/
+.output/
+dist/
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Generated code
+generated/
+
+# Database files
+prisma/dev.db
+prisma/dev.db-journal
+.data/
+
+# AI/MCP metadata (avoid recursion)
+.claude/
+.serena/
+.mcp.json
+claude-logs/
+skills-lock.json
+
+# Playwright
+.playwright/
+.playwright-cli/
+
+# Lock files (bloat context)
+pnpm-lock.yaml
+
+# Logs
+*.log
+tmp/
+
+# Deploy manifests (may contain sensitive config)
+deploy/
+
+# Development assets
+misc/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor swap/backup files
+*.swp
+*.swo
+*~
+
+# Test coverage
+coverage/
+
+# Caches
+.cache/
+.turbo/
+
+# Package tarballs
+*.tgz

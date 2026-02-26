@@ -60,3 +60,24 @@ docs/
 
 # Scripts (dev utilities)
 scripts/
+
+# Temp files
+tmp/
+
+# Development assets
+misc/
+
+# AI-related (not needed in container)
+.claude/
+.serena/
+.mcp.json
+claude-logs/
+skills-lock.json
+.playwright/
+.playwright-cli/
+
+# Generated Prisma (regenerate in container)
+generated/
+
+# Deploy manifests
+deploy/
