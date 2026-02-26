@@ -202,6 +202,17 @@ const formatNoteDate = (dateStr: string) => {
                   {{ request.timezone }}
                 </span>
               </div>
+              <div class="text-muted-500 dark:text-muted-400 mt-1 flex items-center gap-1 text-sm">
+                <Icon name="ph:arrow-square-out-duotone" class="size-4" />
+                <a
+                  :href="`https://console-openshift-console.apps.${request.generatedName}.openshiftpartnerlabs.com`"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-primary-500 hover:text-primary-600 hover:underline"
+                >
+                  OpenShift Console
+                </a>
+              </div>
             </div>
           </div>
 
