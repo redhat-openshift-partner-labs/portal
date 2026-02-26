@@ -1,0 +1,95 @@
+name: Documentation
+description: Report missing, incorrect, or unclear documentation
+title: "[Docs]: "
+labels: ["documentation", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Documentation Issue
+        Help us improve our documentation by reporting issues or suggesting improvements.
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Documentation Type
+      description: What kind of documentation change is needed?
+      options:
+        - Missing Documentation
+        - Incorrect / Outdated Information
+        - Unclear / Confusing Content
+        - Typo / Grammar Fix
+        - Add Code Examples
+        - Improve Organization / Structure
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: location
+    attributes:
+      label: Documentation Location
+      description: Where is this documentation (or where should it be)?
+      options:
+        - README.md
+        - CLAUDE.md
+        - docs/ Directory
+        - Inline Code Comments
+        - Type Definitions / JSDoc
+        - API Documentation
+        - Component Documentation
+        - New Documentation Needed
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: file-path
+    attributes:
+      label: Specific File / Section
+      description: If applicable, which file or section needs attention?
+      placeholder: "e.g., docs/database.md, CLAUDE.md#authentication"
+    validations:
+      required: false
+
+  - type: textarea
+    id: current
+    attributes:
+      label: Current State
+      description: What does the documentation currently say (if it exists)?
+      placeholder: Quote or describe the current documentation...
+    validations:
+      required: false
+
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed Changes
+      description: What should the documentation say or cover?
+      placeholder: Describe your proposed changes or additions...
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Why is this change needed? Who would benefit from it?
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I would be willing to submit a PR with these documentation changes
+          required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues to ensure this hasn't already been reported
+          required: true

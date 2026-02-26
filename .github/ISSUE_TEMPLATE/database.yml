@@ -1,0 +1,126 @@
+name: Database / Migration Issue
+description: Report issues with Prisma, migrations, or database operations
+title: "[Database]: "
+labels: ["database", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Database / Migration Issue
+        Use this template to report issues related to Prisma, database migrations, or data operations.
+
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: Issue Type
+      description: What type of database issue is this?
+      options:
+        - Migration Failure
+        - Schema Issue
+        - Prisma Client Error
+        - Query / Performance Issue
+        - Data Integrity Issue
+        - Connection Issue
+        - Seed Script Issue
+        - Environment Sync Issue (SQLite/PostgreSQL)
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: database
+    attributes:
+      label: Database Environment
+      description: Which database are you using?
+      options:
+        - SQLite (development)
+        - PostgreSQL (production)
+        - Both
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Issue Description
+      description: Describe the database issue in detail.
+      placeholder: Describe what's happening...
+    validations:
+      required: true
+
+  - type: input
+    id: command
+    attributes:
+      label: Command Used
+      description: Which pnpm/prisma command were you running?
+      placeholder: "e.g., pnpm db:migrate, pnpm db:pg:push, prisma generate"
+    validations:
+      required: false
+
+  - type: textarea
+    id: schema
+    attributes:
+      label: Relevant Schema
+      description: Include any relevant parts of your Prisma schema.
+      render: prisma
+    validations:
+      required: false
+
+  - type: textarea
+    id: error
+    attributes:
+      label: Error Output
+      description: Full error message or stack trace.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this issue?
+      placeholder: |
+        1. Run '...'
+        2. Execute query '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: input
+    id: prisma-version
+    attributes:
+      label: Prisma Version
+      description: Output of `pnpm prisma --version`
+      placeholder: "e.g., prisma: 6.8.2"
+    validations:
+      required: false
+
+  - type: input
+    id: node-version
+    attributes:
+      label: Node.js Version
+      description: Output of `node --version`
+      placeholder: "e.g., v20.10.0"
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any other relevant information (recent changes, environment details, etc.)
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues to ensure this hasn't already been reported
+          required: true
+        - label: I have verified my schema is valid with `pnpm db:validate`
+          required: false
+        - label: I have regenerated the Prisma client after schema changes
+          required: false

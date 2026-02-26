@@ -1,0 +1,155 @@
+name: UI/UX Issue
+description: Report visual bugs, accessibility issues, or design problems
+title: "[UI/UX]: "
+labels: ["ui/ux", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## UI/UX Issue Report
+        Use this template to report visual bugs, accessibility concerns, layout issues, or design problems.
+
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: Issue Type
+      description: What type of UI/UX issue is this?
+      options:
+        - Visual Bug (incorrect styling, colors, spacing)
+        - Layout Issue (responsive, alignment, overflow)
+        - Accessibility (a11y) Issue
+        - Animation / Transition Problem
+        - Component Behavior
+        - Dark Mode / Theme Issue
+        - Typography Issue
+        - Icon / Image Issue
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Issue Description
+      description: Describe the UI/UX issue in detail.
+      placeholder: Describe what's wrong with the UI/UX...
+    validations:
+      required: true
+
+  - type: input
+    id: location
+    attributes:
+      label: Location
+      description: Where does this issue occur? (page URL, component name, or layout)
+      placeholder: "e.g., /dashboard, TairoSidebar, topnav layout"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Affected Component
+      description: Which UI component library is involved?
+      multiple: true
+      options:
+        - Tairo Components
+        - Shuriken UI Components
+        - Reka UI Primitives
+        - Custom Components
+        - Layout Components
+        - Unknown / Not Sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: viewport
+    attributes:
+      label: Viewport / Screen Size
+      description: At which screen sizes does this issue occur?
+      multiple: true
+      options:
+        - Mobile (< 640px)
+        - Tablet (640px - 1024px)
+        - Desktop (1024px - 1280px)
+        - Large Desktop (> 1280px)
+        - All Sizes
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser
+      description: Which browser are you using?
+      placeholder: "e.g., Chrome 120, Firefox 121, Safari 17"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: locale
+    attributes:
+      label: Language / Locale
+      description: Does this issue occur with a specific language?
+      options:
+        - English (en)
+        - French (fr)
+        - Spanish (es)
+        - German (de)
+        - Arabic (ar) - RTL
+        - Japanese (ja)
+        - All Languages
+        - Not Language Related
+      default: 7
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Appearance / Behavior
+      description: How should it look or behave?
+      placeholder: Describe the expected UI...
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots / Videos
+      description: Add screenshots or screen recordings showing the issue.
+      placeholder: Drag and drop images/videos here
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any other context about the issue (CSS classes, Tailwind utilities, etc.)
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: accessibility
+    attributes:
+      label: Accessibility Impact
+      description: Does this issue affect accessibility?
+      options:
+        - label: This issue affects keyboard navigation
+          required: false
+        - label: This issue affects screen readers
+          required: false
+        - label: This issue affects color contrast
+          required: false
+        - label: This issue affects users with motion sensitivity
+          required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues to ensure this hasn't already been reported
+          required: true
+        - label: I have included screenshots or videos demonstrating the issue
+          required: true
