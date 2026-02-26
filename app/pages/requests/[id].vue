@@ -170,6 +170,22 @@ const durationIndicator = computed(() => {
       return null
   }
 })
+
+// Calculate the difference in days between planned and actual
+const durationDifference = computed(() => {
+  if (!request.value) return null
+  if (request.value.status === 'Denied') return null
+
+  const planned = getPlannedDuration(request.value.startDate, request.value.endDate)
+  const actual = getActualDuration(request.value.startDate, request.value.completedAt ?? null)
+
+  if (actual === null) return null
+
+  const diff = actual - planned
+  if (diff === 0) return null
+
+  return diff
+})
 </script>
 
 <template>
@@ -326,43 +342,57 @@ const durationIndicator = computed(() => {
 
           <!-- Show reservation details for archived requests -->
           <template v-else>
-            <div class="flex items-center gap-4">
-              <div
-                v-if="durationIndicator"
-                class="flex size-14 shrink-0 items-center justify-center rounded-xl"
-                :class="durationIndicator.bgColor"
-              >
-                <Icon
-                  :name="durationIndicator.icon"
-                  class="size-6"
-                  :class="durationIndicator.color"
-                />
-              </div>
-              <div
-                v-else
-                class="flex size-14 shrink-0 items-center justify-center rounded-xl bg-muted-500/10"
-              >
-                <Icon name="ph:calendar-duotone" class="size-6 text-muted-500" />
-              </div>
-              <div>
-                <p class="text-muted-500 dark:text-muted-400 text-sm">
-                  Reservation Details
-                </p>
-                <div class="mt-1 space-y-1">
-                  <p class="text-muted-600 dark:text-muted-300 text-sm">
-                    <span class="text-muted-400 dark:text-muted-500">Planned:</span>&nbsp;
-                    {{ formatDate(request.endDate) }}
-                  </p>
-                  <p class="text-muted-600 dark:text-muted-300 text-sm">
-                    <span class="text-muted-400 dark:text-muted-500">Actual:</span>&nbsp;
-                    <template v-if="request.completedAt">
-                      {{ formatDate(request.completedAt) }}
-                    </template>
-                    <template v-else>
-                      N/A
-                    </template>
-                  </p>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <div
+                  v-if="durationIndicator"
+                  class="flex size-14 shrink-0 items-center justify-center rounded-xl"
+                  :class="durationIndicator.bgColor"
+                >
+                  <Icon
+                    :name="durationIndicator.icon"
+                    class="size-6"
+                    :class="durationIndicator.color"
+                  />
                 </div>
+                <div
+                  v-else
+                  class="flex size-14 shrink-0 items-center justify-center rounded-xl bg-muted-500/10"
+                >
+                  <Icon name="ph:calendar-duotone" class="size-6 text-muted-500" />
+                </div>
+                <div>
+                  <p class="text-muted-500 dark:text-muted-400 text-sm">
+                    Reservation Details
+                  </p>
+                  <div class="mt-1 space-y-1">
+                    <p class="text-muted-600 dark:text-muted-300 text-sm">
+                      <span class="text-muted-400 dark:text-muted-500">Planned:</span>&nbsp;
+                      {{ formatDate(request.endDate) }}
+                    </p>
+                    <p class="text-muted-600 dark:text-muted-300 text-sm">
+                      <span class="text-muted-400 dark:text-muted-500">Actual:</span>&nbsp;
+                      <template v-if="request.completedAt">
+                        {{ formatDate(request.completedAt) }}
+                      </template>
+                      <template v-else>
+                        N/A
+                      </template>
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <!-- Day difference indicator -->
+              <div
+                v-if="durationDifference !== null"
+                class="text-right"
+              >
+                <p
+                  class="text-lg font-semibold"
+                  :class="durationDifference < 0 ? 'text-emerald-500' : 'text-amber-500'"
+                >
+                  {{ durationDifference > 0 ? '+' : '' }}{{ durationDifference }} days
+                </p>
               </div>
             </div>
           </template>
