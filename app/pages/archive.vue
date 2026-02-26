@@ -148,6 +148,28 @@ const formatDuration = (days: number): string => {
   return `${weeks}w ${remainingDays}d`
 }
 
+// Determine if actual duration was early, exact, or late compared to planned
+const getDurationStatus = (planned: number, actual: number | null): 'early' | 'exact' | 'late' | null => {
+  if (actual === null) return null
+  if (actual < planned) return 'early'
+  if (actual > planned) return 'late'
+  return 'exact'
+}
+
+// Get icon and color for duration status indicator
+const getDurationIndicator = (status: 'early' | 'exact' | 'late' | null) => {
+  switch (status) {
+    case 'early':
+      return { icon: 'ph:arrow-down', color: 'text-emerald-500' }
+    case 'exact':
+      return { icon: 'ph:arrow-right', color: 'text-sky-500' }
+    case 'late':
+      return { icon: 'ph:arrow-up', color: 'text-amber-500' }
+    default:
+      return null
+  }
+}
+
 // Get status classes for colored pills
 const getStatusClasses = (status: string): string => {
   switch (status) {
@@ -394,8 +416,13 @@ const handleCreateNote = (requestId: number) => {
               <span class="text-muted-600 dark:text-muted-300 text-sm">
                 {{ formatDuration(getPlannedDuration(request.startDate, request.endDate)) }}
               </span>
-              <span class="text-muted-400 dark:text-muted-500 text-xs">
+              <span class="text-muted-400 dark:text-muted-500 text-xs flex items-center gap-1">
                 <template v-if="getActualDuration(request.startDate, request.completedAt, request.status) !== null">
+                  <Icon
+                    v-if="getDurationIndicator(getDurationStatus(getPlannedDuration(request.startDate, request.endDate), getActualDuration(request.startDate, request.completedAt, request.status)))"
+                    :name="getDurationIndicator(getDurationStatus(getPlannedDuration(request.startDate, request.endDate), getActualDuration(request.startDate, request.completedAt, request.status)))!.icon"
+                    :class="['size-3', getDurationIndicator(getDurationStatus(getPlannedDuration(request.startDate, request.endDate), getActualDuration(request.startDate, request.completedAt, request.status)))!.color]"
+                  />
                   {{ formatDuration(getActualDuration(request.startDate, request.completedAt, request.status)!) }}
                 </template>
                 <template v-else>
