@@ -117,15 +117,33 @@ const visiblePages = computed(() => {
   return pages
 })
 
-// Calculate reservation progress percentage
-const getReservationProgress = (startDate: string, endDate: string): number => {
+// Calculate planned duration (original reservation period)
+const getPlannedDuration = (startDate: string, endDate: string): number => {
   const start = parseISO(startDate)
   const end = parseISO(endDate)
-  const now = new Date()
-  const totalDays = differenceInDays(end, start)
-  if (totalDays <= 0) return 100
-  const elapsedDays = differenceInDays(now, start)
-  return Math.round(Math.min(100, Math.max(0, (elapsedDays / totalDays) * 100)))
+  return Math.max(0, differenceInDays(end, start))
+}
+
+// Calculate actual duration (start to completion/update date)
+const getActualDuration = (startDate: string, updatedAt: string, status: string): number | null => {
+  // For Denied requests, there was no actual reservation
+  if (status === 'Denied') return null
+  const start = parseISO(startDate)
+  const completed = parseISO(updatedAt)
+  return Math.max(0, differenceInDays(completed, start))
+}
+
+// Format duration as human-readable string
+const formatDuration = (days: number): string => {
+  if (days === 0) return '0 days'
+  if (days === 1) return '1 day'
+  if (days < 7) return `${days} days`
+  const weeks = Math.floor(days / 7)
+  const remainingDays = days % 7
+  if (remainingDays === 0) {
+    return weeks === 1 ? '1 week' : `${weeks} weeks`
+  }
+  return `${weeks}w ${remainingDays}d`
 }
 
 // Get status classes for colored pills
@@ -309,7 +327,7 @@ const handleCreateNote = (requestId: number) => {
             Status
           </TairoTableHeading>
           <TairoTableHeading uppercase>
-            Reservation
+            Planned/Actual
           </TairoTableHeading>
           <TairoTableHeading uppercase class="pe-4 text-end">
             Action
@@ -368,16 +386,19 @@ const handleCreateNote = (requestId: number) => {
             </BaseTag>
           </TairoTableCell>
 
-          <!-- Reservation Column -->
+          <!-- Planned/Actual Duration Column -->
           <TairoTableCell spaced>
-            <div class="flex items-center gap-3">
-              <BaseProgressCircle
-                :model-value="getReservationProgress(request.startDate, request.endDate)"
-                :size="40"
-                :thickness="3"
-              />
-              <span class="text-muted-500 dark:text-muted-400 text-sm">
-                {{ getReservationProgress(request.startDate, request.endDate) }}% elapsed
+            <div class="flex flex-col gap-0.5">
+              <span class="text-muted-600 dark:text-muted-300 text-sm">
+                {{ formatDuration(getPlannedDuration(request.startDate, request.endDate)) }}
+              </span>
+              <span class="text-muted-400 dark:text-muted-500 text-xs">
+                <template v-if="getActualDuration(request.startDate, request.updatedAt, request.status) !== null">
+                  {{ formatDuration(getActualDuration(request.startDate, request.updatedAt, request.status)!) }}
+                </template>
+                <template v-else>
+                  N/A
+                </template>
               </span>
             </div>
           </TairoTableCell>
