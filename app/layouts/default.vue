@@ -6,7 +6,7 @@ const { isWarningVisible, secondsRemaining, stayLoggedIn } = useIdleTimeout()
 <template>
   <TairoCollapseLayout>
     <TairoCollapseSidebar>
-      <TairoCollapseSidebarHeader>My App</TairoCollapseSidebarHeader>
+      <TairoCollapseSidebarHeader>Partner Labs Portal</TairoCollapseSidebarHeader>
       <TairoCollapseSidebarLinks class="px-4 space-y-1 grow">
         <TairoCollapseSidebarLink
           to="/dashboard"
