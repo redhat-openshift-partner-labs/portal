@@ -127,6 +127,49 @@ const formatDate = (dateStr: string) => {
 const formatNoteDate = (dateStr: string) => {
   return format(parseISO(dateStr), 'MMM d, yyyy h:mm a')
 }
+
+// Calculate planned duration (original reservation period)
+const getPlannedDuration = (startDate: string, endDate: string): number => {
+  const start = parseISO(startDate)
+  const end = parseISO(endDate)
+  return Math.max(0, differenceInDays(end, start))
+}
+
+// Calculate actual duration (start to completion date)
+const getActualDuration = (startDate: string, completedAt: string | null): number | null => {
+  if (!completedAt) return null
+  const start = parseISO(startDate)
+  const completed = parseISO(completedAt)
+  return Math.max(0, differenceInDays(completed, start))
+}
+
+// Determine if actual duration was early, exact, or late compared to planned
+const getDurationStatus = computed(() => {
+  if (!request.value) return null
+  if (request.value.status === 'Denied') return null
+
+  const planned = getPlannedDuration(request.value.startDate, request.value.endDate)
+  const actual = getActualDuration(request.value.startDate, request.value.completedAt ?? null)
+
+  if (actual === null) return null
+  if (actual < planned) return 'early'
+  if (actual > planned) return 'late'
+  return 'exact'
+})
+
+// Get icon and color for duration status indicator
+const durationIndicator = computed(() => {
+  switch (getDurationStatus.value) {
+    case 'early':
+      return { icon: 'ph:arrow-down', color: 'text-emerald-500', bgColor: 'bg-emerald-500/10' }
+    case 'exact':
+      return { icon: 'ph:arrow-right', color: 'text-sky-500', bgColor: 'bg-sky-500/10' }
+    case 'late':
+      return { icon: 'ph:arrow-up', color: 'text-amber-500', bgColor: 'bg-amber-500/10' }
+    default:
+      return null
+  }
+})
 </script>
 
 <template>
@@ -257,26 +300,72 @@ const formatNoteDate = (dateStr: string) => {
 
       <!-- Stats Grid -->
       <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
-        <!-- Reservation Progress -->
+        <!-- Reservation Progress (active requests) / Reservation Details (archived) -->
         <BaseCard rounded="lg" class="p-5">
-          <div class="flex items-center gap-4">
-            <BaseProgressCircle
-              :model-value="reservationProgress"
-              :size="64"
-              :thickness="4"
-            />
-            <div>
-              <p class="text-muted-500 dark:text-muted-400 text-sm">
-                Reservation Progress
-              </p>
-              <p class="text-muted-800 dark:text-white text-2xl font-semibold">
-                {{ reservationProgress }}%
-              </p>
-              <p class="text-muted-400 text-xs">
-                {{ daysRemaining }} days remaining
-              </p>
+          <!-- Show progress for active requests -->
+          <template v-if="!isArchived">
+            <div class="flex items-center gap-4">
+              <BaseProgressCircle
+                :model-value="reservationProgress"
+                :size="64"
+                :thickness="4"
+              />
+              <div>
+                <p class="text-muted-500 dark:text-muted-400 text-sm">
+                  Reservation Progress
+                </p>
+                <p class="text-muted-800 dark:text-white text-2xl font-semibold">
+                  {{ reservationProgress }}%
+                </p>
+                <p class="text-muted-400 text-xs">
+                  {{ daysRemaining }} days remaining
+                </p>
+              </div>
             </div>
-          </div>
+          </template>
+
+          <!-- Show reservation details for archived requests -->
+          <template v-else>
+            <div class="flex items-center gap-4">
+              <div
+                v-if="durationIndicator"
+                class="flex size-14 shrink-0 items-center justify-center rounded-xl"
+                :class="durationIndicator.bgColor"
+              >
+                <Icon
+                  :name="durationIndicator.icon"
+                  class="size-6"
+                  :class="durationIndicator.color"
+                />
+              </div>
+              <div
+                v-else
+                class="flex size-14 shrink-0 items-center justify-center rounded-xl bg-muted-500/10"
+              >
+                <Icon name="ph:calendar-duotone" class="size-6 text-muted-500" />
+              </div>
+              <div>
+                <p class="text-muted-500 dark:text-muted-400 text-sm">
+                  Reservation Details
+                </p>
+                <div class="mt-1 space-y-1">
+                  <p class="text-muted-600 dark:text-muted-300 text-sm">
+                    <span class="text-muted-400 dark:text-muted-500">Planned:</span>
+                    {{ formatDate(request.endDate) }}
+                  </p>
+                  <p class="text-muted-600 dark:text-muted-300 text-sm">
+                    <span class="text-muted-400 dark:text-muted-500">Actual:</span>
+                    <template v-if="request.completedAt">
+                      {{ formatDate(request.completedAt) }}
+                    </template>
+                    <template v-else>
+                      N/A
+                    </template>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </template>
         </BaseCard>
 
         <!-- Submitted -->
