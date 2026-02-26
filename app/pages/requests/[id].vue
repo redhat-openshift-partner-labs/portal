@@ -22,7 +22,7 @@ const extensionConfirmModalOpen = ref(false)
 const pendingExtensionDuration = ref<'3d' | '1w' | '2w' | '1mo' | null>(null)
 
 useHead({
-  title: computed(() => request.value ? `${request.value.cluster} - Requests` : 'Request Details')
+  title: computed(() => request.value ? `${request.value.generatedName} - Requests` : 'Request Details')
 })
 
 // Refresh on mount
@@ -181,7 +181,7 @@ const formatNoteDate = (dateStr: string) => {
             <div>
               <div class="flex items-center gap-3">
                 <h1 class="text-muted-800 dark:text-white text-xl font-semibold">
-                  {{ request.cluster }}
+                  {{ request.generatedName }}
                 </h1>
                 <BaseTag
                   variant="none"
