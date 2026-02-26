@@ -170,12 +170,24 @@ Vue Options API is disabled (`__VUE_OPTIONS_API__: false`). Only use Composition
 ### View Transitions
 Experimental view transitions are enabled. Use `ViewTransitions` component for page transitions.
 
-## Testing Approach
+## Testing
 
-Currently no test suite. If adding tests:
-- Use Vitest for unit tests
+```bash
+pnpm test           # Run all tests
+pnpm test:watch     # Run tests in watch mode
+pnpm test:coverage  # Run tests with coverage report
+```
+
+### Test Suite
+- **Framework**: Vitest
+- **Tests**: `tests/` directory
+- **Integration tests**: Database compatibility tests verifying SQLite/PostgreSQL parity
+- **Coverage**: `coverage/` directory (gitignored)
+
+### Testing Guidelines
+- Use Vitest for unit and integration tests
 - Test composables in isolation
-- Use Playwright for E2E tests
+- Use Playwright for E2E tests (when added)
 
 ## Dependencies
 
@@ -198,6 +210,7 @@ Currently no test suite. If adding tests:
 | `@prisma/adapter-*` | Prisma driver adapters |
 | `jsonwebtoken` | JWT for auth |
 | `@iconify-json/*` | Various icon sets |
+| `vitest` | Test framework |
 
 ## Environment Variables
 
