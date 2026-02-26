@@ -55,7 +55,9 @@ const filteredRequests = computed(() => {
     return (
       request.generatedName.toLowerCase().includes(query) ||
       request.timezone.toLowerCase().includes(query) ||
-      request.status.toLowerCase().includes(query)
+      request.status.toLowerCase().includes(query) ||
+      request.requestType.toLowerCase().includes(query) ||
+      getRequestTypeLabel(request.requestType).toLowerCase().includes(query)
     )
   })
 })
