@@ -46,26 +46,41 @@ pnpm run typecheck # Run TypeScript type checker
 
 ### Database Commands
 
+**First-time local setup:**
 ```bash
-# Local development (SQLite)
-pnpm db:migrate    # Run SQLite migrations
-pnpm db:seed       # Seed local database
-pnpm db:studio     # Open Prisma Studio (SQLite)
-pnpm prisma generate  # Generate client for SQLite
+pnpm prisma generate  # Generate Prisma client for SQLite
+pnpm db:migrate       # Run migrations
+pnpm db:seed          # Seed database
+```
 
-# Production (PostgreSQL)
-pnpm db:pg:generate   # Generate client for PostgreSQL (required before dev/build)
+**Local development (SQLite):**
+```bash
+pnpm prisma generate  # Generate client for SQLite (required!)
+pnpm db:migrate       # Run SQLite migrations
+pnpm db:seed          # Seed local database
+pnpm db:studio        # Open Prisma Studio (SQLite)
+```
+
+**Production (PostgreSQL):**
+```bash
+pnpm db:pg:generate   # Generate client for PostgreSQL (required!)
 pnpm db:pg:push       # Push schema to PostgreSQL
 pnpm db:pg:push:sql   # Generate SQL for manual apply (workaround for connection issues)
 pnpm db:pg:migrate    # Create PostgreSQL migration
 pnpm db:pg:deploy     # Deploy migrations to production
 pnpm db:pg:studio     # Open Prisma Studio (PostgreSQL)
-
-# Validation
-pnpm db:validate   # Verify schemas are in sync
 ```
 
-**Note:** The Prisma client must be generated for the matching database. When switching between SQLite and PostgreSQL, regenerate the client first. See `docs/database.md` for the full workflow.
+**Validation:**
+```bash
+pnpm db:validate      # Verify schemas are in sync
+```
+
+> **Critical:** The Prisma client is tied to a specific database provider. If you see "Driver Adapter not compatible with provider" error, regenerate the client:
+> - For SQLite: `pnpm prisma generate`
+> - For PostgreSQL: `pnpm db:pg:generate`
+>
+> See `docs/database.md` for the full dual-schema workflow.
 
 ### Key Directories
 

@@ -15,6 +15,7 @@
 9. [Styling Guide](#styling-guide)
 10. [Testing](#testing)
 11. [Deployment](#deployment)
+12. [Troubleshooting](#troubleshooting)
 
 ## Development Setup
 
@@ -38,7 +39,16 @@ pnpm install
 cp .env.example .env
 
 # Edit .env with your configuration
+
+# Generate Prisma client for SQLite (local development)
+pnpm prisma generate
+
+# Run database migrations and seed
+pnpm db:migrate
+pnpm db:seed
 ```
+
+> **Important**: The `pnpm prisma generate` step is required before running the dev server. This generates the Prisma client for SQLite. If you see an error about "Driver Adapter not compatible with provider", you need to regenerate the client. See [Troubleshooting](#troubleshooting).
 
 ### Environment Variables
 
@@ -538,6 +548,41 @@ sessionStore.delete(sessionId): boolean
 
 ## Database Operations
 
+### Dual-Database Architecture
+
+This project uses a **dual-schema approach** to support different databases for development and production:
+
+| Environment | Database | Schema File | Config File |
+|-------------|----------|-------------|-------------|
+| **Local Development** | SQLite | `prisma/schema.prisma` | `prisma.config.ts` |
+| **Production** | PostgreSQL | `prisma/schema.postgresql.prisma` | `prisma.config.postgresql.ts` |
+
+Both schema files contain **identical model definitions**—only the `datasource` block differs.
+
+#### How It Works
+
+The `server/utils/db.ts` file automatically selects the correct adapter at runtime:
+- If `DATABASE_URL` starts with `postgres://` or `postgresql://` → uses PostgreSQL adapter
+- Otherwise → uses SQLite adapter (defaults to `prisma/dev.db`)
+
+**However**, the Prisma client must be generated for the matching database provider. The generated client is "baked in" with the provider at generation time.
+
+#### Switching Between Databases
+
+```bash
+# For local development (SQLite)
+pnpm prisma generate
+
+# For production (PostgreSQL)
+pnpm db:pg:generate
+```
+
+> **Critical**: If you switch between databases without regenerating the client, you'll get:
+> ```
+> Error: The Driver Adapter @prisma/adapter-better-sqlite3 is not compatible
+> with the provider postgres specified in the Prisma schema.
+> ```
+
 ### Prisma Schema Overview
 
 ```mermaid
@@ -795,6 +840,62 @@ flowchart LR
     Output --> Vercel["Vercel/Netlify"]
     Output --> CloudRun["Cloud Run/ECS"]
 ```
+
+## Troubleshooting
+
+### "Driver Adapter not compatible with provider"
+
+**Error:**
+```
+Error: The Driver Adapter @prisma/adapter-better-sqlite3, based on sqlite,
+is not compatible with the provider postgres specified in the Prisma schema.
+```
+
+**Cause:** The Prisma client was generated for PostgreSQL, but you're trying to run locally with SQLite (or vice versa).
+
+**Solution:**
+```bash
+# For local development (SQLite)
+pnpm prisma generate
+
+# For production (PostgreSQL)
+pnpm db:pg:generate
+```
+
+Then restart the dev server.
+
+### "Cannot find module '../generated/prisma/client.js'"
+
+**Cause:** The Prisma client hasn't been generated yet.
+
+**Solution:**
+```bash
+pnpm prisma generate
+```
+
+### Database schema out of sync
+
+**Cause:** Schema changes were made but migrations weren't run.
+
+**Solution:**
+```bash
+# For local development
+pnpm db:migrate
+
+# For production
+pnpm db:pg:migrate
+```
+
+### "P1001: Can't reach database server" with PostgreSQL
+
+**Cause:** Prisma's schema-engine binary sometimes fails to connect even when `psql` works.
+
+**Solution:** Use the manual SQL workaround:
+```bash
+pnpm db:pg:push:sql | psql "$DATABASE_URL"
+```
+
+See [Database documentation](database.md#troubleshooting) for more details.
 
 ---
 

@@ -27,7 +27,10 @@ pnpm install
 cp .env.example .env
 # Edit .env with your credentials
 
-# Run database migrations
+# Generate Prisma client for SQLite (local development)
+pnpm prisma generate
+
+# Run database migrations and seed
 pnpm db:migrate
 pnpm db:seed
 
@@ -36,6 +39,8 @@ pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+> **Note**: Local development uses SQLite by default. See [Database documentation](./docs/database.md) for PostgreSQL production setup.
 
 ## Tech Stack
 
