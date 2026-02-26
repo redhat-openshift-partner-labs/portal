@@ -4,6 +4,7 @@ interface UpdateRequestBody {
   status?: string
   timezone?: string
   hold?: boolean
+  openshiftVersion?: string
 }
 
 // User-settable statuses (Running/Hibernating are set by hub cluster, not users)
@@ -29,6 +30,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Invalid timezone' })
   }
 
+  // Validate openshiftVersion if provided
+  if (body.openshiftVersion !== undefined && typeof body.openshiftVersion !== 'string') {
+    throw createError({ statusCode: 400, message: 'Invalid OpenShift version' })
+  }
+
   const db = await getDb()
 
   // Verify lab exists
@@ -46,7 +52,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Build update data
-  const updateData: { state?: string; region?: string; hold?: boolean } = {}
+  const updateData: { state?: string; region?: string; hold?: boolean; openshiftVersion?: string } = {}
   if (body.status !== undefined) {
     updateData.state = body.status
   }
@@ -55,6 +61,9 @@ export default defineEventHandler(async (event) => {
   }
   if (body.hold !== undefined) {
     updateData.hold = body.hold
+  }
+  if (body.openshiftVersion !== undefined) {
+    updateData.openshiftVersion = body.openshiftVersion.trim()
   }
 
   if (Object.keys(updateData).length === 0) {
@@ -90,5 +99,6 @@ export default defineEventHandler(async (event) => {
     startDate: lab.startDate.toISOString(),
     endDate: lab.endDate.toISOString(),
     hold: lab.hold,
+    openshiftVersion: lab.openshiftVersion,
   }
 })

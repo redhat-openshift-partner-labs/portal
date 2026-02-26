@@ -48,6 +48,7 @@ const IANA_TIMEZONES = [
 // Form state
 const status = ref('')
 const timezone = ref('')
+const openshiftVersion = ref('')
 const notes = ref<(RequestNote & { edited: boolean; newContent: string; makeImmutable: boolean })[]>([])
 const loading = ref(false)
 const submitting = ref(false)
@@ -64,12 +65,14 @@ const fetchRequest = async () => {
     const data = await $fetch<{
       status: string
       timezone: string
+      openshiftVersion: string
       notes: RequestNote[]
     }>(`/api/requests/${props.requestId}`)
 
     // If status is Running/Hibernating (hub-managed), show placeholder instead
     status.value = VALID_STATUSES.includes(data.status) ? data.status : ''
     timezone.value = data.timezone
+    openshiftVersion.value = data.openshiftVersion || ''
     notes.value = data.notes.map((note) => ({
       ...note,
       edited: false,
@@ -110,10 +113,10 @@ const handleSubmit = async () => {
   error.value = null
 
   try {
-    // Update request status and timezone
+    // Update request status, timezone, and openshift version
     await $fetch(`/api/requests/${props.requestId}`, {
       method: 'PATCH',
-      body: { status: status.value, timezone: timezone.value },
+      body: { status: status.value, timezone: timezone.value, openshiftVersion: openshiftVersion.value },
     })
 
     // Update edited notes and notes marked to become immutable
@@ -154,6 +157,7 @@ watch(open, (isOpen) => {
   } else {
     status.value = ''
     timezone.value = ''
+    openshiftVersion.value = ''
     notes.value = []
     error.value = null
   }
@@ -181,7 +185,7 @@ watch(open, (isOpen) => {
         </div>
 
         <DialogDescription class="mb-4 text-sm text-muted-500 dark:text-muted-400">
-          Edit the request status, timezone, and notes.
+          Edit the request status, timezone, OpenShift version, and notes.
         </DialogDescription>
 
         <!-- Loading State -->
@@ -224,6 +228,20 @@ watch(open, (isOpen) => {
                 {{ tz.label }}
               </option>
             </select>
+          </div>
+
+          <!-- OpenShift Version Field -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-muted-700 dark:text-muted-300 mb-2">
+              OpenShift Version
+            </label>
+            <input
+              v-model="openshiftVersion"
+              type="text"
+              :disabled="submitting"
+              placeholder="e.g., 4.15.0"
+              class="w-full rounded-lg border border-muted-300 bg-muted-50 px-3 py-2 text-sm text-muted-600 transition-colors focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-muted-700 dark:bg-muted-900 dark:text-muted-200"
+            >
           </div>
 
           <!-- Notes Section -->
