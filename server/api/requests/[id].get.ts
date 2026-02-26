@@ -56,6 +56,7 @@ export default defineEventHandler(async (event) => {
     status: lab.state,
     startDate: lab.startDate.toISOString(),
     endDate: lab.endDate.toISOString(),
+    completedAt: lab.completedAt?.toISOString() ?? null,
     createdAt: lab.createdAt.toISOString(),
     updatedAt: lab.updatedAt.toISOString(),
     // Additional lab-specific fields
