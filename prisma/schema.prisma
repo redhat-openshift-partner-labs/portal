@@ -50,6 +50,9 @@ model Lab {
   audits            Audit[]
   extensionRequests ExtensionRequest[]
 
+  @@index([state])
+  @@index([companyId])
+  @@index([startDate])
   @@map("labs")
 }
 
@@ -105,6 +108,7 @@ model Note {
 
   lab Lab @relation(fields: [labId], references: [id], onDelete: Cascade)
 
+  @@index([labId])
   @@map("notes")
 }
 
@@ -120,6 +124,7 @@ model Audit {
 
   lab Lab? @relation(fields: [generatedName], references: [generatedName]) // No cascade to match production
 
+  @@index([generatedName])
   @@map("audits")
 }
 
@@ -136,6 +141,7 @@ model ExtensionRequest {
 
   lab Lab? @relation(fields: [labId], references: [id])
 
+  @@index([labId])
   @@map("regexts")
 }
 
