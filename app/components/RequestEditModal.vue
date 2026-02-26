@@ -74,18 +74,24 @@ const fetchRequest = async () => {
   error.value = null
 
   try {
-    // Fetch request data and denial note in parallel
-    const [requestData, denialData] = await Promise.all([
-      $fetch<{
-        status: string
-        timezone: string
-        openshiftVersion: string
-        notes: RequestNote[]
-      }>(`/api/requests/${props.requestId}`),
-      $fetch<{ reason: string; deniedBy: string; deniedAt: string } | null>(
+    // Fetch request data
+    const requestData = await $fetch<{
+      status: string
+      timezone: string
+      openshiftVersion: string
+      notes: RequestNote[]
+    }>(`/api/requests/${props.requestId}`)
+
+    // Fetch denial note separately to handle errors gracefully
+    let denialData: { reason: string; deniedBy: string; deniedAt: string } | null = null
+    try {
+      denialData = await $fetch<{ reason: string; deniedBy: string; deniedAt: string } | null>(
         `/api/requests/${props.requestId}/denial-reason`
-      ),
-    ])
+      )
+    } catch {
+      // Ignore errors fetching denial reason - treat as no denial note
+      denialData = null
+    }
 
     // If status is Running/Hibernating (hub-managed), show placeholder instead
     status.value = VALID_STATUSES.includes(requestData.status) ? requestData.status : ''
@@ -101,7 +107,8 @@ const fetchRequest = async () => {
 
     // Set denial-related state
     isDenied.value = requestData.status === 'Denied'
-    hasDenialNote.value = denialData !== null
+    // Check for denial note by verifying the reason field exists (null response may be parsed as empty object)
+    hasDenialNote.value = denialData !== null && typeof denialData === 'object' && 'reason' in denialData
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Failed to load request'
   } finally {
