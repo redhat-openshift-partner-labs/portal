@@ -10,6 +10,7 @@ const companyId = computed(() => Number(route.params.id))
 
 const { requests, pending, error, refresh, extendRequest, addNote } = useCompanyRequests(companyId)
 const { canEdit } = useAuth()
+const { getLabel: getRequestTypeLabel } = useRequestTypeLabels()
 
 // Company name derived from first request
 const companyName = computed(() => {
@@ -270,6 +271,9 @@ const handleEditUpdated = () => {
           <TairoTable rounded="lg">
             <template #header>
               <TairoTableHeading uppercase class="ps-4">
+                Type
+              </TairoTableHeading>
+              <TairoTableHeading uppercase>
                 Cluster Name
               </TairoTableHeading>
               <TairoTableHeading uppercase>
@@ -287,8 +291,15 @@ const handleEditUpdated = () => {
             </template>
 
             <TairoTableRow v-for="request in activeRequests" :key="request.id">
-              <!-- Cluster Name Column -->
+              <!-- Type Column -->
               <TairoTableCell spaced class="ps-4">
+                <span class="text-muted-600 dark:text-muted-300">
+                  {{ getRequestTypeLabel(request.requestType) }}
+                </span>
+              </TairoTableCell>
+
+              <!-- Cluster Name Column -->
+              <TairoTableCell spaced>
                 <div class="flex items-center gap-3">
                   <div class="bg-primary-500/10 flex size-10 shrink-0 items-center justify-center rounded-lg">
                     <Icon name="ph:cube-duotone" class="text-primary-500 size-5" />
@@ -389,6 +400,9 @@ const handleEditUpdated = () => {
           <TairoTable rounded="lg">
             <template #header>
               <TairoTableHeading uppercase class="ps-4">
+                Type
+              </TairoTableHeading>
+              <TairoTableHeading uppercase>
                 Cluster Name
               </TairoTableHeading>
               <TairoTableHeading uppercase>
@@ -406,8 +420,15 @@ const handleEditUpdated = () => {
             </template>
 
             <TairoTableRow v-for="request in archivedRequests" :key="request.id">
-              <!-- Cluster Name Column -->
+              <!-- Type Column -->
               <TairoTableCell spaced class="ps-4">
+                <span class="text-muted-500 dark:text-muted-400">
+                  {{ getRequestTypeLabel(request.requestType) }}
+                </span>
+              </TairoTableCell>
+
+              <!-- Cluster Name Column -->
+              <TairoTableCell spaced>
                 <div class="flex items-center gap-3">
                   <div class="bg-muted-500/10 flex size-10 shrink-0 items-center justify-center rounded-lg">
                     <Icon name="ph:cube-duotone" class="text-muted-400 size-5" />

@@ -16,6 +16,7 @@ export interface RequestItem {
   startDate: string
   endDate: string
   notesCount: number
+  requestType: string
 }
 
 export interface NoteAuthor {

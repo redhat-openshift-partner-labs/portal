@@ -59,5 +59,6 @@ export default defineEventHandler(async (event) => {
     cloudProvider: lab.cloudProvider,
     openshiftVersion: lab.openshiftVersion,
     clusterSize: lab.clusterSize,
+    requestType: lab.requestType,
   }))
 })
