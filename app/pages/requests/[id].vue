@@ -350,11 +350,11 @@ const durationIndicator = computed(() => {
                 </p>
                 <div class="mt-1 space-y-1">
                   <p class="text-muted-600 dark:text-muted-300 text-sm">
-                    <span class="text-muted-400 dark:text-muted-500">Planned:</span>
+                    <span class="text-muted-400 dark:text-muted-500">Planned:</span>&nbsp;
                     {{ formatDate(request.endDate) }}
                   </p>
                   <p class="text-muted-600 dark:text-muted-300 text-sm">
-                    <span class="text-muted-400 dark:text-muted-500">Actual:</span>
+                    <span class="text-muted-400 dark:text-muted-500">Actual:</span>&nbsp;
                     <template v-if="request.completedAt">
                       {{ formatDate(request.completedAt) }}
                     </template>
