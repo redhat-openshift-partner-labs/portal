@@ -50,6 +50,7 @@ model Lab {
   noteRecords       Note[]
   audits            Audit[]
   extensionRequests ExtensionRequest[]
+  denialNote        DenialNote?
 
   @@index([state])
   @@index([companyId])
@@ -159,4 +160,17 @@ model OpenshiftVersionMapping {
   updatedAt DateTime? @map("updated_at")
 
   @@map("openshift_version_mappings")
+}
+
+// Denial note for tracking denial reasons - immutable by design
+model DenialNote {
+  id        Int      @id @default(autoincrement())
+  labId     Int      @unique @map("lab_id")
+  userId    String   @map("user_id") // Required - email of user who denied
+  reason    String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  lab Lab @relation(fields: [labId], references: [id], onDelete: Cascade)
+
+  @@map("denial_notes")
 }

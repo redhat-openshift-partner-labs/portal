@@ -2,6 +2,12 @@
 
 import type { RequestItem, RequestNote } from './useRequests'
 
+export interface DenialReason {
+  reason: string
+  deniedBy: string
+  deniedAt: string
+}
+
 export const useArchive = () => {
   const requests = useState<RequestItem[]>('archive-list', () => [])
   const pending = useState('archive-pending', () => false)
@@ -43,11 +49,38 @@ export const useArchive = () => {
     return result
   }
 
+  const fetchDenialReason = async (id: number): Promise<DenialReason | null> => {
+    return await $fetch<DenialReason | null>(`/api/requests/${id}/denial-reason`)
+  }
+
+  const denyRequest = async (id: number, reason: string) => {
+    const result = await $fetch(`/api/requests/${id}/deny`, {
+      method: 'POST',
+      body: { reason },
+    })
+
+    // Update the request status in the list
+    const index = requests.value.findIndex((r) => r.id === id)
+    if (index !== -1) {
+      const existingRequest = requests.value[index]
+      if (existingRequest) {
+        requests.value[index] = {
+          ...existingRequest,
+          status: 'Denied',
+        }
+      }
+    }
+
+    return result
+  }
+
   return {
     requests: readonly(requests),
     pending: readonly(pending),
     error: readonly(error),
     refresh,
     addNote,
+    fetchDenialReason,
+    denyRequest,
   }
 }

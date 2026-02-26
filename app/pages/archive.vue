@@ -20,6 +20,8 @@ const statusFilter = computed(() => route.query.status as string | undefined)
 // Modal state
 const noteModalOpen = ref(false)
 const selectedRequestId = ref<number | null>(null)
+const denialReasonModalOpen = ref(false)
+const selectedDenialRequest = ref<{ id: number; name: string } | null>(null)
 
 // Search and pagination state
 const searchQuery = ref('')
@@ -194,6 +196,12 @@ const getStatusClasses = (status: string): string => {
 const handleCreateNote = (requestId: number) => {
   selectedRequestId.value = requestId
   noteModalOpen.value = true
+}
+
+// Handle view denial reason action
+const handleViewDenialReason = (request: { id: number; generatedName: string }) => {
+  selectedDenialRequest.value = { id: request.id, name: request.generatedName }
+  denialReasonModalOpen.value = true
 }
 </script>
 
@@ -434,7 +442,18 @@ const handleCreateNote = (requestId: number) => {
 
           <!-- Action Column -->
           <TairoTableCell spaced class="pe-4 text-end">
-            <div class="flex items-center justify-end">
+            <div class="flex items-center justify-end gap-2">
+              <BaseButton
+                v-if="request.status === 'Denied'"
+                size="sm"
+                rounded="lg"
+                color="danger"
+                variant="pastel"
+                @click="handleViewDenialReason(request)"
+              >
+                <Icon name="ph:x-circle-duotone" class="size-4" />
+                <span>Denial Reason</span>
+              </BaseButton>
               <BaseButton
                 size="sm"
                 rounded="lg"
@@ -515,6 +534,13 @@ const handleCreateNote = (requestId: number) => {
     <RequestNoteModal
       v-model:open="noteModalOpen"
       :request-id="selectedRequestId"
+    />
+
+    <!-- Denial Reason Modal -->
+    <DenialReasonModal
+      v-model:open="denialReasonModalOpen"
+      :request-id="selectedDenialRequest?.id ?? null"
+      :request-name="selectedDenialRequest?.name"
     />
   </div>
 </template>

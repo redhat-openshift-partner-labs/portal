@@ -12,6 +12,7 @@ import type { RequestNote } from '~/composables/useRequests'
 
 const props = defineProps<{
   requestId: number | null
+  requestName?: string
 }>()
 
 const emit = defineEmits<{
@@ -20,7 +21,9 @@ const emit = defineEmits<{
 
 const open = defineModel<boolean>('open', { default: false })
 
+// Status options for the dropdown (Denied is handled separately via deny modal)
 const VALID_STATUSES = ['Pending', 'Approved', 'Denied', 'Completed']
+const EDITABLE_STATUSES = ['Pending', 'Approved', 'Completed']
 
 const IANA_TIMEZONES = [
   { value: 'America/New_York', label: 'America/New_York (Eastern)' },
@@ -47,12 +50,21 @@ const IANA_TIMEZONES = [
 
 // Form state
 const status = ref('')
+const originalStatus = ref('')
 const timezone = ref('')
 const openshiftVersion = ref('')
 const notes = ref<(RequestNote & { edited: boolean; newContent: string; makeImmutable: boolean })[]>([])
 const loading = ref(false)
 const submitting = ref(false)
 const error = ref<string | null>(null)
+
+// Denial-related state
+const hasDenialNote = ref(false)
+const isDenied = ref(false)
+const denyModalOpen = ref(false)
+
+// Check if editing is blocked (denied or has denial note)
+const isEditBlocked = computed(() => isDenied.value || hasDenialNote.value)
 
 // Fetch request data when modal opens
 const fetchRequest = async () => {
@@ -62,23 +74,34 @@ const fetchRequest = async () => {
   error.value = null
 
   try {
-    const data = await $fetch<{
-      status: string
-      timezone: string
-      openshiftVersion: string
-      notes: RequestNote[]
-    }>(`/api/requests/${props.requestId}`)
+    // Fetch request data and denial note in parallel
+    const [requestData, denialData] = await Promise.all([
+      $fetch<{
+        status: string
+        timezone: string
+        openshiftVersion: string
+        notes: RequestNote[]
+      }>(`/api/requests/${props.requestId}`),
+      $fetch<{ reason: string; deniedBy: string; deniedAt: string } | null>(
+        `/api/requests/${props.requestId}/denial-reason`
+      ),
+    ])
 
     // If status is Running/Hibernating (hub-managed), show placeholder instead
-    status.value = VALID_STATUSES.includes(data.status) ? data.status : ''
-    timezone.value = data.timezone
-    openshiftVersion.value = data.openshiftVersion || ''
-    notes.value = data.notes.map((note) => ({
+    status.value = VALID_STATUSES.includes(requestData.status) ? requestData.status : ''
+    originalStatus.value = status.value
+    timezone.value = requestData.timezone
+    openshiftVersion.value = requestData.openshiftVersion || ''
+    notes.value = requestData.notes.map((note) => ({
       ...note,
       edited: false,
       newContent: note.content,
       makeImmutable: false,
     }))
+
+    // Set denial-related state
+    isDenied.value = requestData.status === 'Denied'
+    hasDenialNote.value = denialData !== null
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Failed to load request'
   } finally {
@@ -108,6 +131,12 @@ const handleMakeImmutable = (noteId: number, value: boolean) => {
 
 const handleSubmit = async () => {
   if (!props.requestId) return
+
+  // If status changed to Denied, open deny modal instead
+  if (status.value === 'Denied' && originalStatus.value !== 'Denied') {
+    denyModalOpen.value = true
+    return
+  }
 
   submitting.value = true
   error.value = null
@@ -146,6 +175,13 @@ const handleSubmit = async () => {
   }
 }
 
+// Handle denial completed from deny modal
+const handleDenied = () => {
+  denyModalOpen.value = false
+  emit('updated')
+  open.value = false
+}
+
 const handleCancel = () => {
   error.value = null
   open.value = false
@@ -156,10 +192,14 @@ watch(open, (isOpen) => {
     fetchRequest()
   } else {
     status.value = ''
+    originalStatus.value = ''
     timezone.value = ''
     openshiftVersion.value = ''
     notes.value = []
     error.value = null
+    hasDenialNote.value = false
+    isDenied.value = false
+    denyModalOpen.value = false
   }
 })
 </script>
@@ -191,6 +231,31 @@ watch(open, (isOpen) => {
         <!-- Loading State -->
         <div v-if="loading" class="flex items-center justify-center py-8">
           <Icon name="ph:spinner" class="size-8 animate-spin text-primary-500" />
+        </div>
+
+        <!-- Blocked State for Denied Requests -->
+        <div v-else-if="isEditBlocked" class="space-y-4">
+          <div class="flex items-start gap-3 rounded-lg border border-rose-200 bg-rose-50 p-4 dark:border-rose-800 dark:bg-rose-900/20">
+            <Icon name="ph:prohibit-duotone" class="size-5 shrink-0 text-rose-500" />
+            <div>
+              <p class="text-sm font-medium text-rose-700 dark:text-rose-300">
+                This request has been denied
+              </p>
+              <p class="mt-1 text-sm text-rose-600 dark:text-rose-400">
+                Denied requests cannot be edited. You can still add notes to the request.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex justify-end">
+            <BaseButton
+              type="button"
+              color="muted"
+              @click="handleCancel"
+            >
+              Close
+            </BaseButton>
+          </div>
         </div>
 
         <!-- Form -->
@@ -317,6 +382,14 @@ watch(open, (isOpen) => {
         </form>
       </DialogContent>
     </DialogPortal>
+
+    <!-- Deny Request Modal -->
+    <DenyRequestModal
+      v-model:open="denyModalOpen"
+      :request-id="requestId"
+      :request-name="requestName"
+      @denied="handleDenied"
+    />
   </DialogRoot>
 </template>
 
