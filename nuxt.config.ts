@@ -85,21 +85,23 @@ export default defineNuxtConfig({
   ],
   fonts: {
     families: [
+      // Red Hat brand fonts
       {
-        name: 'Inter',
+        name: 'Red Hat Display',
         provider: 'google',
-        weights: ['100 900'],
+        weights: ['300', '400', '500', '700', '900'],
       },
       {
-        name: 'Karla',
+        name: 'Red Hat Text',
         provider: 'google',
-        weights: ['200 800'],
+        weights: ['300', '400', '500', '700'],
       },
       {
-        name: 'Fira Code',
+        name: 'Red Hat Mono',
         provider: 'google',
-        weights: ['300 700'],
+        weights: ['300', '400', '500', '700'],
       },
+      // Locale-specific fonts
       {
         name: 'Noto Sans JP',
         provider: 'google',
