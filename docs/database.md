@@ -414,21 +414,41 @@ flowchart LR
 
 ### Database Connection
 
+The database connection uses async initialization with driver adapters for both SQLite (development) and PostgreSQL (production):
+
 ```typescript
 // server/utils/db.ts
-import { PrismaClient } from '../generated/prisma'
+import { PrismaClient } from '../../generated/prisma/client.js'
 
 declare global {
   var __prisma: PrismaClient | undefined
 }
 
-const prisma = globalThis.__prisma ?? new PrismaClient()
+// Lazy initialization with caching
+let prismaPromise: Promise<PrismaClient> | null = null
 
-if (process.env.NODE_ENV !== 'production') {
-  globalThis.__prisma = prisma
+export async function getDb(): Promise<PrismaClient> {
+  if (globalThis.__prisma) {
+    return globalThis.__prisma
+  }
+
+  if (!prismaPromise) {
+    prismaPromise = createPrismaClient().then((client) => {
+      if (process.env.NODE_ENV !== 'production') {
+        globalThis.__prisma = client
+      }
+      return client
+    })
+  }
+
+  return prismaPromise
 }
+```
 
-export const getDb = () => prisma
+**Important:** `getDb()` is async and must be awaited:
+```typescript
+const db = await getDb()  // Correct
+const db = getDb()        // Wrong - returns Promise
 ```
 
 ### Common Queries
@@ -436,6 +456,7 @@ export const getDb = () => prisma
 #### Find All Labs with Company
 
 ```typescript
+const db = await getDb()
 const labs = await db.lab.findMany({
   include: {
     company: true
@@ -450,6 +471,7 @@ const labs = await db.lab.findMany({
 #### Find Lab with All Relations
 
 ```typescript
+const db = await getDb()
 const lab = await db.lab.findUnique({
   where: { id: labId },
   include: {
@@ -471,6 +493,7 @@ const lab = await db.lab.findUnique({
 #### Create Note
 
 ```typescript
+const db = await getDb()
 const note = await db.note.create({
   data: {
     labId: request.id,
@@ -484,6 +507,7 @@ const note = await db.note.create({
 #### Update Lab Status
 
 ```typescript
+const db = await getDb()
 await db.lab.update({
   where: { id },
   data: {
@@ -496,6 +520,7 @@ await db.lab.update({
 #### Aggregate Statistics
 
 ```typescript
+const db = await getDb()
 const stats = await db.lab.groupBy({
   by: ['state'],
   _count: { id: true }
@@ -511,6 +536,7 @@ const counts = stats.reduce((acc, stat) => {
 #### Get Monthly Costs
 
 ```typescript
+const db = await getDb()
 const costs = await db.cloudCost.findMany({
   where: {
     year: { in: [currentYear, lastYear] }

@@ -175,22 +175,31 @@ Request an extension for a running lab:
    - 1 Week
    - 2 Weeks
    - 1 Month
-3. The extension request is submitted for approval
+3. A confirmation dialog appears with a warning message
+4. Review the message reminding you to discuss with a manager
+5. Click **Confirm Extension** to submit or **Cancel** to abort
+6. The extension request is submitted for approval
 
 ```mermaid
 sequenceDiagram
     participant User
     participant UI
+    participant ConfirmModal
     participant API
     participant DB
 
     User->>UI: Click Extend > Select Duration
-    UI->>API: POST /api/requests/{id}/extend
+    UI->>ConfirmModal: Show confirmation dialog
+    ConfirmModal->>User: Display warning message
+    User->>ConfirmModal: Click Confirm Extension
+    ConfirmModal->>API: POST /api/requests/{id}/extend
     API->>DB: Create ExtensionRequest
     DB-->>API: Confirm
     API-->>UI: Success Response
-    UI->>User: Show confirmation
+    UI->>User: Show success notification
 ```
+
+**Important:** The confirmation dialog reminds users to discuss extensions with lab managers before proceeding. This helps ensure proper approval workflows are followed.
 
 #### Add Note
 

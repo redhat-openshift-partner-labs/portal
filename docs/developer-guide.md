@@ -334,6 +334,7 @@ graph LR
 | `useArchive` | Archived requests | `requests`, `pending`, `error` |
 | `useCompanyRequests` | Company-specific requests | `requests`, `pending`, `error` |
 | `useIdleTimeout` | Idle session management | `isWarningVisible`, `secondsRemaining` |
+| `useSessionData` | In-memory session data store | `data` |
 
 ## Creating Components
 
@@ -419,8 +420,8 @@ export default defineEventHandler(async (event) => {
   // Require authentication
   const session = requireAuth(event)
 
-  // Get database instance
-  const db = getDb()
+  // Get database instance (async)
+  const db = await getDb()
 
   // Fetch data
   const data = await db.lab.findMany({
@@ -476,8 +477,8 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Update database
-  const db = getDb()
+  // Update database (getDb is async)
+  const db = await getDb()
   const updated = await db.lab.update({
     where: { id: Number(id) },
     data: result.data
@@ -501,6 +502,39 @@ getAuthSession(event): SessionPayload | null
 // Require auth (throws 401 if not authenticated)
 requireAuth(event): SessionPayload
 ```
+
+### Session Store Utilities
+
+```typescript
+// Available in server/utils/sessionStore.ts
+// In-memory session data store for user-specific data
+
+interface SessionData {
+  sensitive: Record<string, unknown>  // Server-only, never sent to client
+  client: Record<string, unknown>     // Sent to client
+  createdAt: number
+}
+
+// Store session data (keyed by user's sub claim)
+sessionStore.set(sessionId, { sensitive: {...}, client: {...} })
+
+// Get full session data
+sessionStore.get(sessionId): SessionData | undefined
+
+// Get only client-safe data
+sessionStore.getClient(sessionId): Record<string, unknown> | undefined
+
+// Get only server-side sensitive data
+sessionStore.getSensitive(sessionId): Record<string, unknown> | undefined
+
+// Check if session exists
+sessionStore.has(sessionId): boolean
+
+// Delete session data
+sessionStore.delete(sessionId): boolean
+```
+
+**Note:** Session data is stored in-memory and is lost on server restart. For persistent session data, use the database.
 
 ## Database Operations
 
@@ -556,7 +590,7 @@ erDiagram
 ### Common Queries
 
 ```typescript
-const db = getDb()
+const db = await getDb()
 
 // Find all with relations
 const labs = await db.lab.findMany({

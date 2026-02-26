@@ -22,6 +22,7 @@ graph TB
         ExtendButton
         RequestNoteModal
         RequestEditModal
+        RequestExtensionConfirmModal
         IdleTimeoutWarning
         RequestActionsDropdown
         ArchiveActionsDropdown
@@ -311,6 +312,68 @@ A dropdown menu with actions for active requests.
 - View Details - navigates to request page
 - Extend (submenu) - +1 Week, +2 Weeks, +1 Month
 - Create Note - opens note modal
+
+---
+
+### RequestExtensionConfirmModal
+
+A confirmation dialog shown before submitting extension requests.
+
+**Location:** `app/components/RequestExtensionConfirmModal.vue`
+
+**Props:**
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `duration` | `'3d' \| '1w' \| '2w' \| '1mo' \| null` | Required | Extension duration to confirm |
+
+**Models:**
+
+| Model | Type | Description |
+|-------|------|-------------|
+| `open` | `boolean` | Controls dialog visibility |
+
+**Events:**
+
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `confirm` | - | User confirmed the extension |
+| `cancel` | - | User cancelled the extension |
+
+**Usage:**
+
+```vue
+<template>
+  <RequestExtensionConfirmModal
+    v-model:open="confirmModalOpen"
+    :duration="selectedDuration"
+    @confirm="handleConfirmExtend"
+    @cancel="handleCancelExtend"
+  />
+</template>
+
+<script setup>
+const confirmModalOpen = ref(false)
+const selectedDuration = ref<'3d' | '1w' | '2w' | '1mo' | null>(null)
+
+const handleExtendRequest = (duration: '3d' | '1w' | '2w' | '1mo') => {
+  selectedDuration.value = duration
+  confirmModalOpen.value = true
+}
+
+const handleConfirmExtend = async () => {
+  // Submit the extension request
+  await extendRequest(requestId, selectedDuration.value)
+}
+</script>
+```
+
+**Features:**
+- Warning icon and message
+- Displays human-readable duration (e.g., "1 Week")
+- Reminds users to discuss with managers before extending
+- Confirm/Cancel buttons
+- Animated appearance/disappearance
 
 ---
 

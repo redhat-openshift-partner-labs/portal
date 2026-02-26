@@ -26,10 +26,10 @@ This file provides context for AI assistants.
 ## Project Overview
 
 **Tech Stack:**
-- **Framework**: Nuxt 4.0.3 (Vue 3.5.18)
+- **Framework**: Nuxt 4.3.1 (Vue 3.5.28)
 - **Language**: TypeScript 5.9.2
 - **UI Components**: Shuriken UI 4.0.0 + Tairo layer + Reka UI
-- **Styling**: Tailwind CSS with LightningCSS transformer
+- **Styling**: Tailwind CSS 4.2.0 with LightningCSS transformer
 - **Options API**: Disabled for smaller bundles
 
 ## Quick Reference
@@ -166,20 +166,21 @@ Currently no test suite. If adding tests:
 
 | Package | Purpose |
 |---------|---------|
-| `nuxt` | Framework (v4.0.3) |
+| `nuxt` | Framework (v4.3.1) |
 | `@shuriken-ui/nuxt` | Base UI components (v4.0.0) |
 | `layers/tairo` | Extended UI layer (local) |
-| `reka-ui` | Headless UI primitives |
+| `reka-ui` | Headless UI primitives (via Tairo) |
 | `@vueuse/nuxt` | Vue composables |
 | `@nuxtjs/i18n` | Internationalization (6 languages) |
 | `@nuxt/content` | Markdown content management |
 | `@nuxt/image` | Image optimization |
 | `@nuxt/fonts` | Font loading (Inter, Karla, Fira Code) |
-| `vee-validate` + `zod` | Form validation |
+| `zod` | Schema validation |
 | `vue3-apexcharts` | Charts |
-| `mapbox-gl` | Maps |
 | `date-fns` | Date utilities |
-| `better-sqlite3` | SQLite database |
+| `better-sqlite3` | SQLite database (dev) |
+| `pg` | PostgreSQL database (prod) |
+| `@prisma/adapter-*` | Prisma driver adapters |
 | `jsonwebtoken` | JWT for auth |
 | `@iconify-json/*` | Various icon sets |
 

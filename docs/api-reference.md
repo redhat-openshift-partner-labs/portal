@@ -7,10 +7,12 @@
 1. [Overview](#overview)
 2. [Authentication](#authentication)
 3. [Error Handling](#error-handling)
-4. [Authentication Endpoints](#authentication-endpoints)
-5. [Dashboard Endpoints](#dashboard-endpoints)
-6. [Request Endpoints](#request-endpoints)
-7. [Notes Endpoints](#notes-endpoints)
+4. [Health Endpoint](#health-endpoint)
+5. [Authentication Endpoints](#authentication-endpoints)
+6. [Session Endpoints](#session-endpoints)
+7. [Dashboard Endpoints](#dashboard-endpoints)
+8. [Request Endpoints](#request-endpoints)
+9. [Notes Endpoints](#notes-endpoints)
 
 ## Overview
 
@@ -99,6 +101,32 @@ interface ErrorResponse {
 
 ---
 
+## Health Endpoint
+
+### GET /api/health
+
+Health check endpoint for monitoring and load balancers.
+
+**Request:**
+```http
+GET /api/health
+```
+
+**Response (200):**
+```json
+{
+  "status": "ok",
+  "timestamp": "2026-02-26T12:00:00.000Z"
+}
+```
+
+**Notes:**
+- Does not require authentication
+- Used by Kubernetes/OpenShift readiness probes
+- Returns current server timestamp
+
+---
+
 ## Authentication Endpoints
 
 ### GET /api/auth/callback
@@ -179,6 +207,63 @@ Cookie: auth_session=<jwt-token>
 ```
 
 **Side Effect:** Deletes the `auth_session` cookie.
+
+---
+
+## Session Endpoints
+
+The session endpoints provide an in-memory data store for user-specific session data that persists for the duration of the server process.
+
+### POST /api/session/init
+
+Initialize session data for the current user.
+
+**Request:**
+```http
+POST /api/session/init
+Cookie: auth_session=<jwt-token>
+```
+
+**Response (200):**
+```json
+{
+  "initializedAt": 1708948800000
+}
+```
+
+**Behavior:**
+- Returns existing session data if already initialized
+- Creates new session data if not present
+- Session data is stored in-memory on the server
+- Data is lost on server restart
+
+---
+
+### GET /api/session/data
+
+Retrieve session data for the current user.
+
+**Request:**
+```http
+GET /api/session/data
+Cookie: auth_session=<jwt-token>
+```
+
+**Response (200):**
+```json
+{
+  "initializedAt": 1708948800000
+}
+```
+
+**Response (200) - No session data:**
+```json
+null
+```
+
+**Notes:**
+- Returns `null` if session not initialized
+- Only returns client-safe data (sensitive data is kept server-side only)
 
 ---
 
@@ -565,7 +650,9 @@ flowchart TB
     end
 
     subgraph API["API Layer"]
+        Health["/api/health"]
         Auth["/api/auth/*"]
+        Session["/api/session/*"]
         Dashboard["/api/dashboard/*"]
         Requests["/api/requests/*"]
         Notes["/api/requests/*/notes/*"]
@@ -573,16 +660,19 @@ flowchart TB
 
     subgraph Data["Data Layer"]
         Prisma["Prisma ORM"]
+        SessionStore["In-Memory Store"]
         DB[(SQLite/PostgreSQL)]
     end
 
     Pages --> Composables
     Composables -->|$fetch| Auth
+    Composables -->|$fetch| Session
     Composables -->|$fetch| Dashboard
     Composables -->|$fetch| Requests
     Composables -->|$fetch| Notes
 
     Auth --> Prisma
+    Session --> SessionStore
     Dashboard --> Prisma
     Requests --> Prisma
     Notes --> Prisma

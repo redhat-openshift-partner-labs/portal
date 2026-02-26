@@ -457,6 +457,24 @@ export default defineNuxtPlugin(async () => {
 })
 ```
 
+**Example**: `session.client.ts` (session data initialization)
+```typescript
+export default defineNuxtPlugin(async () => {
+  const { user } = useAuth()
+  const sessionData = useState('session_data', () => null)
+
+  if (!user.value) return
+  if (sessionData.value) return
+
+  try {
+    const data = await $fetch('/api/session/init', { method: 'POST' })
+    sessionData.value = data
+  } catch {
+    sessionData.value = null
+  }
+})
+```
+
 **Types**:
 - `.server.ts` - Server-side only (SSR)
 - `.client.ts` - Client-side only (browser)
