@@ -26,7 +26,10 @@
     "db:pg:migrate": "prisma migrate dev --config=prisma.config.postgresql.ts",
     "db:pg:deploy": "prisma migrate deploy --config=prisma.config.postgresql.ts",
     "db:pg:studio": "prisma studio --config=prisma.config.postgresql.ts",
-    "db:validate": "tsx scripts/validate-schemas.ts"
+    "db:validate": "tsx scripts/validate-schemas.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.4.1",
@@ -53,11 +56,13 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.3.0",
     "@types/pg": "^8.16.0",
+    "@vitest/coverage-v8": "^4.0.18",
     "@vueuse/nuxt": "^14.2.1",
     "better-sqlite3": "^12.6.2",
     "prisma": "^7.4.1",
     "tailwindcss": "^4.2.0",
     "tsx": "^4.21.0",
+    "vitest": "^4.0.18",
     "zod": "^4.3.6"
   }
 }
