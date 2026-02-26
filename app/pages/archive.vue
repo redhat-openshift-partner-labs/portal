@@ -447,8 +447,7 @@ const handleViewDenialReason = (request: { id: number; generatedName: string }) 
                 v-if="request.status === 'Denied'"
                 size="sm"
                 rounded="lg"
-                color="danger"
-                variant="pastel"
+                variant="default"
                 @click="handleViewDenialReason(request)"
               >
                 <Icon name="ph:x-circle-duotone" class="size-4" />
