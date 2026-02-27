@@ -41,15 +41,17 @@ export default defineEventHandler(async (event) => {
   })
 
   // Map to request-like response for frontend compatibility
-  return labs.map((lab) => ({
+  return labs.map(lab => ({
     id: lab.id,
     cluster: lab.clusterName,
     generatedName: lab.generatedName,
-    company: lab.company ? {
-      id: lab.company.id,
-      name: lab.company.companyName,
-      logoUrl: lab.company.logoUrl,
-    } : null,
+    company: lab.company
+      ? {
+          id: lab.company.id,
+          name: lab.company.companyName,
+          logoUrl: lab.company.logoUrl,
+        }
+      : null,
     companyName: lab.companyName,
     timezone: lab.region, // Map region to timezone for compatibility
     status: lab.state,

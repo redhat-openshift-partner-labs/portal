@@ -20,12 +20,12 @@ export default defineEventHandler(async (event) => {
   const clientData: Record<string, unknown> = {
     // Safe to expose to client
     // Example: preferences: {}, permissions: []
-    initializedAt: Date.now()
+    initializedAt: Date.now(),
   }
 
   sessionStore.set(session.sub, {
     sensitive: sensitiveData,
-    client: clientData
+    client: clientData,
   })
 
   return clientData

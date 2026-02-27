@@ -60,8 +60,15 @@ const handleCancel = () => {
             Confirm Extension
           </DialogTitle>
           <DialogClose as-child>
-            <BaseButtonIcon size="sm" rounded="full" @click="handleCancel">
-              <Icon name="lucide:x" class="size-4" />
+            <BaseButtonIcon
+              size="sm"
+              rounded="full"
+              @click="handleCancel"
+            >
+              <Icon
+                name="lucide:x"
+                class="size-4"
+              />
             </BaseButtonIcon>
           </DialogClose>
         </div>
@@ -73,7 +80,10 @@ const handleCancel = () => {
         <!-- Warning Icon -->
         <div class="mb-4 flex justify-center">
           <div class="flex size-16 items-center justify-center rounded-full bg-amber-500/10">
-            <Icon name="ph:warning-circle-duotone" class="size-10 text-amber-500" />
+            <Icon
+              name="ph:warning-circle-duotone"
+              class="size-10 text-amber-500"
+            />
           </div>
         </div>
 

@@ -36,7 +36,10 @@ const handleStayLoggedIn = () => {
       >
         <div class="mb-4 flex items-center gap-3">
           <div class="flex size-10 items-center justify-center rounded-full bg-warning-100 dark:bg-warning-500/20">
-            <Icon name="ph:clock-duotone" class="size-5 text-warning-500" />
+            <Icon
+              name="ph:clock-duotone"
+              class="size-5 text-warning-500"
+            />
           </div>
           <DialogTitle class="text-lg font-semibold text-muted-800 dark:text-muted-100">
             Session Timeout

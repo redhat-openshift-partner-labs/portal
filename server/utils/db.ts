@@ -71,7 +71,7 @@ export async function getDb(): Promise<PrismaClient> {
 export const prisma = new Proxy({} as PrismaClient, {
   get(_, prop) {
     throw new Error(
-      `Cannot use 'prisma.${String(prop)}' directly. Use 'const db = await getDb()' instead.`
+      `Cannot use 'prisma.${String(prop)}' directly. Use 'const db = await getDb()' instead.`,
     )
   },
 })

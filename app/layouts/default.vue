@@ -34,7 +34,10 @@ const { isWarningVisible, secondsRemaining, stayLoggedIn } = useIdleTimeout()
           class="text-muted-500 hover:text-primary-500 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors"
           @click="logout"
         >
-          <Icon name="ph:sign-out-duotone" class="size-5" />
+          <Icon
+            name="ph:sign-out-duotone"
+            class="size-5"
+          />
           <span>Logout</span>
         </button>
       </div>

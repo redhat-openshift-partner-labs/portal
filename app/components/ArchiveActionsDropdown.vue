@@ -23,8 +23,14 @@ const handleCreateNote = () => {
 <template>
   <DropdownMenuRoot>
     <DropdownMenuTrigger as-child>
-      <BaseButtonIcon size="sm" rounded="lg">
-        <Icon name="lucide:more-horizontal" class="size-4" />
+      <BaseButtonIcon
+        size="sm"
+        rounded="lg"
+      >
+        <Icon
+          name="lucide:more-horizontal"
+          class="size-4"
+        />
       </BaseButtonIcon>
     </DropdownMenuTrigger>
 
@@ -39,7 +45,10 @@ const handleCreateNote = () => {
           :href="`/requests/${props.requestId}?from=archive`"
           class="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-500 transition-colors hover:bg-muted-100 hover:text-muted-700 dark:text-muted-400 dark:hover:bg-muted-700 dark:hover:text-muted-200"
         >
-          <Icon name="lucide:eye" class="size-4" />
+          <Icon
+            name="lucide:eye"
+            class="size-4"
+          />
           <span>Details</span>
         </DropdownMenuItem>
 
@@ -47,7 +56,10 @@ const handleCreateNote = () => {
           class="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-500 transition-colors hover:bg-muted-100 hover:text-muted-700 dark:text-muted-400 dark:hover:bg-muted-700 dark:hover:text-muted-200"
           @click="handleCreateNote"
         >
-          <Icon name="lucide:message-square-plus" class="size-4" />
+          <Icon
+            name="lucide:message-square-plus"
+            class="size-4"
+          />
           <span>Create Note</span>
         </DropdownMenuItem>
       </DropdownMenuContent>

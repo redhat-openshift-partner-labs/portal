@@ -81,11 +81,13 @@ export default defineEventHandler(async (event) => {
     id: updatedLab.id,
     cluster: updatedLab.clusterName,
     generatedName: updatedLab.generatedName,
-    company: updatedLab.company ? {
-      id: updatedLab.company.id,
-      name: updatedLab.company.companyName,
-      logoUrl: updatedLab.company.logoUrl,
-    } : null,
+    company: updatedLab.company
+      ? {
+          id: updatedLab.company.id,
+          name: updatedLab.company.companyName,
+          logoUrl: updatedLab.company.logoUrl,
+        }
+      : null,
     companyName: updatedLab.companyName,
     timezone: updatedLab.region,
     status: updatedLab.state,

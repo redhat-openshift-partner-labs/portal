@@ -58,7 +58,8 @@ export const useIdleTimeout = (options: IdleTimeoutOptions = {}) => {
     isWarningVisible.value = false
     if (onTimeout) {
       onTimeout()
-    } else {
+    }
+    else {
       logout()
     }
   }
@@ -147,11 +148,12 @@ export const useIdleTimeout = (options: IdleTimeoutOptions = {}) => {
     (newUser) => {
       if (newUser) {
         start()
-      } else {
+      }
+      else {
         stop()
       }
     },
-    { immediate: true }
+    { immediate: true },
   )
 
   // Cleanup on unmount

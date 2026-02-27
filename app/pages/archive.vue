@@ -4,11 +4,11 @@ import { differenceInDays, parseISO } from 'date-fns'
 const route = useRoute()
 
 definePageMeta({
-  layout: 'default'
+  layout: 'default',
 })
 
 useHead({
-  title: 'Archive - OpenShift Partner Labs'
+  title: 'Archive - OpenShift Partner Labs',
 })
 
 const { requests, pending, error, refresh, addNote } = useArchive()
@@ -21,7 +21,7 @@ const statusFilter = computed(() => route.query.status as string | undefined)
 const noteModalOpen = ref(false)
 const selectedRequestId = ref<number | null>(null)
 const denialReasonModalOpen = ref(false)
-const selectedDenialRequest = ref<{ id: number; name: string } | null>(null)
+const selectedDenialRequest = ref<{ id: number, name: string } | null>(null)
 
 // Search and pagination state
 const searchQuery = ref('')
@@ -40,7 +40,7 @@ const filteredRequests = computed(() => {
 
   // Apply status filter from query param (Denied or Completed)
   if (statusFilter.value) {
-    result = result.filter((request) => request.status === statusFilter.value)
+    result = result.filter(request => request.status === statusFilter.value)
   }
 
   // Apply search query
@@ -48,12 +48,12 @@ const filteredRequests = computed(() => {
     const query = searchQuery.value.toLowerCase().trim()
     result = result.filter((request) => {
       return (
-        request.generatedName.toLowerCase().includes(query) ||
-        request.company.name.toLowerCase().includes(query) ||
-        request.timezone.toLowerCase().includes(query) ||
-        request.status.toLowerCase().includes(query) ||
-        request.requestType.toLowerCase().includes(query) ||
-        getRequestTypeLabel(request.requestType).toLowerCase().includes(query)
+        request.generatedName.toLowerCase().includes(query)
+        || request.company.name.toLowerCase().includes(query)
+        || request.timezone.toLowerCase().includes(query)
+        || request.status.toLowerCase().includes(query)
+        || request.requestType.toLowerCase().includes(query)
+        || getRequestTypeLabel(request.requestType).toLowerCase().includes(query)
       )
     })
   }
@@ -106,12 +106,15 @@ const visiblePages = computed(() => {
     for (let i = 1; i <= total; i++) {
       pages.push(i)
     }
-  } else {
+  }
+  else {
     if (current <= 3) {
       pages.push(1, 2, 3, 4, 5, -1, total)
-    } else if (current >= total - 2) {
+    }
+    else if (current >= total - 2) {
       pages.push(1, -1, total - 4, total - 3, total - 2, total - 1, total)
-    } else {
+    }
+    else {
       pages.push(1, -1, current - 1, current, current + 1, -1, total)
     }
   }
@@ -199,7 +202,7 @@ const handleCreateNote = (requestId: number) => {
 }
 
 // Handle view denial reason action
-const handleViewDenialReason = (request: { id: number; generatedName: string }) => {
+const handleViewDenialReason = (request: { id: number, generatedName: string }) => {
   selectedDenialRequest.value = { id: request.id, name: request.generatedName }
   denialReasonModalOpen.value = true
 }
@@ -236,7 +239,10 @@ const handleViewDenialReason = (request: { id: number; generatedName: string }) 
       v-if="statusFilter"
       class="flex items-center gap-2 rounded-lg border border-primary-200 bg-primary-50 p-3 dark:border-primary-800 dark:bg-primary-900/20"
     >
-      <Icon name="ph:funnel-duotone" class="size-5 text-primary-500" />
+      <Icon
+        name="ph:funnel-duotone"
+        class="size-5 text-primary-500"
+      />
       <p class="text-sm text-primary-700 dark:text-primary-400">
         Showing only <strong>{{ statusFilter }}</strong> requests
       </p>
@@ -253,7 +259,10 @@ const handleViewDenialReason = (request: { id: number; generatedName: string }) 
       <!-- Search Input -->
       <div class="relative w-full sm:max-w-xs">
         <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
-          <Icon name="ph:magnifying-glass" class="text-muted-400 size-5" />
+          <Icon
+            name="ph:magnifying-glass"
+            class="text-muted-400 size-5"
+          />
         </div>
         <input
           v-model="searchQuery"
@@ -270,7 +279,11 @@ const handleViewDenialReason = (request: { id: number; generatedName: string }) 
           v-model="pageSize"
           class="border-muted-300 bg-muted-50 text-muted-600 focus:border-primary-500 focus:ring-primary-500 dark:border-muted-700 dark:bg-muted-800 dark:text-muted-200 dark:focus:border-primary-500 rounded-lg border px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-1"
         >
-          <option v-for="size in pageSizeOptions" :key="size" :value="size">
+          <option
+            v-for="size in pageSizeOptions"
+            :key="size"
+            :value="size"
+          >
             {{ size }}
           </option>
         </select>
@@ -283,7 +296,10 @@ const handleViewDenialReason = (request: { id: number; generatedName: string }) 
       v-if="error"
       class="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20"
     >
-      <Icon name="ph:warning-circle-duotone" class="size-5 text-red-500" />
+      <Icon
+        name="ph:warning-circle-duotone"
+        class="size-5 text-red-500"
+      />
       <p class="text-sm text-red-700 dark:text-red-400">
         Failed to load archived requests. Please try again.
       </p>
@@ -297,23 +313,39 @@ const handleViewDenialReason = (request: { id: number; generatedName: string }) 
 
     <!-- Loading State -->
     <template v-if="pending && requests.length === 0">
-      <BaseCard rounded="lg" class="p-8">
+      <BaseCard
+        rounded="lg"
+        class="p-8"
+      >
         <div class="flex flex-col items-center justify-center gap-4">
-          <Icon name="ph:spinner" class="text-primary-500 size-8 animate-spin" />
-          <p class="text-muted-500 dark:text-muted-400">Loading archived requests...</p>
+          <Icon
+            name="ph:spinner"
+            class="text-primary-500 size-8 animate-spin"
+          />
+          <p class="text-muted-500 dark:text-muted-400">
+            Loading archived requests...
+          </p>
         </div>
       </BaseCard>
     </template>
 
     <!-- Empty State -->
     <template v-else-if="!pending && requests.length === 0 && !error">
-      <BaseCard rounded="lg" class="p-8">
+      <BaseCard
+        rounded="lg"
+        class="p-8"
+      >
         <div class="flex flex-col items-center justify-center gap-4">
           <div class="bg-muted-100 dark:bg-muted-800 flex size-16 items-center justify-center rounded-full">
-            <Icon name="ph:archive-duotone" class="text-muted-400 size-8" />
+            <Icon
+              name="ph:archive-duotone"
+              class="text-muted-400 size-8"
+            />
           </div>
           <div class="text-center">
-            <h3 class="text-muted-800 dark:text-white text-lg font-semibold">No archived requests</h3>
+            <h3 class="text-muted-800 dark:text-white text-lg font-semibold">
+              No archived requests
+            </h3>
             <p class="text-muted-500 dark:text-muted-400 mt-1">
               Denied and completed requests will appear here.
             </p>
@@ -324,13 +356,21 @@ const handleViewDenialReason = (request: { id: number; generatedName: string }) 
 
     <!-- No Search Results -->
     <template v-else-if="!pending && filteredRequests.length === 0 && searchQuery.trim()">
-      <BaseCard rounded="lg" class="p-8">
+      <BaseCard
+        rounded="lg"
+        class="p-8"
+      >
         <div class="flex flex-col items-center justify-center gap-4">
           <div class="bg-muted-100 dark:bg-muted-800 flex size-16 items-center justify-center rounded-full">
-            <Icon name="ph:magnifying-glass-duotone" class="text-muted-400 size-8" />
+            <Icon
+              name="ph:magnifying-glass-duotone"
+              class="text-muted-400 size-8"
+            />
           </div>
           <div class="text-center">
-            <h3 class="text-muted-800 dark:text-white text-lg font-semibold">No results found</h3>
+            <h3 class="text-muted-800 dark:text-white text-lg font-semibold">
+              No results found
+            </h3>
             <p class="text-muted-500 dark:text-muted-400 mt-1">
               No archived requests match "{{ searchQuery }}". Try a different search term.
             </p>
@@ -343,7 +383,10 @@ const handleViewDenialReason = (request: { id: number; generatedName: string }) 
     <template v-else>
       <TairoTable rounded="lg">
         <template #header>
-          <TairoTableHeading uppercase class="ps-4">
+          <TairoTableHeading
+            uppercase
+            class="ps-4"
+          >
             Type
           </TairoTableHeading>
           <TairoTableHeading uppercase>
@@ -361,14 +404,23 @@ const handleViewDenialReason = (request: { id: number; generatedName: string }) 
           <TairoTableHeading uppercase>
             Planned/Actual
           </TairoTableHeading>
-          <TairoTableHeading uppercase class="pe-4 text-end">
+          <TairoTableHeading
+            uppercase
+            class="pe-4 text-end"
+          >
             Action
           </TairoTableHeading>
         </template>
 
-        <TairoTableRow v-for="request in paginatedRequests" :key="request.id">
+        <TairoTableRow
+          v-for="request in paginatedRequests"
+          :key="request.id"
+        >
           <!-- Type Column -->
-          <TairoTableCell spaced class="ps-4">
+          <TairoTableCell
+            spaced
+            class="ps-4"
+          >
             <span class="text-muted-600 dark:text-muted-300">
               {{ getRequestTypeLabel(request.requestType) }}
             </span>
@@ -378,7 +430,10 @@ const handleViewDenialReason = (request: { id: number; generatedName: string }) 
           <TairoTableCell spaced>
             <div class="flex items-center gap-3">
               <div class="bg-primary-500/10 flex size-10 shrink-0 items-center justify-center rounded-lg">
-                <Icon name="ph:cube-duotone" class="text-primary-500 size-5" />
+                <Icon
+                  name="ph:cube-duotone"
+                  class="text-primary-500 size-5"
+                />
               </div>
               <NuxtLink
                 :to="`/requests/${request.id}?from=archive`"
@@ -400,7 +455,10 @@ const handleViewDenialReason = (request: { id: number; generatedName: string }) 
           </TairoTableCell>
 
           <!-- TimeZone Column -->
-          <TairoTableCell spaced light>
+          <TairoTableCell
+            spaced
+            light
+          >
             <span class="text-muted-500 dark:text-muted-400">
               {{ request.timezone }}
             </span>
@@ -441,7 +499,10 @@ const handleViewDenialReason = (request: { id: number; generatedName: string }) 
           </TairoTableCell>
 
           <!-- Action Column -->
-          <TairoTableCell spaced class="pe-4 text-end">
+          <TairoTableCell
+            spaced
+            class="pe-4 text-end"
+          >
             <div class="flex items-center justify-end gap-2">
               <BaseButton
                 v-if="request.status === 'Denied'"
@@ -450,7 +511,10 @@ const handleViewDenialReason = (request: { id: number; generatedName: string }) 
                 variant="default"
                 @click="handleViewDenialReason(request)"
               >
-                <Icon name="ph:x-circle-duotone" class="size-4" />
+                <Icon
+                  name="ph:x-circle-duotone"
+                  class="size-4"
+                />
                 <span>Denial Reason</span>
               </BaseButton>
               <BaseButton
@@ -459,7 +523,10 @@ const handleViewDenialReason = (request: { id: number; generatedName: string }) 
                 variant="default"
                 @click="handleCreateNote(request.id)"
               >
-                <Icon name="lucide:message-square-plus" class="size-4" />
+                <Icon
+                  name="lucide:message-square-plus"
+                  class="size-4"
+                />
                 <span>Note</span>
               </BaseButton>
             </div>
@@ -475,7 +542,10 @@ const handleViewDenialReason = (request: { id: number; generatedName: string }) 
         </p>
 
         <!-- Pagination Controls -->
-        <div v-if="totalPages > 1" class="flex items-center gap-1">
+        <div
+          v-if="totalPages > 1"
+          class="flex items-center gap-1"
+        >
           <!-- Previous Button -->
           <button
             :disabled="currentPage === 1"
@@ -483,15 +553,21 @@ const handleViewDenialReason = (request: { id: number; generatedName: string }) 
             :class="[
               currentPage === 1
                 ? 'border-muted-200 text-muted-300 cursor-not-allowed dark:border-muted-700 dark:text-muted-600'
-                : 'border-muted-300 text-muted-500 hover:bg-muted-100 hover:text-muted-700 dark:border-muted-700 dark:text-muted-400 dark:hover:bg-muted-800 dark:hover:text-muted-200'
+                : 'border-muted-300 text-muted-500 hover:bg-muted-100 hover:text-muted-700 dark:border-muted-700 dark:text-muted-400 dark:hover:bg-muted-800 dark:hover:text-muted-200',
             ]"
             @click="goToPrevPage"
           >
-            <Icon name="lucide:chevron-left" class="size-4" />
+            <Icon
+              name="lucide:chevron-left"
+              class="size-4"
+            />
           </button>
 
           <!-- Page Numbers -->
-          <template v-for="(page, index) in visiblePages" :key="index">
+          <template
+            v-for="(page, index) in visiblePages"
+            :key="index"
+          >
             <span
               v-if="page === -1"
               class="text-muted-400 flex size-9 items-center justify-center"
@@ -504,7 +580,7 @@ const handleViewDenialReason = (request: { id: number; generatedName: string }) 
               :class="[
                 page === currentPage
                   ? 'border-primary-500 bg-primary-500 text-white'
-                  : 'border-muted-300 text-muted-500 hover:bg-muted-100 hover:text-muted-700 dark:border-muted-700 dark:text-muted-400 dark:hover:bg-muted-800 dark:hover:text-muted-200'
+                  : 'border-muted-300 text-muted-500 hover:bg-muted-100 hover:text-muted-700 dark:border-muted-700 dark:text-muted-400 dark:hover:bg-muted-800 dark:hover:text-muted-200',
               ]"
               @click="goToPage(page)"
             >
@@ -519,11 +595,14 @@ const handleViewDenialReason = (request: { id: number; generatedName: string }) 
             :class="[
               currentPage === totalPages
                 ? 'border-muted-200 text-muted-300 cursor-not-allowed dark:border-muted-700 dark:text-muted-600'
-                : 'border-muted-300 text-muted-500 hover:bg-muted-100 hover:text-muted-700 dark:border-muted-700 dark:text-muted-400 dark:hover:bg-muted-800 dark:hover:text-muted-200'
+                : 'border-muted-300 text-muted-500 hover:bg-muted-100 hover:text-muted-700 dark:border-muted-700 dark:text-muted-400 dark:hover:bg-muted-800 dark:hover:text-muted-200',
             ]"
             @click="goToNextPage"
           >
-            <Icon name="lucide:chevron-right" class="size-4" />
+            <Icon
+              name="lucide:chevron-right"
+              class="size-4"
+            />
           </button>
         </div>
       </div>

@@ -1,17 +1,15 @@
 <script setup lang="ts">
-
 definePageMeta({
-  layout: 'empty'
+  layout: 'empty',
 })
 
 useHead({
-  title: 'Home - OpenShift Partner Labs'
+  title: 'Home - OpenShift Partner Labs',
 })
 </script>
 
 <template>
-  <div class="container">
-  </div>
+  <div class="container" />
 </template>
 
 <style scoped>

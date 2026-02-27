@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   })
 
   // Map companyName to name for API response compatibility
-  return companies.map((company) => ({
+  return companies.map(company => ({
     id: company.id,
     name: company.companyName,
     logoUrl: company.logoUrl,

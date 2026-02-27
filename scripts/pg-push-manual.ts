@@ -43,7 +43,8 @@ function main(): void {
     // Diff against existing database
     command = `npx prisma migrate diff --from-url "${databaseUrl}" --to-schema-datamodel ${SCHEMA_PATH} --script`
     console.error('Generating incremental migration SQL (comparing against existing database)...')
-  } else {
+  }
+  else {
     // Generate full schema from empty
     command = `npx prisma migrate diff --from-empty --to-schema-datamodel ${SCHEMA_PATH} --script`
     console.error('Generating full schema SQL (from empty database)...')
@@ -61,8 +62,9 @@ function main(): void {
     console.error('\n-- SQL generated successfully.')
     console.error('-- Apply with: psql "$DATABASE_URL" -f <file.sql>')
     console.error('-- Or pipe:    pnpm db:pg:push:sql | psql "$DATABASE_URL"')
-  } catch (error: unknown) {
-    const execError = error as { stderr?: Buffer | string; message?: string }
+  }
+  catch (error: unknown) {
+    const execError = error as { stderr?: Buffer | string, message?: string }
     console.error('Error generating SQL:')
     console.error(execError.stderr?.toString() || execError.message)
     process.exit(1)

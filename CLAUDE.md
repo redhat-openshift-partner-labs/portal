@@ -42,6 +42,8 @@ pnpm run build     # Production build
 pnpm run preview   # Preview production build
 pnpm run generate  # Static site generation
 pnpm run typecheck # Run TypeScript type checker
+pnpm run lint      # Run ESLint
+pnpm run lint:fix  # Run ESLint with auto-fix
 ```
 
 ### Database Commands

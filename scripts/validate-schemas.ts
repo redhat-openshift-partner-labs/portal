@@ -87,8 +87,8 @@ function extractModels(schemaContent: string): string {
 function normalize(content: string): string {
   return content
     .split('\n')
-    .map((line) => line.trimEnd())
-    .filter((line) => line.trim() !== '')
+    .map(line => line.trimEnd())
+    .filter(line => line.trim() !== '')
     .join('\n')
 }
 
@@ -100,14 +100,16 @@ function main(): void {
 
   try {
     sqliteContent = readFileSync(SQLITE_SCHEMA, 'utf-8')
-  } catch {
+  }
+  catch {
     console.error(`Error: Could not read SQLite schema at ${SQLITE_SCHEMA}`)
     process.exit(1)
   }
 
   try {
     pgContent = readFileSync(PG_SCHEMA, 'utf-8')
-  } catch {
+  }
+  catch {
     console.error(`Error: Could not read PostgreSQL schema at ${PG_SCHEMA}`)
     process.exit(1)
   }

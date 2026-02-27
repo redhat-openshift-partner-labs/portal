@@ -3,7 +3,7 @@ import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
 import { randomUUID } from 'crypto'
 
 const adapter = new PrismaBetterSqlite3({
-  url: process.env.DATABASE_URL || 'file:./prisma/dev.db'
+  url: process.env.DATABASE_URL || 'file:./prisma/dev.db',
 })
 const prisma = new PrismaClient({ adapter })
 
@@ -47,7 +47,7 @@ async function main() {
   ]
 
   const companies = await Promise.all(
-    companyData.map((c) => prisma.company.create({ data: c }))
+    companyData.map(c => prisma.company.create({ data: c })),
   )
   console.log(`Created ${companies.length} companies`)
 
@@ -77,8 +77,8 @@ async function main() {
           admin: i < 2, // First two users are admins
           group: i === 0 ? 'oplmgr' : i === 1 ? 'opldev' : null,
         },
-      })
-    )
+      }),
+    ),
   )
   console.log(`Created ${users.length} users`)
 
@@ -92,7 +92,7 @@ async function main() {
   ]
 
   await Promise.all(
-    versions.map((v) => prisma.openshiftVersionMapping.create({ data: v }))
+    versions.map(v => prisma.openshiftVersionMapping.create({ data: v })),
   )
   console.log(`Created ${versions.length} OpenShift version mappings`)
 
@@ -159,7 +159,7 @@ async function main() {
           createdAt: startDate,
         },
       })
-    })
+    }),
   )
   console.log(`Created ${labs.length} labs`)
 
@@ -172,7 +172,7 @@ async function main() {
 
       // Create cost records for each provider
       return Promise.all(
-        cloudProviders.map((provider) =>
+        cloudProviders.map(provider =>
           prisma.cloudCost.create({
             data: {
               month,
@@ -180,10 +180,10 @@ async function main() {
               provider,
               cost: 5000 + Math.random() * 15000, // $5k to $20k per provider
             },
-          })
-        )
+          }),
+        ),
       )
-    })
+    }),
   )
   console.log(`Created ${cloudCosts.flat().length} cloud cost records`)
 
@@ -216,7 +216,7 @@ async function main() {
           createdAt,
         },
       })
-    })
+    }),
   )
   console.log(`Created ${notes.length} notes`)
 
@@ -238,7 +238,7 @@ async function main() {
           status: statuses[Math.floor(Math.random() * statuses.length)],
         },
       })
-    })
+    }),
   )
   console.log(`Created ${extensionRequests.length} extension requests`)
 
@@ -258,7 +258,7 @@ async function main() {
           loginType: loginTypes[Math.floor(Math.random() * loginTypes.length)],
         },
       })
-    })
+    }),
   )
   console.log(`Created ${audits.length} audit records`)
 

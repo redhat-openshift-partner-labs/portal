@@ -97,11 +97,15 @@ const handleGoogleLogin = () => {
           <!-- Social Sign Up Buttons -->
           <div class="flex flex-wrap justify-between gap-4">
             <!-- Google button -->
-            <button id="login"
-                    @click="handleGoogleLogin"
+            <button
+              id="login"
               class="cursor-pointer dark:bg-muted-700 text-muted-800 border-muted-300 dark:border-muted-600 focus-visible:nui-focus relative inline-flex grow items-center justify-center gap-2 rounded-md border bg-white px-6 py-4 dark:text-white"
+              @click="handleGoogleLogin"
             >
-              <Icon name="logos:google-icon" class="size-5" />
+              <Icon
+                name="logos:google-icon"
+                class="size-5"
+              />
               <div>Login with Google</div>
             </button>
           </div>

@@ -13,7 +13,8 @@ export default defineNuxtPlugin(async () => {
   try {
     const data = await $fetch('/api/session/init', { method: 'POST' })
     sessionData.value = data as Record<string, unknown>
-  } catch {
+  }
+  catch {
     // Session init failed, but don't block app load
     sessionData.value = null
   }

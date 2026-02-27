@@ -33,9 +33,11 @@ const handleSubmit = async () => {
     noteContent.value = ''
     isImmutable.value = false
     open.value = false
-  } catch (e) {
+  }
+  catch (e) {
     error.value = e instanceof Error ? e.message : 'Failed to add note'
-  } finally {
+  }
+  finally {
     submitting.value = false
   }
 }
@@ -52,7 +54,8 @@ watch(open, (isOpen) => {
     noteContent.value = ''
     isImmutable.value = props.forceImmutable ?? false
     error.value = null
-  } else if (props.forceImmutable) {
+  }
+  else if (props.forceImmutable) {
     isImmutable.value = true
   }
 })
@@ -72,8 +75,15 @@ watch(open, (isOpen) => {
             Add Note
           </DialogTitle>
           <DialogClose as-child>
-            <BaseButtonIcon size="sm" rounded="full" @click="handleCancel">
-              <Icon name="lucide:x" class="size-4" />
+            <BaseButtonIcon
+              size="sm"
+              rounded="full"
+              @click="handleCancel"
+            >
+              <Icon
+                name="lucide:x"
+                class="size-4"
+              />
             </BaseButtonIcon>
           </DialogClose>
         </div>
@@ -109,7 +119,10 @@ watch(open, (isOpen) => {
             </p>
           </div>
 
-          <div v-if="error" class="mb-4 rounded-lg bg-danger-100 p-3 text-sm text-danger-600 dark:bg-danger-500/20 dark:text-danger-400">
+          <div
+            v-if="error"
+            class="mb-4 rounded-lg bg-danger-100 p-3 text-sm text-danger-600 dark:bg-danger-500/20 dark:text-danger-400"
+          >
             {{ error }}
           </div>
 

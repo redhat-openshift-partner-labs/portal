@@ -21,7 +21,8 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     const requestFetch = useRequestFetch()
     const data = await requestFetch('/api/auth/me')
     user.value = data as typeof user.value
-  } catch {
+  }
+  catch {
     // Invalid or expired token - user remains null
     user.value = null
   }

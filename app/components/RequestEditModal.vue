@@ -53,7 +53,7 @@ const status = ref('')
 const originalStatus = ref('')
 const timezone = ref('')
 const openshiftVersion = ref('')
-const notes = ref<(RequestNote & { edited: boolean; newContent: string; makeImmutable: boolean })[]>([])
+const notes = ref<(RequestNote & { edited: boolean, newContent: string, makeImmutable: boolean })[]>([])
 const loading = ref(false)
 const submitting = ref(false)
 const error = ref<string | null>(null)
@@ -83,12 +83,13 @@ const fetchRequest = async () => {
     }>(`/api/requests/${props.requestId}`)
 
     // Fetch denial note separately to handle errors gracefully
-    let denialData: { reason: string; deniedBy: string; deniedAt: string } | null = null
+    let denialData: { reason: string, deniedBy: string, deniedAt: string } | null = null
     try {
-      denialData = await $fetch<{ reason: string; deniedBy: string; deniedAt: string } | null>(
-        `/api/requests/${props.requestId}/denial-reason`
+      denialData = await $fetch<{ reason: string, deniedBy: string, deniedAt: string } | null>(
+        `/api/requests/${props.requestId}/denial-reason`,
       )
-    } catch {
+    }
+    catch {
       // Ignore errors fetching denial reason - treat as no denial note
       denialData = null
     }
@@ -98,7 +99,7 @@ const fetchRequest = async () => {
     originalStatus.value = status.value
     timezone.value = requestData.timezone
     openshiftVersion.value = requestData.openshiftVersion || ''
-    notes.value = requestData.notes.map((note) => ({
+    notes.value = requestData.notes.map(note => ({
       ...note,
       edited: false,
       newContent: note.content,
@@ -109,20 +110,22 @@ const fetchRequest = async () => {
     isDenied.value = requestData.status === 'Denied'
     // Check for denial note by verifying the reason field exists (null response may be parsed as empty object)
     hasDenialNote.value = denialData !== null && typeof denialData === 'object' && 'reason' in denialData
-  } catch (e) {
+  }
+  catch (e) {
     error.value = e instanceof Error ? e.message : 'Failed to load request'
-  } finally {
+  }
+  finally {
     loading.value = false
   }
 }
 
 // Track if any changes were made
 const hasChanges = computed(() => {
-  return notes.value.some((note) => note.edited && note.newContent !== note.content)
+  return notes.value.some(note => note.edited && note.newContent !== note.content)
 })
 
 const handleNoteEdit = (noteId: number, content: string) => {
-  const note = notes.value.find((n) => n.id === noteId)
+  const note = notes.value.find(n => n.id === noteId)
   if (note) {
     note.newContent = content
     note.edited = content !== note.content
@@ -130,7 +133,7 @@ const handleNoteEdit = (noteId: number, content: string) => {
 }
 
 const handleMakeImmutable = (noteId: number, value: boolean) => {
-  const note = notes.value.find((n) => n.id === noteId)
+  const note = notes.value.find(n => n.id === noteId)
   if (note) {
     note.makeImmutable = value
   }
@@ -157,10 +160,10 @@ const handleSubmit = async () => {
 
     // Update edited notes and notes marked to become immutable
     const notesToUpdate = notes.value.filter(
-      (note) => (note.edited && !note.immutable) || (note.makeImmutable && !note.immutable)
+      note => (note.edited && !note.immutable) || (note.makeImmutable && !note.immutable),
     )
     for (const note of notesToUpdate) {
-      const body: { content?: string; immutable?: boolean } = {}
+      const body: { content?: string, immutable?: boolean } = {}
       if (note.edited && !note.immutable) {
         body.content = note.newContent
       }
@@ -175,9 +178,11 @@ const handleSubmit = async () => {
 
     emit('updated')
     open.value = false
-  } catch (e) {
+  }
+  catch (e) {
     error.value = e instanceof Error ? e.message : 'Failed to save changes'
-  } finally {
+  }
+  finally {
     submitting.value = false
   }
 }
@@ -197,7 +202,8 @@ const handleCancel = () => {
 watch(open, (isOpen) => {
   if (isOpen && props.requestId) {
     fetchRequest()
-  } else {
+  }
+  else {
     status.value = ''
     originalStatus.value = ''
     timezone.value = ''
@@ -225,8 +231,15 @@ watch(open, (isOpen) => {
             Edit Request
           </DialogTitle>
           <DialogClose as-child>
-            <BaseButtonIcon size="sm" rounded="full" @click="handleCancel">
-              <Icon name="lucide:x" class="size-4" />
+            <BaseButtonIcon
+              size="sm"
+              rounded="full"
+              @click="handleCancel"
+            >
+              <Icon
+                name="lucide:x"
+                class="size-4"
+              />
             </BaseButtonIcon>
           </DialogClose>
         </div>
@@ -236,14 +249,26 @@ watch(open, (isOpen) => {
         </DialogDescription>
 
         <!-- Loading State -->
-        <div v-if="loading" class="flex items-center justify-center py-8">
-          <Icon name="ph:spinner" class="size-8 animate-spin text-primary-500" />
+        <div
+          v-if="loading"
+          class="flex items-center justify-center py-8"
+        >
+          <Icon
+            name="ph:spinner"
+            class="size-8 animate-spin text-primary-500"
+          />
         </div>
 
         <!-- Blocked State for Denied Requests -->
-        <div v-else-if="isEditBlocked" class="space-y-4">
+        <div
+          v-else-if="isEditBlocked"
+          class="space-y-4"
+        >
           <div class="flex items-start gap-3 rounded-lg border border-rose-200 bg-rose-50 p-4 dark:border-rose-800 dark:bg-rose-900/20">
-            <Icon name="ph:prohibit-duotone" class="size-5 shrink-0 text-rose-500" />
+            <Icon
+              name="ph:prohibit-duotone"
+              class="size-5 shrink-0 text-rose-500"
+            />
             <div>
               <p class="text-sm font-medium text-rose-700 dark:text-rose-300">
                 This request has been denied
@@ -266,7 +291,10 @@ watch(open, (isOpen) => {
         </div>
 
         <!-- Form -->
-        <form v-else @submit.prevent="handleSubmit">
+        <form
+          v-else
+          @submit.prevent="handleSubmit"
+        >
           <!-- Status Field -->
           <div class="mb-4">
             <label class="block text-sm font-medium text-muted-700 dark:text-muted-300 mb-2">
@@ -277,10 +305,18 @@ watch(open, (isOpen) => {
               :disabled="submitting"
               class="w-full rounded-lg border border-muted-300 bg-muted-50 px-3 py-2 text-sm text-muted-600 transition-colors focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-muted-700 dark:bg-muted-900 dark:text-muted-200"
             >
-              <option v-if="!VALID_STATUSES.includes(status)" value="" disabled>
+              <option
+                v-if="!VALID_STATUSES.includes(status)"
+                value=""
+                disabled
+              >
                 Update Status
               </option>
-              <option v-for="s in VALID_STATUSES" :key="s" :value="s">
+              <option
+                v-for="s in VALID_STATUSES"
+                :key="s"
+                :value="s"
+              >
                 {{ s }}
               </option>
             </select>
@@ -296,7 +332,11 @@ watch(open, (isOpen) => {
               :disabled="submitting"
               class="w-full rounded-lg border border-muted-300 bg-muted-50 px-3 py-2 text-sm text-muted-600 transition-colors focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-muted-700 dark:bg-muted-900 dark:text-muted-200"
             >
-              <option v-for="tz in IANA_TIMEZONES" :key="tz.value" :value="tz.value">
+              <option
+                v-for="tz in IANA_TIMEZONES"
+                :key="tz.value"
+                :value="tz.value"
+              >
                 {{ tz.label }}
               </option>
             </select>
@@ -317,7 +357,10 @@ watch(open, (isOpen) => {
           </div>
 
           <!-- Notes Section -->
-          <div v-if="notes.length > 0" class="mb-4">
+          <div
+            v-if="notes.length > 0"
+            class="mb-4"
+          >
             <label class="block text-sm font-medium text-muted-700 dark:text-muted-300 mb-2">
               Notes ({{ notes.length }})
             </label>
@@ -336,8 +379,14 @@ watch(open, (isOpen) => {
                       {{ new Date(note.createdAt).toLocaleDateString() }}
                     </span>
                   </div>
-                  <div v-if="note.immutable" class="flex items-center gap-1 text-muted-400">
-                    <Icon name="lucide:lock" class="size-3.5" />
+                  <div
+                    v-if="note.immutable"
+                    class="flex items-center gap-1 text-muted-400"
+                  >
+                    <Icon
+                      name="lucide:lock"
+                      class="size-3.5"
+                    />
                     <span class="text-xs">Immutable</span>
                   </div>
                 </div>
@@ -348,7 +397,10 @@ watch(open, (isOpen) => {
                   :class="{ 'opacity-60 cursor-not-allowed': note.immutable }"
                   @update:model-value="(val: string) => handleNoteEdit(note.id, val)"
                 />
-                <div v-if="!note.immutable" class="mt-2">
+                <div
+                  v-if="!note.immutable"
+                  class="mt-2"
+                >
                   <BaseCheckbox
                     :model-value="note.makeImmutable"
                     :disabled="submitting"
@@ -357,14 +409,20 @@ watch(open, (isOpen) => {
                     @update:model-value="(val: boolean) => handleMakeImmutable(note.id, val)"
                   />
                 </div>
-                <p v-if="note.immutable" class="mt-1 text-xs text-muted-400">
+                <p
+                  v-if="note.immutable"
+                  class="mt-1 text-xs text-muted-400"
+                >
                   This note cannot be edited
                 </p>
               </div>
             </div>
           </div>
 
-          <div v-if="error" class="mb-4 rounded-lg bg-danger-100 p-3 text-sm text-danger-600 dark:bg-danger-500/20 dark:text-danger-400">
+          <div
+            v-if="error"
+            class="mb-4 rounded-lg bg-danger-100 p-3 text-sm text-danger-600 dark:bg-danger-500/20 dark:text-danger-400"
+          >
             {{ error }}
           </div>
 

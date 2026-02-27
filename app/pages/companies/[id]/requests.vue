@@ -2,7 +2,7 @@
 import { differenceInDays, parseISO } from 'date-fns'
 
 definePageMeta({
-  layout: 'default'
+  layout: 'default',
 })
 
 const route = useRoute()
@@ -21,7 +21,7 @@ const companyName = computed(() => {
 })
 
 useHead({
-  title: computed(() => `${companyName.value} Requests - OpenShift Partner Labs`)
+  title: computed(() => `${companyName.value} Requests - OpenShift Partner Labs`),
 })
 
 // Modal state
@@ -53,22 +53,22 @@ const filteredRequests = computed(() => {
   const query = searchQuery.value.toLowerCase().trim()
   return requests.value.filter((request) => {
     return (
-      request.generatedName.toLowerCase().includes(query) ||
-      request.timezone.toLowerCase().includes(query) ||
-      request.status.toLowerCase().includes(query) ||
-      request.requestType.toLowerCase().includes(query) ||
-      getRequestTypeLabel(request.requestType).toLowerCase().includes(query)
+      request.generatedName.toLowerCase().includes(query)
+      || request.timezone.toLowerCase().includes(query)
+      || request.status.toLowerCase().includes(query)
+      || request.requestType.toLowerCase().includes(query)
+      || getRequestTypeLabel(request.requestType).toLowerCase().includes(query)
     )
   })
 })
 
 // Separate active and archived requests
 const activeRequests = computed(() => {
-  return filteredRequests.value.filter((r) => activeStatuses.includes(r.status))
+  return filteredRequests.value.filter(r => activeStatuses.includes(r.status))
 })
 
 const archivedRequests = computed(() => {
-  return filteredRequests.value.filter((r) => archivedStatuses.includes(r.status))
+  return filteredRequests.value.filter(r => archivedStatuses.includes(r.status))
 })
 
 // Calculate reservation progress percentage
@@ -116,9 +116,11 @@ const handleExtendConfirmed = async () => {
   extending.value = pendingExtensionRequestId.value
   try {
     await extendRequest(pendingExtensionRequestId.value, pendingExtensionDuration.value)
-  } catch (e) {
+  }
+  catch (e) {
     console.error('Failed to extend request:', e)
-  } finally {
+  }
+  finally {
     extending.value = null
     pendingExtensionRequestId.value = null
     pendingExtensionDuration.value = null
@@ -159,7 +161,10 @@ const handleEditUpdated = () => {
             to="/requests"
             class="text-muted-500 hover:text-primary-500 inline-flex items-center gap-1 text-sm transition-colors"
           >
-            <Icon name="lucide:arrow-left" class="size-4" />
+            <Icon
+              name="lucide:arrow-left"
+              class="size-4"
+            />
             <span>Back to Requests</span>
           </NuxtLink>
         </div>
@@ -187,7 +192,10 @@ const handleEditUpdated = () => {
     <!-- Search Input -->
     <div class="relative w-full sm:max-w-xs">
       <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
-        <Icon name="ph:magnifying-glass" class="text-muted-400 size-5" />
+        <Icon
+          name="ph:magnifying-glass"
+          class="text-muted-400 size-5"
+        />
       </div>
       <input
         v-model="searchQuery"
@@ -202,7 +210,10 @@ const handleEditUpdated = () => {
       v-if="error"
       class="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20"
     >
-      <Icon name="ph:warning-circle-duotone" class="size-5 text-red-500" />
+      <Icon
+        name="ph:warning-circle-duotone"
+        class="size-5 text-red-500"
+      />
       <p class="text-sm text-red-700 dark:text-red-400">
         Failed to load requests. Please try again.
       </p>
@@ -216,23 +227,39 @@ const handleEditUpdated = () => {
 
     <!-- Loading State -->
     <template v-if="pending && requests.length === 0">
-      <BaseCard rounded="lg" class="p-8">
+      <BaseCard
+        rounded="lg"
+        class="p-8"
+      >
         <div class="flex flex-col items-center justify-center gap-4">
-          <Icon name="ph:spinner" class="text-primary-500 size-8 animate-spin" />
-          <p class="text-muted-500 dark:text-muted-400">Loading requests...</p>
+          <Icon
+            name="ph:spinner"
+            class="text-primary-500 size-8 animate-spin"
+          />
+          <p class="text-muted-500 dark:text-muted-400">
+            Loading requests...
+          </p>
         </div>
       </BaseCard>
     </template>
 
     <!-- Empty State -->
     <template v-else-if="!pending && requests.length === 0 && !error">
-      <BaseCard rounded="lg" class="p-8">
+      <BaseCard
+        rounded="lg"
+        class="p-8"
+      >
         <div class="flex flex-col items-center justify-center gap-4">
           <div class="bg-muted-100 dark:bg-muted-800 flex size-16 items-center justify-center rounded-full">
-            <Icon name="ph:clipboard-text-duotone" class="text-muted-400 size-8" />
+            <Icon
+              name="ph:clipboard-text-duotone"
+              class="text-muted-400 size-8"
+            />
           </div>
           <div class="text-center">
-            <h3 class="text-muted-800 dark:text-white text-lg font-semibold">No requests found</h3>
+            <h3 class="text-muted-800 dark:text-white text-lg font-semibold">
+              No requests found
+            </h3>
             <p class="text-muted-500 dark:text-muted-400 mt-1">
               This company has no reservation requests yet.
             </p>
@@ -243,13 +270,21 @@ const handleEditUpdated = () => {
 
     <!-- No Search Results -->
     <template v-else-if="!pending && filteredRequests.length === 0 && searchQuery.trim()">
-      <BaseCard rounded="lg" class="p-8">
+      <BaseCard
+        rounded="lg"
+        class="p-8"
+      >
         <div class="flex flex-col items-center justify-center gap-4">
           <div class="bg-muted-100 dark:bg-muted-800 flex size-16 items-center justify-center rounded-full">
-            <Icon name="ph:magnifying-glass-duotone" class="text-muted-400 size-8" />
+            <Icon
+              name="ph:magnifying-glass-duotone"
+              class="text-muted-400 size-8"
+            />
           </div>
           <div class="text-center">
-            <h3 class="text-muted-800 dark:text-white text-lg font-semibold">No results found</h3>
+            <h3 class="text-muted-800 dark:text-white text-lg font-semibold">
+              No results found
+            </h3>
             <p class="text-muted-500 dark:text-muted-400 mt-1">
               No requests match "{{ searchQuery }}". Try a different search term.
             </p>
@@ -263,7 +298,9 @@ const handleEditUpdated = () => {
       <!-- Active Requests Section -->
       <div class="space-y-4">
         <div class="flex items-center gap-2">
-          <h2 class="text-muted-800 dark:text-white text-lg font-semibold">Active Requests</h2>
+          <h2 class="text-muted-800 dark:text-white text-lg font-semibold">
+            Active Requests
+          </h2>
           <span class="bg-primary-500/10 text-primary-600 dark:text-primary-400 rounded-full px-2.5 py-0.5 text-xs font-medium">
             {{ activeRequests.length }}
           </span>
@@ -272,7 +309,10 @@ const handleEditUpdated = () => {
         <template v-if="activeRequests.length > 0">
           <TairoTable rounded="lg">
             <template #header>
-              <TairoTableHeading uppercase class="ps-4">
+              <TairoTableHeading
+                uppercase
+                class="ps-4"
+              >
                 Type
               </TairoTableHeading>
               <TairoTableHeading uppercase>
@@ -287,14 +327,23 @@ const handleEditUpdated = () => {
               <TairoTableHeading uppercase>
                 Reservation
               </TairoTableHeading>
-              <TairoTableHeading uppercase class="pe-4 text-end">
+              <TairoTableHeading
+                uppercase
+                class="pe-4 text-end"
+              >
                 Action
               </TairoTableHeading>
             </template>
 
-            <TairoTableRow v-for="request in activeRequests" :key="request.id">
+            <TairoTableRow
+              v-for="request in activeRequests"
+              :key="request.id"
+            >
               <!-- Type Column -->
-              <TairoTableCell spaced class="ps-4">
+              <TairoTableCell
+                spaced
+                class="ps-4"
+              >
                 <span class="text-muted-600 dark:text-muted-300">
                   {{ getRequestTypeLabel(request.requestType) }}
                 </span>
@@ -304,7 +353,10 @@ const handleEditUpdated = () => {
               <TairoTableCell spaced>
                 <div class="flex items-center gap-3">
                   <div class="bg-primary-500/10 flex size-10 shrink-0 items-center justify-center rounded-lg">
-                    <Icon name="ph:cube-duotone" class="text-primary-500 size-5" />
+                    <Icon
+                      name="ph:cube-duotone"
+                      class="text-primary-500 size-5"
+                    />
                   </div>
                   <NuxtLink
                     :to="`/requests/${request.id}`"
@@ -316,7 +368,10 @@ const handleEditUpdated = () => {
               </TairoTableCell>
 
               <!-- TimeZone Column -->
-              <TairoTableCell spaced light>
+              <TairoTableCell
+                spaced
+                light
+              >
                 <span class="text-muted-500 dark:text-muted-400">
                   {{ request.timezone }}
                 </span>
@@ -349,7 +404,10 @@ const handleEditUpdated = () => {
               </TairoTableCell>
 
               <!-- Action Column -->
-              <TairoTableCell spaced class="pe-4 text-end">
+              <TairoTableCell
+                spaced
+                class="pe-4 text-end"
+              >
                 <div class="flex items-center justify-end gap-2">
                   <ExtendButton
                     :loading="extending === request.id"
@@ -362,7 +420,10 @@ const handleEditUpdated = () => {
                     variant="default"
                     @click="handleEdit(request.id)"
                   >
-                    <Icon name="lucide:pencil" class="size-4" />
+                    <Icon
+                      name="lucide:pencil"
+                      class="size-4"
+                    />
                     <span>Edit</span>
                   </BaseButton>
                   <BaseButton
@@ -371,7 +432,10 @@ const handleEditUpdated = () => {
                     variant="default"
                     @click="handleCreateNote(request.id)"
                   >
-                    <Icon name="lucide:message-square-plus" class="size-4" />
+                    <Icon
+                      name="lucide:message-square-plus"
+                      class="size-4"
+                    />
                     <span>Note</span>
                   </BaseButton>
                 </div>
@@ -381,7 +445,10 @@ const handleEditUpdated = () => {
         </template>
 
         <template v-else>
-          <BaseCard rounded="lg" class="p-6">
+          <BaseCard
+            rounded="lg"
+            class="p-6"
+          >
             <p class="text-muted-500 dark:text-muted-400 text-center text-sm">
               No active requests
             </p>
@@ -392,7 +459,9 @@ const handleEditUpdated = () => {
       <!-- Archived Requests Section -->
       <div class="space-y-4">
         <div class="flex items-center gap-2">
-          <h2 class="text-muted-800 dark:text-white text-lg font-semibold">Archived Requests</h2>
+          <h2 class="text-muted-800 dark:text-white text-lg font-semibold">
+            Archived Requests
+          </h2>
           <span class="bg-muted-500/10 text-muted-600 dark:text-muted-400 rounded-full px-2.5 py-0.5 text-xs font-medium">
             {{ archivedRequests.length }}
           </span>
@@ -401,7 +470,10 @@ const handleEditUpdated = () => {
         <template v-if="archivedRequests.length > 0">
           <TairoTable rounded="lg">
             <template #header>
-              <TairoTableHeading uppercase class="ps-4">
+              <TairoTableHeading
+                uppercase
+                class="ps-4"
+              >
                 Type
               </TairoTableHeading>
               <TairoTableHeading uppercase>
@@ -416,14 +488,23 @@ const handleEditUpdated = () => {
               <TairoTableHeading uppercase>
                 Reservation
               </TairoTableHeading>
-              <TairoTableHeading uppercase class="pe-4 text-end">
+              <TairoTableHeading
+                uppercase
+                class="pe-4 text-end"
+              >
                 Action
               </TairoTableHeading>
             </template>
 
-            <TairoTableRow v-for="request in archivedRequests" :key="request.id">
+            <TairoTableRow
+              v-for="request in archivedRequests"
+              :key="request.id"
+            >
               <!-- Type Column -->
-              <TairoTableCell spaced class="ps-4">
+              <TairoTableCell
+                spaced
+                class="ps-4"
+              >
                 <span class="text-muted-500 dark:text-muted-400">
                   {{ getRequestTypeLabel(request.requestType) }}
                 </span>
@@ -433,7 +514,10 @@ const handleEditUpdated = () => {
               <TairoTableCell spaced>
                 <div class="flex items-center gap-3">
                   <div class="bg-muted-500/10 flex size-10 shrink-0 items-center justify-center rounded-lg">
-                    <Icon name="ph:cube-duotone" class="text-muted-400 size-5" />
+                    <Icon
+                      name="ph:cube-duotone"
+                      class="text-muted-400 size-5"
+                    />
                   </div>
                   <NuxtLink
                     :to="`/requests/${request.id}`"
@@ -445,7 +529,10 @@ const handleEditUpdated = () => {
               </TairoTableCell>
 
               <!-- TimeZone Column -->
-              <TairoTableCell spaced light>
+              <TairoTableCell
+                spaced
+                light
+              >
                 <span class="text-muted-500 dark:text-muted-400">
                   {{ request.timezone }}
                 </span>
@@ -478,7 +565,10 @@ const handleEditUpdated = () => {
               </TairoTableCell>
 
               <!-- Action Column -->
-              <TairoTableCell spaced class="pe-4 text-end">
+              <TairoTableCell
+                spaced
+                class="pe-4 text-end"
+              >
                 <div class="flex items-center justify-end gap-2">
                   <BaseButton
                     v-if="canEdit"
@@ -487,7 +577,10 @@ const handleEditUpdated = () => {
                     variant="default"
                     @click="handleEdit(request.id)"
                   >
-                    <Icon name="lucide:pencil" class="size-4" />
+                    <Icon
+                      name="lucide:pencil"
+                      class="size-4"
+                    />
                     <span>Edit</span>
                   </BaseButton>
                   <BaseButton
@@ -496,7 +589,10 @@ const handleEditUpdated = () => {
                     variant="default"
                     @click="handleCreateNote(request.id)"
                   >
-                    <Icon name="lucide:message-square-plus" class="size-4" />
+                    <Icon
+                      name="lucide:message-square-plus"
+                      class="size-4"
+                    />
                     <span>Note</span>
                   </BaseButton>
                 </div>
@@ -506,7 +602,10 @@ const handleEditUpdated = () => {
         </template>
 
         <template v-else>
-          <BaseCard rounded="lg" class="p-6">
+          <BaseCard
+            rounded="lg"
+            class="p-6"
+          >
             <p class="text-muted-500 dark:text-muted-400 text-center text-sm">
               No archived requests
             </p>

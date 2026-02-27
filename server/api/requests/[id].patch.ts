@@ -58,7 +58,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Build update data
-  const updateData: { state?: string; region?: string; hold?: boolean; openshiftVersion?: string; completedAt?: Date | null } = {}
+  const updateData: { state?: string, region?: string, hold?: boolean, openshiftVersion?: string, completedAt?: Date | null } = {}
   if (body.status !== undefined) {
     updateData.state = body.status
     // Set completedAt when status changes to Completed
@@ -98,11 +98,13 @@ export default defineEventHandler(async (event) => {
     id: lab.id,
     cluster: lab.clusterName,
     generatedName: lab.generatedName,
-    company: lab.company ? {
-      id: lab.company.id,
-      name: lab.company.companyName,
-      logoUrl: lab.company.logoUrl,
-    } : null,
+    company: lab.company
+      ? {
+          id: lab.company.id,
+          name: lab.company.companyName,
+          logoUrl: lab.company.logoUrl,
+        }
+      : null,
     companyName: lab.companyName,
     timezone: lab.region,
     status: lab.state,

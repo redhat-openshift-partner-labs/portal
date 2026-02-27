@@ -6,7 +6,8 @@ export const useSessionData = () => {
     try {
       const response = await $fetch('/api/session/data')
       data.value = response as Record<string, unknown> | null
-    } catch {
+    }
+    catch {
       data.value = null
     }
   }
@@ -18,6 +19,6 @@ export const useSessionData = () => {
   return {
     data: readonly(data),
     refresh,
-    clear
+    clear,
   }
 }

@@ -8,7 +8,7 @@ const requestId = computed(() => Number(route.params.id))
 const fromArchive = computed(() => route.query.from === 'archive')
 
 definePageMeta({
-  layout: 'default'
+  layout: 'default',
 })
 
 const { request, pending, error, refresh, extendRequest, addNote } = useRequestDetail(requestId)
@@ -22,7 +22,7 @@ const extensionConfirmModalOpen = ref(false)
 const pendingExtensionDuration = ref<'3d' | '1w' | '2w' | '1mo' | null>(null)
 
 useHead({
-  title: computed(() => request.value ? `${request.value.generatedName} - Requests` : 'Request Details')
+  title: computed(() => request.value ? `${request.value.generatedName} - Requests` : 'Request Details'),
 })
 
 // Refresh on mount
@@ -94,9 +94,11 @@ const handleExtendConfirmed = async () => {
   extending.value = true
   try {
     await extendRequest(pendingExtensionDuration.value)
-  } catch (e) {
+  }
+  catch (e) {
     console.error('Failed to extend:', e)
-  } finally {
+  }
+  finally {
     extending.value = false
     pendingExtensionDuration.value = null
   }
@@ -112,7 +114,8 @@ const handleAddNote = async (content: string) => {
   try {
     await addNote(content)
     noteModalOpen.value = false
-  } catch (e) {
+  }
+  catch (e) {
     console.error('Failed to add note:', e)
     throw e
   }
@@ -196,7 +199,10 @@ const durationDifference = computed(() => {
         :to="backLink"
         class="text-muted-500 hover:text-primary-500 inline-flex items-center gap-2 transition-colors"
       >
-        <Icon name="lucide:arrow-left" class="size-4" />
+        <Icon
+          name="lucide:arrow-left"
+          class="size-4"
+        />
         <span class="text-sm">{{ backLabel }}</span>
       </NuxtLink>
     </div>
@@ -206,7 +212,10 @@ const durationDifference = computed(() => {
       v-if="error"
       class="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20"
     >
-      <Icon name="ph:warning-circle-duotone" class="size-5 text-red-500" />
+      <Icon
+        name="ph:warning-circle-duotone"
+        class="size-5 text-red-500"
+      />
       <p class="text-sm text-red-700 dark:text-red-400">
         Failed to load request details. Please try again.
       </p>
@@ -220,10 +229,18 @@ const durationDifference = computed(() => {
 
     <!-- Loading State -->
     <template v-if="pending && !request">
-      <BaseCard rounded="lg" class="p-8">
+      <BaseCard
+        rounded="lg"
+        class="p-8"
+      >
         <div class="flex flex-col items-center justify-center gap-4">
-          <Icon name="ph:spinner" class="text-primary-500 size-8 animate-spin" />
-          <p class="text-muted-500 dark:text-muted-400">Loading request details...</p>
+          <Icon
+            name="ph:spinner"
+            class="text-primary-500 size-8 animate-spin"
+          />
+          <p class="text-muted-500 dark:text-muted-400">
+            Loading request details...
+          </p>
         </div>
       </BaseCard>
     </template>
@@ -231,11 +248,17 @@ const durationDifference = computed(() => {
     <!-- Request Details -->
     <template v-else-if="request">
       <!-- Header Card -->
-      <BaseCard rounded="lg" class="p-6">
+      <BaseCard
+        rounded="lg"
+        class="p-6"
+      >
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div class="flex items-center gap-4">
             <div class="bg-primary-500/10 flex size-14 shrink-0 items-center justify-center rounded-xl">
-              <Icon name="ph:cube-duotone" class="text-primary-500 size-7" />
+              <Icon
+                name="ph:cube-duotone"
+                class="text-primary-500 size-7"
+              />
             </div>
             <div>
               <div class="flex items-center gap-3">
@@ -253,11 +276,17 @@ const durationDifference = computed(() => {
               </div>
               <div class="text-muted-500 dark:text-muted-400 mt-1 flex items-center gap-4 text-sm">
                 <span class="flex items-center gap-1">
-                  <Icon name="ph:buildings-duotone" class="size-4" />
+                  <Icon
+                    name="ph:buildings-duotone"
+                    class="size-4"
+                  />
                   {{ request.company.name }}
                 </span>
                 <span class="flex items-center gap-1">
-                  <Icon name="ph:globe-duotone" class="size-4" />
+                  <Icon
+                    name="ph:globe-duotone"
+                    class="size-4"
+                  />
                   {{ request.timezone }}
                 </span>
               </div>
@@ -265,7 +294,10 @@ const durationDifference = computed(() => {
                 v-if="request.status === 'Running' || request.status === 'Hibernating'"
                 class="text-muted-500 dark:text-muted-400 mt-1 flex items-center gap-1 text-sm"
               >
-                <Icon name="ph:arrow-square-out-duotone" class="size-4 shrink-0" />
+                <Icon
+                  name="ph:arrow-square-out-duotone"
+                  class="size-4 shrink-0"
+                />
                 <a
                   :href="`https://console-openshift-console.apps.${request.generatedName}.openshiftpartnerlabs.com`"
                   target="_blank"
@@ -283,19 +315,38 @@ const durationDifference = computed(() => {
             <!-- Extend Actions (hidden for archived requests) -->
             <template v-if="!isArchived">
               <template v-if="extending">
-                <Icon name="ph:spinner" class="text-primary-500 size-5 animate-spin" />
+                <Icon
+                  name="ph:spinner"
+                  class="text-primary-500 size-5 animate-spin"
+                />
               </template>
               <template v-else>
-                <BaseButton size="sm" color="muted" @click="initiateExtend('3d')">
+                <BaseButton
+                  size="sm"
+                  color="muted"
+                  @click="initiateExtend('3d')"
+                >
                   +3 Days
                 </BaseButton>
-                <BaseButton size="sm" color="muted" @click="initiateExtend('1w')">
+                <BaseButton
+                  size="sm"
+                  color="muted"
+                  @click="initiateExtend('1w')"
+                >
                   +1 Week
                 </BaseButton>
-                <BaseButton size="sm" color="muted" @click="initiateExtend('2w')">
+                <BaseButton
+                  size="sm"
+                  color="muted"
+                  @click="initiateExtend('2w')"
+                >
                   +2 Weeks
                 </BaseButton>
-                <BaseButton size="sm" color="primary" @click="initiateExtend('1mo')">
+                <BaseButton
+                  size="sm"
+                  color="primary"
+                  @click="initiateExtend('1mo')"
+                >
                   +1 Month
                 </BaseButton>
               </template>
@@ -307,7 +358,10 @@ const durationDifference = computed(() => {
               color="default"
               @click="editModalOpen = true"
             >
-              <Icon name="lucide:pencil" class="me-1 size-4" />
+              <Icon
+                name="lucide:pencil"
+                class="me-1 size-4"
+              />
               Edit
             </BaseButton>
           </div>
@@ -317,7 +371,10 @@ const durationDifference = computed(() => {
       <!-- Stats Grid -->
       <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
         <!-- Reservation Progress (active requests) / Reservation Details (archived) -->
-        <BaseCard rounded="lg" class="p-5">
+        <BaseCard
+          rounded="lg"
+          class="p-5"
+        >
           <!-- Show progress for active requests -->
           <template v-if="!isArchived">
             <div class="flex items-center gap-4">
@@ -359,7 +416,10 @@ const durationDifference = computed(() => {
                   v-else
                   class="flex size-14 shrink-0 items-center justify-center rounded-xl bg-muted-500/10"
                 >
-                  <Icon name="ph:calendar-duotone" class="size-6 text-muted-500" />
+                  <Icon
+                    name="ph:calendar-duotone"
+                    class="size-6 text-muted-500"
+                  />
                 </div>
                 <div>
                   <p class="text-muted-500 dark:text-muted-400 text-sm">
@@ -399,10 +459,16 @@ const durationDifference = computed(() => {
         </BaseCard>
 
         <!-- Submitted -->
-        <BaseCard rounded="lg" class="p-5">
+        <BaseCard
+          rounded="lg"
+          class="p-5"
+        >
           <div class="flex items-center gap-4">
             <div class="flex size-14 shrink-0 items-center justify-center rounded-xl bg-blue-500/10">
-              <Icon name="ph:paper-plane-tilt-duotone" class="size-6 text-blue-500" />
+              <Icon
+                name="ph:paper-plane-tilt-duotone"
+                class="size-6 text-blue-500"
+              />
             </div>
             <div>
               <p class="text-muted-500 dark:text-muted-400 text-sm">
@@ -416,10 +482,16 @@ const durationDifference = computed(() => {
         </BaseCard>
 
         <!-- Start Date -->
-        <BaseCard rounded="lg" class="p-5">
+        <BaseCard
+          rounded="lg"
+          class="p-5"
+        >
           <div class="flex items-center gap-4">
             <div class="flex size-14 shrink-0 items-center justify-center rounded-xl bg-green-500/10">
-              <Icon name="ph:calendar-check-duotone" class="size-6 text-green-500" />
+              <Icon
+                name="ph:calendar-check-duotone"
+                class="size-6 text-green-500"
+              />
             </div>
             <div>
               <p class="text-muted-500 dark:text-muted-400 text-sm">
@@ -433,10 +505,16 @@ const durationDifference = computed(() => {
         </BaseCard>
 
         <!-- End Date -->
-        <BaseCard rounded="lg" class="p-5">
+        <BaseCard
+          rounded="lg"
+          class="p-5"
+        >
           <div class="flex items-center gap-4">
             <div class="flex size-14 shrink-0 items-center justify-center rounded-xl bg-red-500/10">
-              <Icon name="ph:calendar-x-duotone" class="size-6 text-red-500" />
+              <Icon
+                name="ph:calendar-x-duotone"
+                class="size-6 text-red-500"
+              />
             </div>
             <div>
               <p class="text-muted-500 dark:text-muted-400 text-sm">
@@ -453,10 +531,16 @@ const durationDifference = computed(() => {
       <!-- Request Details -->
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         <!-- OpenShift Version -->
-        <BaseCard rounded="lg" class="p-5">
+        <BaseCard
+          rounded="lg"
+          class="p-5"
+        >
           <div class="flex items-center gap-4">
             <div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-rose-500/10">
-              <Icon name="ph:cube-duotone" class="size-6 text-rose-500" />
+              <Icon
+                name="ph:cube-duotone"
+                class="size-6 text-rose-500"
+              />
             </div>
             <div>
               <p class="text-muted-500 dark:text-muted-400 text-sm">
@@ -470,10 +554,16 @@ const durationDifference = computed(() => {
         </BaseCard>
 
         <!-- Request Type -->
-        <BaseCard rounded="lg" class="p-5">
+        <BaseCard
+          rounded="lg"
+          class="p-5"
+        >
           <div class="flex items-center gap-4">
             <div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
-              <Icon name="ph:tag-duotone" class="size-6 text-amber-500" />
+              <Icon
+                name="ph:tag-duotone"
+                class="size-6 text-amber-500"
+              />
             </div>
             <div>
               <p class="text-muted-500 dark:text-muted-400 text-sm">
@@ -487,10 +577,16 @@ const durationDifference = computed(() => {
         </BaseCard>
 
         <!-- Reservation (Lease Time) -->
-        <BaseCard rounded="lg" class="p-5">
+        <BaseCard
+          rounded="lg"
+          class="p-5"
+        >
           <div class="flex items-center gap-4">
             <div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-cyan-500/10">
-              <Icon name="ph:clock-duotone" class="size-6 text-cyan-500" />
+              <Icon
+                name="ph:clock-duotone"
+                class="size-6 text-cyan-500"
+              />
             </div>
             <div>
               <p class="text-muted-500 dark:text-muted-400 text-sm">
@@ -504,10 +600,16 @@ const durationDifference = computed(() => {
         </BaseCard>
 
         <!-- Sponsor -->
-        <BaseCard rounded="lg" class="p-5">
+        <BaseCard
+          rounded="lg"
+          class="p-5"
+        >
           <div class="flex items-center gap-4">
             <div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-purple-500/10">
-              <Icon name="ph:handshake-duotone" class="size-6 text-purple-500" />
+              <Icon
+                name="ph:handshake-duotone"
+                class="size-6 text-purple-500"
+              />
             </div>
             <div>
               <p class="text-muted-500 dark:text-muted-400 text-sm">
@@ -521,10 +623,16 @@ const durationDifference = computed(() => {
         </BaseCard>
 
         <!-- Primary Contact -->
-        <BaseCard rounded="lg" class="p-5">
+        <BaseCard
+          rounded="lg"
+          class="p-5"
+        >
           <div class="flex items-center gap-4">
             <div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-sky-500/10">
-              <Icon name="ph:user-duotone" class="size-6 text-sky-500" />
+              <Icon
+                name="ph:user-duotone"
+                class="size-6 text-sky-500"
+              />
             </div>
             <div>
               <p class="text-muted-500 dark:text-muted-400 text-sm">
@@ -545,10 +653,16 @@ const durationDifference = computed(() => {
         </BaseCard>
 
         <!-- Secondary Contact -->
-        <BaseCard rounded="lg" class="p-5">
+        <BaseCard
+          rounded="lg"
+          class="p-5"
+        >
           <div class="flex items-center gap-4">
             <div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-teal-500/10">
-              <Icon name="ph:user-duotone" class="size-6 text-teal-500" />
+              <Icon
+                name="ph:user-duotone"
+                class="size-6 text-teal-500"
+              />
             </div>
             <div>
               <p class="text-muted-500 dark:text-muted-400 text-sm">
@@ -570,10 +684,17 @@ const durationDifference = computed(() => {
       </div>
 
       <!-- Description -->
-      <BaseCard v-if="request.description" rounded="lg" class="p-5">
+      <BaseCard
+        v-if="request.description"
+        rounded="lg"
+        class="p-5"
+      >
         <div class="flex gap-4">
           <div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10">
-            <Icon name="ph:text-align-left-duotone" class="size-6 text-indigo-500" />
+            <Icon
+              name="ph:text-align-left-duotone"
+              class="size-6 text-indigo-500"
+            />
           </div>
           <div>
             <p class="text-muted-500 dark:text-muted-400 mb-2 text-sm">
@@ -588,90 +709,116 @@ const durationDifference = computed(() => {
 
       <!-- Notes Section -->
       <div class="grid grid-cols-12 gap-6">
-        <BaseCard rounded="lg" class="col-span-12 p-6 md:col-span-6">
-        <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-muted-800 dark:text-white text-lg font-semibold">
-            Notes
-          </h2>
-          <BaseButton size="sm" color="primary" @click="noteModalOpen = true">
-            <Icon name="lucide:plus" class="me-1 size-4" />
-            Add Note
-          </BaseButton>
-        </div>
-
-        <!-- Empty Notes -->
-        <template v-if="request.notes.length === 0">
-          <div class="flex flex-col items-center justify-center gap-3 py-8">
-            <div class="bg-muted-100 dark:bg-muted-800 flex size-12 items-center justify-center rounded-full">
-              <Icon name="ph:note-duotone" class="text-muted-400 size-6" />
-            </div>
-            <p class="text-muted-500 dark:text-muted-400 text-sm">
-              No notes yet. Add one to get started.
-            </p>
-          </div>
-        </template>
-
-        <!-- Notes List -->
-        <template v-else>
-          <div class="max-h-[400px] space-y-4 overflow-y-auto">
-            <div
-              v-for="note in request.notes"
-              :key="note.id"
-              class="border-muted-200 dark:border-muted-700 rounded-lg border p-4"
+        <BaseCard
+          rounded="lg"
+          class="col-span-12 p-6 md:col-span-6"
+        >
+          <div class="mb-4 flex items-center justify-between">
+            <h2 class="text-muted-800 dark:text-white text-lg font-semibold">
+              Notes
+            </h2>
+            <BaseButton
+              size="sm"
+              color="primary"
+              @click="noteModalOpen = true"
             >
-              <div class="mb-2 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <template v-if="note.author">
-                    <img
-                      v-if="note.author.picture"
-                      :src="note.author.picture"
-                      :alt="note.author.name"
-                      class="size-8 rounded-full object-cover"
-                    >
-                    <div
-                      v-else
-                      class="bg-primary-500/10 text-primary-500 flex size-8 items-center justify-center rounded-full text-sm font-semibold"
-                    >
-                      {{ note.author.name.charAt(0) }}
-                    </div>
-                    <div>
-                      <p class="text-muted-800 dark:text-white text-sm font-medium">
-                        {{ note.author.name }}
-                      </p>
-                      <p class="text-muted-400 text-xs">
-                        {{ formatNoteDate(note.createdAt) }}
-                      </p>
-                    </div>
-                  </template>
-                  <template v-else>
-                    <div class="bg-muted-100 dark:bg-muted-700 flex size-8 items-center justify-center rounded-full">
-                      <Icon name="ph:user-duotone" class="text-muted-400 size-4" />
-                    </div>
-                    <div>
-                      <p class="text-muted-500 dark:text-muted-400 text-sm">
-                        Unknown Author
-                      </p>
-                      <p class="text-muted-400 text-xs">
-                        {{ formatNoteDate(note.createdAt) }}
-                      </p>
-                    </div>
-                  </template>
-                </div>
-                <div v-if="note.immutable" class="flex items-center gap-1 text-muted-400" title="This note cannot be edited">
-                  <Icon name="lucide:lock" class="size-3.5" />
-                  <span class="text-xs">Immutable</span>
-                </div>
+              <Icon
+                name="lucide:plus"
+                class="me-1 size-4"
+              />
+              Add Note
+            </BaseButton>
+          </div>
+
+          <!-- Empty Notes -->
+          <template v-if="request.notes.length === 0">
+            <div class="flex flex-col items-center justify-center gap-3 py-8">
+              <div class="bg-muted-100 dark:bg-muted-800 flex size-12 items-center justify-center rounded-full">
+                <Icon
+                  name="ph:note-duotone"
+                  class="text-muted-400 size-6"
+                />
               </div>
-              <p class="text-muted-600 dark:text-muted-300 text-sm">
-                {{ note.content }}
+              <p class="text-muted-500 dark:text-muted-400 text-sm">
+                No notes yet. Add one to get started.
               </p>
             </div>
-          </div>
-        </template>
+          </template>
+
+          <!-- Notes List -->
+          <template v-else>
+            <div class="max-h-[400px] space-y-4 overflow-y-auto">
+              <div
+                v-for="note in request.notes"
+                :key="note.id"
+                class="border-muted-200 dark:border-muted-700 rounded-lg border p-4"
+              >
+                <div class="mb-2 flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <template v-if="note.author">
+                      <img
+                        v-if="note.author.picture"
+                        :src="note.author.picture"
+                        :alt="note.author.name"
+                        class="size-8 rounded-full object-cover"
+                      >
+                      <div
+                        v-else
+                        class="bg-primary-500/10 text-primary-500 flex size-8 items-center justify-center rounded-full text-sm font-semibold"
+                      >
+                        {{ note.author.name.charAt(0) }}
+                      </div>
+                      <div>
+                        <p class="text-muted-800 dark:text-white text-sm font-medium">
+                          {{ note.author.name }}
+                        </p>
+                        <p class="text-muted-400 text-xs">
+                          {{ formatNoteDate(note.createdAt) }}
+                        </p>
+                      </div>
+                    </template>
+                    <template v-else>
+                      <div class="bg-muted-100 dark:bg-muted-700 flex size-8 items-center justify-center rounded-full">
+                        <Icon
+                          name="ph:user-duotone"
+                          class="text-muted-400 size-4"
+                        />
+                      </div>
+                      <div>
+                        <p class="text-muted-500 dark:text-muted-400 text-sm">
+                          Unknown Author
+                        </p>
+                        <p class="text-muted-400 text-xs">
+                          {{ formatNoteDate(note.createdAt) }}
+                        </p>
+                      </div>
+                    </template>
+                  </div>
+                  <div
+                    v-if="note.immutable"
+                    class="flex items-center gap-1 text-muted-400"
+                    title="This note cannot be edited"
+                  >
+                    <Icon
+                      name="lucide:lock"
+                      class="size-3.5"
+                    />
+                    <span class="text-xs">Immutable</span>
+                  </div>
+                </div>
+                <p class="text-muted-600 dark:text-muted-300 text-sm">
+                  {{ note.content }}
+                </p>
+              </div>
+            </div>
+          </template>
         </BaseCard>
 
         <!-- Extensions Log -->
-        <BaseCard rounded="lg" class="col-span-12 p-6 md:col-span-3">
+        <BaseCard
+          rounded="lg"
+          class="col-span-12 p-6 md:col-span-3"
+        >
           <h2 class="text-muted-800 dark:text-white mb-4 text-lg font-semibold">
             Extension History
           </h2>
@@ -680,7 +827,10 @@ const durationDifference = computed(() => {
           <template v-if="!request.extensionHistory || request.extensionHistory.length === 0">
             <div class="flex flex-col items-center justify-center gap-3 py-8">
               <div class="bg-muted-100 dark:bg-muted-800 flex size-12 items-center justify-center rounded-full">
-                <Icon name="ph:calendar-plus-duotone" class="text-muted-400 size-6" />
+                <Icon
+                  name="ph:calendar-plus-duotone"
+                  class="text-muted-400 size-6"
+                />
               </div>
               <p class="text-muted-500 dark:text-muted-400 text-sm">
                 No extensions yet.
@@ -711,7 +861,10 @@ const durationDifference = computed(() => {
         </BaseCard>
 
         <!-- Cluster Logins Log -->
-        <BaseCard rounded="lg" class="col-span-12 p-6 md:col-span-3">
+        <BaseCard
+          rounded="lg"
+          class="col-span-12 p-6 md:col-span-3"
+        >
           <h2 class="text-muted-800 dark:text-white mb-4 text-lg font-semibold">
             Cluster Logins
           </h2>
@@ -720,7 +873,10 @@ const durationDifference = computed(() => {
           <template v-if="!request.clusterLogins || request.clusterLogins.length === 0">
             <div class="flex flex-col items-center justify-center gap-3 py-8">
               <div class="bg-muted-100 dark:bg-muted-800 flex size-12 items-center justify-center rounded-full">
-                <Icon name="ph:sign-in-duotone" class="text-muted-400 size-6" />
+                <Icon
+                  name="ph:sign-in-duotone"
+                  class="text-muted-400 size-6"
+                />
               </div>
               <p class="text-muted-500 dark:text-muted-400 text-sm">
                 No logins recorded.

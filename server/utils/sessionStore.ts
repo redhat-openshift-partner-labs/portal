@@ -1,8 +1,8 @@
 // server/utils/sessionStore.ts
 
 interface SessionData {
-  sensitive: Record<string, unknown>  // Server-only, never sent to client
-  client: Record<string, unknown>     // Sent to client
+  sensitive: Record<string, unknown> // Server-only, never sent to client
+  client: Record<string, unknown> // Sent to client
   createdAt: number
 }
 
@@ -16,7 +16,7 @@ export const sessionStore = {
   set(sessionId: string, data: Omit<SessionData, 'createdAt'>): void {
     store.set(sessionId, {
       ...data,
-      createdAt: Date.now()
+      createdAt: Date.now(),
     })
   },
 
@@ -34,5 +34,5 @@ export const sessionStore = {
 
   has(sessionId: string): boolean {
     return store.has(sessionId)
-  }
+  },
 }

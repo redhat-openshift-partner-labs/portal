@@ -16,9 +16,11 @@ export const useCompanyRequests = (companyId: number | Ref<number>) => {
 
     try {
       requests.value = await $fetch<RequestItem[]>(`/api/requests?company=${resolvedId.value}`)
-    } catch (e) {
+    }
+    catch (e) {
       error.value = e as Error
-    } finally {
+    }
+    finally {
       pending.value = false
     }
   }
@@ -30,7 +32,7 @@ export const useCompanyRequests = (companyId: number | Ref<number>) => {
     })
 
     // Update the request in the list
-    const index = requests.value.findIndex((r) => r.id === id)
+    const index = requests.value.findIndex(r => r.id === id)
     if (index !== -1) {
       const existingRequest = requests.value[index]
       if (existingRequest) {
@@ -48,7 +50,7 @@ export const useCompanyRequests = (companyId: number | Ref<number>) => {
     })
 
     // Update notes count in the list
-    const index = requests.value.findIndex((r) => r.id === id)
+    const index = requests.value.findIndex(r => r.id === id)
     if (index !== -1) {
       const existingRequest = requests.value[index]
       if (existingRequest) {

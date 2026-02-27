@@ -46,11 +46,13 @@ export default defineEventHandler(async (event) => {
     clusterId: lab.clusterId,
     generatedName: lab.generatedName,
     cluster: lab.clusterName,
-    company: lab.company ? {
-      id: lab.company.id,
-      name: lab.company.companyName,
-      logoUrl: lab.company.logoUrl,
-    } : null,
+    company: lab.company
+      ? {
+          id: lab.company.id,
+          name: lab.company.companyName,
+          logoUrl: lab.company.logoUrl,
+        }
+      : null,
     companyName: lab.companyName,
     timezone: lab.region,
     status: lab.state,
@@ -83,14 +85,14 @@ export default defineEventHandler(async (event) => {
     description: lab.description,
     internalNotes: lab.notes,
     hold: lab.hold,
-    notes: lab.noteRecords.map((note) => ({
+    notes: lab.noteRecords.map(note => ({
       id: note.id,
       content: note.note,
       author: note.userId ? { name: note.userId } : null,
       immutable: note.immutable,
       createdAt: note.createdAt.toISOString(),
     })),
-    extensionHistory: lab.extensionRequests.map((ext) => ({
+    extensionHistory: lab.extensionRequests.map(ext => ({
       id: ext.id,
       extension: ext.extension,
       requestedBy: ext.currentUser,
@@ -98,7 +100,7 @@ export default defineEventHandler(async (event) => {
       status: ext.status,
       createdAt: ext.createdAt?.toISOString() ?? null,
     })),
-    clusterLogins: lab.audits.map((audit) => ({
+    clusterLogins: lab.audits.map(audit => ({
       id: audit.id,
       loginName: audit.loginName,
       loginType: audit.loginType,

@@ -84,9 +84,11 @@ export const useRequests = () => {
 
     try {
       requests.value = await $fetch<RequestItem[]>('/api/requests?type=active')
-    } catch (e) {
+    }
+    catch (e) {
       error.value = e as Error
-    } finally {
+    }
+    finally {
       pending.value = false
     }
   }
@@ -98,7 +100,7 @@ export const useRequests = () => {
     })
 
     // Update the request in the list
-    const index = requests.value.findIndex((r) => r.id === id)
+    const index = requests.value.findIndex(r => r.id === id)
     if (index !== -1) {
       const existingRequest = requests.value[index]
       if (existingRequest) {
@@ -116,7 +118,7 @@ export const useRequests = () => {
     })
 
     // Update notes count in the list
-    const index = requests.value.findIndex((r) => r.id === id)
+    const index = requests.value.findIndex(r => r.id === id)
     if (index !== -1) {
       const existingRequest = requests.value[index]
       if (existingRequest) {
@@ -154,9 +156,11 @@ export const useRequestDetail = (id: number | Ref<number>) => {
 
     try {
       request.value = await $fetch<RequestDetail>(`/api/requests/${resolvedId.value}`)
-    } catch (e) {
+    }
+    catch (e) {
       error.value = e as Error
-    } finally {
+    }
+    finally {
       pending.value = false
     }
   }

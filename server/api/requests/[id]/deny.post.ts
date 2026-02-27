@@ -73,15 +73,19 @@ export default defineEventHandler(async (event) => {
     id: result.id,
     generatedName: result.generatedName,
     status: result.state,
-    company: result.company ? {
-      id: result.company.id,
-      name: result.company.companyName,
-      logoUrl: result.company.logoUrl,
-    } : null,
-    denialNote: result.denialNote ? {
-      reason: result.denialNote.reason,
-      deniedBy: result.denialNote.userId,
-      deniedAt: result.denialNote.createdAt.toISOString(),
-    } : null,
+    company: result.company
+      ? {
+          id: result.company.id,
+          name: result.company.companyName,
+          logoUrl: result.company.logoUrl,
+        }
+      : null,
+    denialNote: result.denialNote
+      ? {
+          reason: result.denialNote.reason,
+          deniedBy: result.denialNote.userId,
+          deniedAt: result.denialNote.createdAt.toISOString(),
+        }
+      : null,
   }
 })

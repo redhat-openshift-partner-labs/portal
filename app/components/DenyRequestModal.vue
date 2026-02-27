@@ -38,9 +38,11 @@ const handleSubmit = async () => {
     reason.value = ''
     emit('denied')
     open.value = false
-  } catch (e) {
+  }
+  catch (e) {
     error.value = e instanceof Error ? e.message : 'Failed to deny request'
-  } finally {
+  }
+  finally {
     submitting.value = false
   }
 }
@@ -73,8 +75,15 @@ watch(open, (isOpen) => {
             Deny Request
           </DialogTitle>
           <DialogClose as-child>
-            <BaseButtonIcon size="sm" rounded="full" @click="handleCancel">
-              <Icon name="lucide:x" class="size-4" />
+            <BaseButtonIcon
+              size="sm"
+              rounded="full"
+              @click="handleCancel"
+            >
+              <Icon
+                name="lucide:x"
+                class="size-4"
+              />
             </BaseButtonIcon>
           </DialogClose>
         </div>
@@ -91,7 +100,10 @@ watch(open, (isOpen) => {
 
         <!-- Warning banner -->
         <div class="mb-4 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20">
-          <Icon name="ph:warning-duotone" class="size-5 shrink-0 text-amber-500" />
+          <Icon
+            name="ph:warning-duotone"
+            class="size-5 shrink-0 text-amber-500"
+          />
           <p class="text-sm text-amber-700 dark:text-amber-400">
             This action cannot be undone. Once denied, the request cannot be edited.
           </p>
@@ -110,7 +122,10 @@ watch(open, (isOpen) => {
             />
           </div>
 
-          <div v-if="error" class="mb-4 rounded-lg bg-danger-100 p-3 text-sm text-danger-600 dark:bg-danger-500/20 dark:text-danger-400">
+          <div
+            v-if="error"
+            class="mb-4 rounded-lg bg-danger-100 p-3 text-sm text-danger-600 dark:bg-danger-500/20 dark:text-danger-400"
+          >
             {{ error }}
           </div>
 

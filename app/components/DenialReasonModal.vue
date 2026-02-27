@@ -36,9 +36,11 @@ const fetchDenialReason = async () => {
   try {
     const data = await $fetch<DenialReason | null>(`/api/requests/${props.requestId}/denial-reason`)
     denialReason.value = data
-  } catch (e) {
+  }
+  catch (e) {
     error.value = e instanceof Error ? e.message : 'Failed to load denial reason'
-  } finally {
+  }
+  finally {
     loading.value = false
   }
 }
@@ -55,7 +57,8 @@ const handleClose = () => {
 watch(open, (isOpen) => {
   if (isOpen && props.requestId) {
     fetchDenialReason()
-  } else {
+  }
+  else {
     denialReason.value = null
     error.value = null
   }
@@ -76,33 +79,58 @@ watch(open, (isOpen) => {
             Denial Reason
           </DialogTitle>
           <DialogClose as-child>
-            <BaseButtonIcon size="sm" rounded="full" @click="handleClose">
-              <Icon name="lucide:x" class="size-4" />
+            <BaseButtonIcon
+              size="sm"
+              rounded="full"
+              @click="handleClose"
+            >
+              <Icon
+                name="lucide:x"
+                class="size-4"
+              />
             </BaseButtonIcon>
           </DialogClose>
         </div>
 
-        <DialogDescription v-if="requestName" class="mb-4 text-sm text-muted-500 dark:text-muted-400">
+        <DialogDescription
+          v-if="requestName"
+          class="mb-4 text-sm text-muted-500 dark:text-muted-400"
+        >
           {{ requestName }}
         </DialogDescription>
 
         <!-- Loading State -->
-        <div v-if="loading" class="flex items-center justify-center py-8">
-          <Icon name="ph:spinner" class="size-8 animate-spin text-primary-500" />
+        <div
+          v-if="loading"
+          class="flex items-center justify-center py-8"
+        >
+          <Icon
+            name="ph:spinner"
+            class="size-8 animate-spin text-primary-500"
+          />
         </div>
 
         <!-- Error State -->
-        <div v-else-if="error" class="rounded-lg bg-danger-100 p-3 text-sm text-danger-600 dark:bg-danger-500/20 dark:text-danger-400">
+        <div
+          v-else-if="error"
+          class="rounded-lg bg-danger-100 p-3 text-sm text-danger-600 dark:bg-danger-500/20 dark:text-danger-400"
+        >
           {{ error }}
         </div>
 
         <!-- No Denial Reason Found -->
-        <div v-else-if="!denialReason" class="py-4 text-center text-sm text-muted-500 dark:text-muted-400">
+        <div
+          v-else-if="!denialReason"
+          class="py-4 text-center text-sm text-muted-500 dark:text-muted-400"
+        >
           No denial reason found for this request.
         </div>
 
         <!-- Denial Reason Content -->
-        <div v-else class="space-y-4">
+        <div
+          v-else
+          class="space-y-4"
+        >
           <!-- Reason -->
           <div>
             <label class="block text-sm font-medium text-muted-700 dark:text-muted-300 mb-2">
@@ -119,7 +147,10 @@ watch(open, (isOpen) => {
               Denied By
             </label>
             <div class="flex items-center gap-2 text-sm text-muted-600 dark:text-muted-300">
-              <Icon name="ph:user-duotone" class="size-4 text-muted-400" />
+              <Icon
+                name="ph:user-duotone"
+                class="size-4 text-muted-400"
+              />
               {{ denialReason.deniedBy }}
             </div>
           </div>
@@ -130,7 +161,10 @@ watch(open, (isOpen) => {
               Denied At
             </label>
             <div class="flex items-center gap-2 text-sm text-muted-600 dark:text-muted-300">
-              <Icon name="ph:calendar-duotone" class="size-4 text-muted-400" />
+              <Icon
+                name="ph:calendar-duotone"
+                class="size-4 text-muted-400"
+              />
               {{ formatDate(denialReason.deniedAt) }}
             </div>
           </div>

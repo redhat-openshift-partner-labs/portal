@@ -3,11 +3,11 @@ const { user } = useAuth()
 const { data, pending, error, refresh } = useDashboard()
 
 definePageMeta({
-  layout: 'default'
+  layout: 'default',
 })
 
 useHead({
-  title: 'Dashboard - OpenShift Partner Labs'
+  title: 'Dashboard - OpenShift Partner Labs',
 })
 
 // Refresh dashboard data on mount
@@ -22,7 +22,7 @@ const statCards = computed(() => {
     { label: 'Total Labs', value: stats?.totalLabs ?? 0, icon: 'ph:flask-duotone', link: '/requests' },
     { label: 'Active Labs', value: stats?.activeLabs ?? 0, icon: 'ph:play-circle-duotone', link: '/requests?status=active' },
     { label: 'Denied Labs', value: stats?.deniedLabs ?? 0, icon: 'ph:prohibit-duotone', link: '/archive?status=Denied' },
-    { label: 'Completed Labs', value: stats?.completedLabs ?? 0, icon: 'ph:check-circle-duotone', link: '/archive?status=Completed' }
+    { label: 'Completed Labs', value: stats?.completedLabs ?? 0, icon: 'ph:check-circle-duotone', link: '/archive?status=Completed' },
   ]
 })
 
@@ -36,12 +36,12 @@ const costChartOptions = computed(() => ({
     toolbar: { show: false },
     zoom: { enabled: false },
     redrawOnParentResize: true,
-    redrawOnWindowResize: true
+    redrawOnWindowResize: true,
   },
   colors: ['#0ea5e9', '#a855f7', '#22c55e'],
   stroke: {
     width: 2,
-    curve: 'smooth' as const
+    curve: 'smooth' as const,
   },
   fill: {
     type: 'gradient',
@@ -49,36 +49,36 @@ const costChartOptions = computed(() => ({
       shadeIntensity: 1,
       opacityFrom: 0.4,
       opacityTo: 0.1,
-      stops: [0, 90, 100]
-    }
+      stops: [0, 90, 100],
+    },
   },
   dataLabels: { enabled: false },
   xaxis: {
     categories: data.value?.costOverview?.months ?? ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'],
     labels: {
-      style: { cssClass: 'text-muted-500 dark:text-muted-400' }
-    }
+      style: { cssClass: 'text-muted-500 dark:text-muted-400' },
+    },
   },
   yaxis: {
     labels: {
       formatter: (val: number) => `$${val}k`,
-      style: { cssClass: 'text-muted-500 dark:text-muted-400' }
-    }
+      style: { cssClass: 'text-muted-500 dark:text-muted-400' },
+    },
   },
   legend: {
     position: 'top' as const,
     horizontalAlign: 'right' as const,
-    labels: { useSeriesColors: true }
+    labels: { useSeriesColors: true },
   },
   tooltip: { theme: 'dark' },
   grid: {
-    borderColor: 'rgba(0,0,0,0.05)'
-  }
+    borderColor: 'rgba(0,0,0,0.05)',
+  },
 }))
 
 const costChartSeries = computed(() => [
   { name: 'This Year', data: data.value?.costOverview?.thisYear ?? [] },
-  { name: 'Last Year', data: data.value?.costOverview?.lastYear ?? [] }
+  { name: 'Last Year', data: data.value?.costOverview?.lastYear ?? [] },
 ])
 
 // Cost Summary Stats (calculated from chart data)
@@ -91,7 +91,7 @@ const costSummary = computed(() => {
   return [
     { label: 'This Year', value: `$${thisYearTotal.toFixed(1)}k`, color: 'text-sky-500' },
     { label: 'Last Year', value: `$${lastYearTotal.toFixed(1)}k`, color: 'text-purple-500' },
-    { label: 'Cost/Lab', value: `$${costPerLab.toFixed(1)}k`, color: 'text-primary-500' }
+    { label: 'Cost/Lab', value: `$${costPerLab.toFixed(1)}k`, color: 'text-primary-500' },
   ]
 })
 
@@ -104,48 +104,48 @@ const labsChartOptions = computed(() => ({
     width: '100%',
     toolbar: { show: false },
     redrawOnParentResize: true,
-    redrawOnWindowResize: true
+    redrawOnWindowResize: true,
   },
   colors: ['#0ea5e9', '#22c55e'],
   plotOptions: {
     bar: {
       borderRadius: 4,
       columnWidth: '55%',
-      dataLabels: { position: 'top' }
-    }
+      dataLabels: { position: 'top' },
+    },
   },
   dataLabels: { enabled: false },
   xaxis: {
     categories: data.value?.labsSummary?.months ?? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
     labels: {
-      style: { cssClass: 'text-muted-500 dark:text-muted-400' }
-    }
+      style: { cssClass: 'text-muted-500 dark:text-muted-400' },
+    },
   },
   yaxis: {
     labels: {
-      style: { cssClass: 'text-muted-500 dark:text-muted-400' }
-    }
+      style: { cssClass: 'text-muted-500 dark:text-muted-400' },
+    },
   },
   legend: {
     position: 'top' as const,
     horizontalAlign: 'right' as const,
-    labels: { useSeriesColors: true }
+    labels: { useSeriesColors: true },
   },
   tooltip: { theme: 'dark' },
   grid: {
-    borderColor: 'rgba(0,0,0,0.05)'
-  }
+    borderColor: 'rgba(0,0,0,0.05)',
+  },
 }))
 
 const labsChartSeries = computed(() => [
   { name: 'Created', data: data.value?.labsSummary?.created ?? [] },
-  { name: 'Completed', data: data.value?.labsSummary?.completed ?? [] }
+  { name: 'Completed', data: data.value?.labsSummary?.completed ?? [] },
 ])
 
 // Labs summary totals
 const labsTotals = computed(() => ({
   created: data.value?.labsSummary?.totalCreated ?? 0,
-  completed: data.value?.labsSummary?.totalCompleted ?? 0
+  completed: data.value?.labsSummary?.totalCompleted ?? 0,
 }))
 
 // Companies with fallback icons for those without logo URLs
@@ -162,13 +162,13 @@ const companiesWithIcons = computed(() => {
     'ph:stack-duotone',
     'ph:network-duotone',
     'ph:code-duotone',
-    'ph:desktop-tower-duotone'
+    'ph:desktop-tower-duotone',
   ]
 
   return (data.value?.companies ?? []).map((company, index) => ({
     name: company.name,
     logo: company.logoUrl,
-    icon: defaultIcons[index % defaultIcons.length] ?? 'ph:building-duotone'
+    icon: defaultIcons[index % defaultIcons.length] ?? 'ph:building-duotone',
   }))
 })
 </script>
@@ -229,7 +229,10 @@ const companiesWithIcons = computed(() => {
       v-if="error"
       class="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20"
     >
-      <Icon name="ph:warning-circle-duotone" class="size-5 text-red-500" />
+      <Icon
+        name="ph:warning-circle-duotone"
+        class="size-5 text-red-500"
+      />
       <p class="text-sm text-red-700 dark:text-red-400">
         Failed to load dashboard data. Please try again.
       </p>
@@ -255,7 +258,10 @@ const companiesWithIcons = computed(() => {
         >
           <div class="flex items-center gap-4">
             <div class="bg-primary-500/10 flex size-12 shrink-0 items-center justify-center rounded-lg">
-              <Icon :name="stat.icon" class="text-primary-500 size-6" />
+              <Icon
+                :name="stat.icon"
+                class="text-primary-500 size-6"
+              />
             </div>
             <div>
               <p class="text-muted-500 dark:text-muted-400 text-sm">
@@ -264,7 +270,10 @@ const companiesWithIcons = computed(() => {
               <template v-if="pending && !data">
                 <div class="bg-muted-200 dark:bg-muted-700 mt-1 h-7 w-16 animate-pulse rounded" />
               </template>
-              <p v-else class="text-muted-800 dark:text-white text-2xl font-semibold">
+              <p
+                v-else
+                class="text-muted-800 dark:text-white text-2xl font-semibold"
+              >
                 {{ stat.value.toLocaleString() }}
               </p>
             </div>
@@ -276,22 +285,37 @@ const companiesWithIcons = computed(() => {
     <!-- Charts Row -->
     <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
       <!-- Cost Overview Chart -->
-      <BaseCard rounded="lg" class="min-w-0 overflow-hidden p-5">
+      <BaseCard
+        rounded="lg"
+        class="min-w-0 overflow-hidden p-5"
+      >
         <div class="mb-4 flex items-center justify-between">
           <h3 class="text-muted-800 dark:text-white text-lg font-semibold">
             Cost Overview
           </h3>
           <div class="flex gap-4">
             <template v-if="pending && !data">
-              <div v-for="i in 3" :key="i" class="text-end">
+              <div
+                v-for="i in 3"
+                :key="i"
+                class="text-end"
+              >
                 <div class="bg-muted-200 dark:bg-muted-700 mb-1 h-3 w-12 animate-pulse rounded" />
                 <div class="bg-muted-200 dark:bg-muted-700 h-5 w-16 animate-pulse rounded" />
               </div>
             </template>
             <template v-else>
-              <div v-for="item in costSummary" :key="item.label" class="text-end">
-                <p class="text-muted-400 text-xs">{{ item.label }}</p>
-                <p :class="[item.color, 'font-semibold']">{{ item.value }}</p>
+              <div
+                v-for="item in costSummary"
+                :key="item.label"
+                class="text-end"
+              >
+                <p class="text-muted-400 text-xs">
+                  {{ item.label }}
+                </p>
+                <p :class="[item.color, 'font-semibold']">
+                  {{ item.value }}
+                </p>
               </div>
             </template>
           </div>
@@ -300,12 +324,20 @@ const companiesWithIcons = computed(() => {
           <template v-if="pending && !data">
             <div class="bg-muted-100 dark:bg-muted-800 flex h-[280px] items-center justify-center rounded-lg">
               <div class="flex items-center gap-2">
-                <Icon name="ph:spinner" class="size-5 animate-spin" />
-                <p class="text-muted-400">Loading chart...</p>
+                <Icon
+                  name="ph:spinner"
+                  class="size-5 animate-spin"
+                />
+                <p class="text-muted-400">
+                  Loading chart...
+                </p>
               </div>
             </div>
           </template>
-          <div v-else class="w-full">
+          <div
+            v-else
+            class="w-full"
+          >
             <apexchart
               type="area"
               height="280"
@@ -316,33 +348,50 @@ const companiesWithIcons = computed(() => {
           </div>
           <template #fallback>
             <div class="bg-muted-100 dark:bg-muted-800 flex h-[280px] items-center justify-center rounded-lg">
-              <p class="text-muted-400">Loading chart...</p>
+              <p class="text-muted-400">
+                Loading chart...
+              </p>
             </div>
           </template>
         </ClientOnly>
       </BaseCard>
 
       <!-- Labs Summary Chart -->
-      <BaseCard rounded="lg" class="min-w-0 overflow-hidden p-5">
+      <BaseCard
+        rounded="lg"
+        class="min-w-0 overflow-hidden p-5"
+      >
         <div class="mb-4 flex items-center justify-between">
           <h3 class="text-muted-800 dark:text-white text-lg font-semibold">
             Labs Summary
           </h3>
           <div class="flex gap-4">
             <template v-if="pending && !data">
-              <div v-for="i in 2" :key="i" class="text-end">
+              <div
+                v-for="i in 2"
+                :key="i"
+                class="text-end"
+              >
                 <div class="bg-muted-200 dark:bg-muted-700 mb-1 h-3 w-16 animate-pulse rounded" />
                 <div class="bg-muted-200 dark:bg-muted-700 h-5 w-12 animate-pulse rounded" />
               </div>
             </template>
             <template v-else>
               <div class="text-end">
-                <p class="text-muted-400 text-xs">Total Created</p>
-                <p class="font-semibold text-sky-500">{{ labsTotals.created }}</p>
+                <p class="text-muted-400 text-xs">
+                  Total Created
+                </p>
+                <p class="font-semibold text-sky-500">
+                  {{ labsTotals.created }}
+                </p>
               </div>
               <div class="text-end">
-                <p class="text-muted-400 text-xs">Total Completed</p>
-                <p class="font-semibold text-green-500">{{ labsTotals.completed }}</p>
+                <p class="text-muted-400 text-xs">
+                  Total Completed
+                </p>
+                <p class="font-semibold text-green-500">
+                  {{ labsTotals.completed }}
+                </p>
               </div>
             </template>
           </div>
@@ -351,12 +400,20 @@ const companiesWithIcons = computed(() => {
           <template v-if="pending && !data">
             <div class="bg-muted-100 dark:bg-muted-800 flex h-[280px] items-center justify-center rounded-lg">
               <div class="flex items-center gap-2">
-                <Icon name="ph:spinner" class="size-5 animate-spin" />
-                <p class="text-muted-400">Loading chart...</p>
+                <Icon
+                  name="ph:spinner"
+                  class="size-5 animate-spin"
+                />
+                <p class="text-muted-400">
+                  Loading chart...
+                </p>
               </div>
             </div>
           </template>
-          <div v-else class="w-full">
+          <div
+            v-else
+            class="w-full"
+          >
             <apexchart
               type="bar"
               height="280"
@@ -367,7 +424,9 @@ const companiesWithIcons = computed(() => {
           </div>
           <template #fallback>
             <div class="bg-muted-100 dark:bg-muted-800 flex h-[280px] items-center justify-center rounded-lg">
-              <p class="text-muted-400">Loading chart...</p>
+              <p class="text-muted-400">
+                Loading chart...
+              </p>
             </div>
           </template>
         </ClientOnly>
@@ -375,22 +434,34 @@ const companiesWithIcons = computed(() => {
     </div>
 
     <!-- Companies Served Ticker -->
-    <BaseCard rounded="lg" class="overflow-hidden p-4">
+    <BaseCard
+      rounded="lg"
+      class="overflow-hidden p-4"
+    >
       <p class="text-muted-500 dark:text-muted-400 mb-3 text-center text-sm font-medium">
         Partners Served
       </p>
       <template v-if="pending && !data">
         <div class="flex justify-center gap-12 overflow-hidden">
-          <div v-for="i in 6" :key="i" class="flex shrink-0 items-center gap-3">
+          <div
+            v-for="i in 6"
+            :key="i"
+            class="flex shrink-0 items-center gap-3"
+          >
             <div class="bg-muted-200 dark:bg-muted-700 size-10 animate-pulse rounded-lg" />
             <div class="bg-muted-200 dark:bg-muted-700 h-4 w-24 animate-pulse rounded" />
           </div>
         </div>
       </template>
       <template v-else-if="companiesWithIcons.length === 0">
-        <p class="text-muted-400 text-center text-sm">No companies to display</p>
+        <p class="text-muted-400 text-center text-sm">
+          No companies to display
+        </p>
       </template>
-      <div v-else class="ticker-container relative">
+      <div
+        v-else
+        class="ticker-container relative"
+      >
         <div class="ticker-track flex gap-12">
           <!-- First set of companies -->
           <div
@@ -405,7 +476,11 @@ const companiesWithIcons = computed(() => {
                 :alt="company.name"
                 class="size-6 object-contain"
               >
-              <Icon v-else :name="company.icon" class="text-primary-500 size-5" />
+              <Icon
+                v-else
+                :name="company.icon"
+                class="text-primary-500 size-5"
+              />
             </div>
             <span class="text-muted-700 dark:text-muted-300 whitespace-nowrap font-medium">
               {{ company.name }}
@@ -424,7 +499,11 @@ const companiesWithIcons = computed(() => {
                 :alt="company.name"
                 class="size-6 object-contain"
               >
-              <Icon v-else :name="company.icon" class="text-primary-500 size-5" />
+              <Icon
+                v-else
+                :name="company.icon"
+                class="text-primary-500 size-5"
+              />
             </div>
             <span class="text-muted-700 dark:text-muted-300 whitespace-nowrap font-medium">
               {{ company.name }}

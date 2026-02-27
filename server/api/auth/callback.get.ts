@@ -18,7 +18,8 @@ export default defineEventHandler(async (event) => {
       if (stateData.returnUrl && stateData.returnUrl.startsWith('/')) {
         returnUrl = stateData.returnUrl
       }
-    } catch {
+    }
+    catch {
       // If state parsing fails, default to dashboard
       returnUrl = '/dashboard'
     }
@@ -36,8 +37,8 @@ export default defineEventHandler(async (event) => {
       client_id: config.public.googleClientId,
       client_secret: config.googleClientSecret,
       redirect_uri: `${config.public.appUrl}/api/auth/callback`,
-      grant_type: 'authorization_code'
-    }
+      grant_type: 'authorization_code',
+    },
   }).catch(() => null)
 
   if (!tokens) {
@@ -46,7 +47,7 @@ export default defineEventHandler(async (event) => {
 
   // decode id_token to get user info (already verified by Google)
   const payload = JSON.parse(
-    Buffer.from(tokens.id_token.split('.')[1], 'base64').toString()
+    Buffer.from(tokens.id_token.split('.')[1], 'base64').toString(),
   )
 
   // Upsert user in database - create if new, update profile if existing
@@ -75,7 +76,7 @@ export default defineEventHandler(async (event) => {
     sub: payload.sub,
     email: payload.email,
     name: payload.name,
-    picture: payload.picture
+    picture: payload.picture,
   })
 
   return sendRedirect(event, returnUrl)

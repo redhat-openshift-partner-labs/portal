@@ -59,9 +59,11 @@ export const useDashboard = () => {
         labsSummary,
         companies,
       }
-    } catch (e) {
+    }
+    catch (e) {
       error.value = e as Error
-    } finally {
+    }
+    finally {
       pending.value = false
     }
   }

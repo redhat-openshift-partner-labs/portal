@@ -11,7 +11,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest'
-import { PrismaClient } from '../../generated/prisma/client.js'
+import type { PrismaClient } from '../../generated/prisma/client.js'
 import { getTestDb, cleanTestDb, teardownTestDb } from '../setup.js'
 
 let db: PrismaClient
@@ -388,7 +388,7 @@ describe('Database Compatibility Tests', () => {
       await expect(
         db.lab.delete({
           where: { id: lab.id },
-        })
+        }),
       ).rejects.toThrow()
 
       // Audit should still exist
@@ -451,7 +451,7 @@ describe('Database Compatibility Tests', () => {
       await expect(
         db.lab.delete({
           where: { id: lab.id },
-        })
+        }),
       ).rejects.toThrow()
 
       // Extension request should still exist
@@ -537,7 +537,7 @@ describe('Database Compatibility Tests', () => {
       await expect(
         db.lab.delete({
           where: { id: lab.id },
-        })
+        }),
       ).resolves.toBeDefined()
 
       // Verify lab is deleted

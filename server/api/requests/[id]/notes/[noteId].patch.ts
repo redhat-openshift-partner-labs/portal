@@ -53,7 +53,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Build update data
-  const updateData: { note?: string; immutable?: boolean } = {}
+  const updateData: { note?: string, immutable?: boolean } = {}
   if (hasContent) {
     updateData.note = body.content!.trim()
   }

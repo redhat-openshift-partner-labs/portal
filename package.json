@@ -29,7 +29,9 @@
     "db:validate": "tsx scripts/validate-schemas.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.4.1",
@@ -49,6 +51,7 @@
     "@iconify-json/lucide": "^1.2.93",
     "@iconify-json/ph": "^1.2.2",
     "@nuxt/content": "^3.11.2",
+    "@nuxt/eslint": "^1.15.2",
     "@nuxt/fonts": "^0.14.0",
     "@nuxt/image": "^2.0.0",
     "@nuxtjs/i18n": "^10.2.3",
@@ -59,9 +62,11 @@
     "@vitest/coverage-v8": "^4.0.18",
     "@vueuse/nuxt": "^14.2.1",
     "better-sqlite3": "^12.6.2",
+    "eslint": "^10.0.2",
     "prisma": "^7.4.1",
     "tailwindcss": "^4.2.0",
     "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
     "vitest": "^4.0.18",
     "zod": "^4.3.6"
   }
