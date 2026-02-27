@@ -84,7 +84,7 @@ Comprehensive documentation is available in the [`docs/`](./docs) folder:
 ## Project Structure
 
 ```
-db4opl/
+portal/
 ├── app/                    # Main application code
 │   ├── pages/             # File-based routing
 │   ├── components/        # Vue components

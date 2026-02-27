@@ -30,7 +30,7 @@
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd db4opl
+cd portal
 
 # Install dependencies
 pnpm install
