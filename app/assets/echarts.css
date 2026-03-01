@@ -1,7 +1,9 @@
 /**
  * ECharts dark mode styling
- * Matches the dark theme used by ApexCharts for consistency
+ * Provides consistent theming across all ECharts components
  */
+
+@reference '~/assets/main.css';
 
 /* Dark mode tooltip styling */
 .dark .echarts-tooltip {
@@ -16,4 +18,19 @@
 
 .dark .echarts-tooltip .tooltip-value {
   color: #ffffff !important;
+}
+
+/* ECharts uses canvas/SVG, so we inject dark mode colors via CSS variables */
+:root {
+  --echarts-axis-label: #6b7280;
+  --echarts-axis-line: #e5e7eb;
+  --echarts-grid-line: rgba(0, 0, 0, 0.05);
+  --echarts-legend-text: #6b7280;
+}
+
+.dark {
+  --echarts-axis-label: #9ca3af;
+  --echarts-axis-line: #374151;
+  --echarts-grid-line: rgba(255, 255, 255, 0.05);
+  --echarts-legend-text: #9ca3af;
 }

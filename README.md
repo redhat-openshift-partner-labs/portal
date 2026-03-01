@@ -52,7 +52,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 | **UI Components** | Shuriken UI + Tairo + Reka UI |
 | **Database** | Prisma ORM (SQLite / PostgreSQL) |
 | **Authentication** | Google OAuth + JWT |
-| **Charts** | ApexCharts |
+| **Charts** | ECharts |
 | **Icons** | Iconify (Phosphor, Lucide) |
 
 ## Features

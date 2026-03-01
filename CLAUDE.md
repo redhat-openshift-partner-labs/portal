@@ -88,7 +88,7 @@ pnpm db:validate      # Verify schemas are in sync
 
 ```
 app/                    # Main application code
-├── assets/            # CSS files (main.css, vcalendar.css, apexcharts.css)
+├── assets/            # CSS files (main.css, vcalendar.css, echarts.css)
 ├── composables/       # Composables (useAuth.ts)
 ├── layouts/           # Layout components (8 layouts)
 ├── middleware/        # Route middleware (auth.global.ts)
@@ -205,7 +205,7 @@ pnpm test:coverage  # Run tests with coverage report
 | `@nuxt/image` | Image optimization |
 | `@nuxt/fonts` | Font loading (Inter, Karla, Fira Code) |
 | `zod` | Schema validation |
-| `vue3-apexcharts` | Charts |
+| `echarts` | Charts |
 | `date-fns` | Date utilities |
 | `better-sqlite3` | SQLite database (dev) |
 | `pg` | PostgreSQL database (prod) |

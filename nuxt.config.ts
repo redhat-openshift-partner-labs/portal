@@ -40,10 +40,6 @@ export default defineNuxtConfig({
      */
     '~/assets/main.css',
     /**
-     * ApexCharts dark mode styles
-     */
-    '~/assets/apexcharts.css',
-    /**
      * ECharts dark mode styles
      */
     '~/assets/echarts.css',
@@ -192,8 +188,6 @@ export default defineNuxtConfig({
         'klona',
         'ohash',
         'zod',
-        'apexcharts',
-        'vue3-apexcharts',
       ],
     },
   },
@@ -208,8 +202,8 @@ export default defineNuxtConfig({
   },
 
   echarts: {
-    charts: ['SankeyChart'],
-    components: ['TooltipComponent', 'TitleComponent'],
+    charts: ['SankeyChart', 'BarChart', 'LineChart'],
+    components: ['TooltipComponent', 'TitleComponent', 'GridComponent', 'LegendComponent'],
   },
 
   eslint: {
