@@ -46,8 +46,12 @@ export default defineEventHandler(async (event) => {
   }
 
   // decode id_token to get user info (already verified by Google)
+  const payloadBase64 = tokens.id_token.split('.')[1]
+  if (!payloadBase64) {
+    return sendRedirect(event, '/auth?error=invalid_token')
+  }
   const payload = JSON.parse(
-    Buffer.from(tokens.id_token.split('.')[1], 'base64').toString(),
+    Buffer.from(payloadBase64, 'base64').toString(),
   )
 
   // Upsert user in database - create if new, update profile if existing
