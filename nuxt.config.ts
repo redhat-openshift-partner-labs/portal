@@ -20,6 +20,7 @@ export default defineNuxtConfig({
     '@nuxt/content',
     '@nuxt/fonts',
     '@nuxt/eslint',
+    'nuxt-echarts',
   ],
   $development: {
     experimental: {
@@ -42,6 +43,10 @@ export default defineNuxtConfig({
      * ApexCharts dark mode styles
      */
     '~/assets/apexcharts.css',
+    /**
+     * ECharts dark mode styles
+     */
+    '~/assets/echarts.css',
   ],
 
   runtimeConfig: {
@@ -158,8 +163,8 @@ export default defineNuxtConfig({
   vite: {
     server: {
       allowedHosts: [
-	'portal.me'
-      ]
+        'portal.me',
+      ],
     },
     define: {
       // Enable / disable Options API support. Disabling this will result in smaller bundles
@@ -200,6 +205,11 @@ export default defineNuxtConfig({
       //   target: 3.4,
       // },
     },
+  },
+
+  echarts: {
+    charts: ['SankeyChart'],
+    components: ['TooltipComponent', 'TitleComponent'],
   },
 
   eslint: {

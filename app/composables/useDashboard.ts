@@ -27,11 +27,21 @@ export interface Company {
   logoUrl: string | null
 }
 
+export interface RequestsByType {
+  total: number
+  breakdown: Array<{
+    requestType: string
+    label: string
+    count: number
+  }>
+}
+
 export interface DashboardData {
   stats: DashboardStats
   costOverview: CostOverview
   labsSummary: LabsSummary
   companies: Company[]
+  requestsByType: RequestsByType
 }
 
 export const useDashboard = () => {
@@ -46,11 +56,12 @@ export const useDashboard = () => {
     error.value = null
 
     try {
-      const [stats, costOverview, labsSummary, companies] = await Promise.all([
+      const [stats, costOverview, labsSummary, companies, requestsByType] = await Promise.all([
         $fetch<DashboardStats>('/api/dashboard/stats'),
         $fetch<CostOverview>('/api/dashboard/cost-overview'),
         $fetch<LabsSummary>('/api/dashboard/labs-summary'),
         $fetch<Company[]>('/api/dashboard/companies'),
+        $fetch<RequestsByType>('/api/dashboard/requests-by-type'),
       ])
 
       data.value = {
@@ -58,6 +69,7 @@ export const useDashboard = () => {
         costOverview,
         labsSummary,
         companies,
+        requestsByType,
       }
     }
     catch (e) {

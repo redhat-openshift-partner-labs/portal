@@ -1,0 +1,19 @@
+/**
+ * ECharts dark mode styling
+ * Matches the dark theme used by ApexCharts for consistency
+ */
+
+/* Dark mode tooltip styling */
+.dark .echarts-tooltip {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #f3f4f6 !important;
+}
+
+.dark .echarts-tooltip .tooltip-title {
+  color: #f3f4f6 !important;
+}
+
+.dark .echarts-tooltip .tooltip-value {
+  color: #ffffff !important;
+}

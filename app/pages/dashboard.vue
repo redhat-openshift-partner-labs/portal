@@ -431,6 +431,30 @@ const companiesWithIcons = computed(() => {
           </template>
         </ClientOnly>
       </BaseCard>
+
+      <!-- Request Flow Sankey -->
+      <BaseCard
+        rounded="lg"
+        class="xl:col-span-2 min-w-0 overflow-hidden p-5"
+      >
+        <div class="mb-4 flex items-center justify-between">
+          <h3 class="text-muted-800 dark:text-white text-lg font-semibold">
+            Request Distribution
+          </h3>
+          <div class="text-end">
+            <p class="text-muted-400 text-xs">
+              Total Requests
+            </p>
+            <p class="font-semibold text-sky-500">
+              {{ data?.requestsByType?.total ?? 0 }}
+            </p>
+          </div>
+        </div>
+        <RequestFlowSankey
+          :data="data?.requestsByType ?? null"
+          :pending="pending"
+        />
+      </BaseCard>
     </div>
 
     <!-- Companies Served Ticker -->
