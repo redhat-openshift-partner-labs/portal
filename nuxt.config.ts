@@ -156,6 +156,11 @@ export default defineNuxtConfig({
   },
 
   vite: {
+    server: {
+      allowedHosts: [
+	'portal.me'
+      ]
+    },
     define: {
       // Enable / disable Options API support. Disabling this will result in smaller bundles
       // but may affect compatibility with 3rd party libraries if they rely on Options API.
