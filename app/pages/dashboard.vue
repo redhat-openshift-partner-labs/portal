@@ -483,7 +483,7 @@ const companiesWithIcons = computed(() => {
       <!-- Request Flow Sankey -->
       <BaseCard
         rounded="lg"
-        class="xl:col-span-2 min-w-0 overflow-hidden p-5"
+        class="min-w-0 overflow-hidden p-5"
       >
         <div class="mb-4 flex items-center justify-between">
           <h3 class="text-muted-800 dark:text-white text-lg font-semibold">
@@ -503,6 +503,16 @@ const companiesWithIcons = computed(() => {
           :pending="pending"
         />
       </BaseCard>
+
+      <!-- Analytics Insights -->
+      <DashboardAnalyticsInsights
+        :labs-by-company="data?.labsByCompany ?? null"
+        :active-by-company="data?.activeByCompany ?? null"
+        :extension-stats="data?.extensionStats ?? null"
+        :audit-activity="data?.auditActivity ?? null"
+        :request-funnel="data?.requestFunnel ?? null"
+        :pending="pending"
+      />
     </div>
 
     <!-- Companies Served Ticker -->

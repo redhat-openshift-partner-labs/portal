@@ -5,6 +5,7 @@ export interface DashboardStats {
   activeLabs: number
   totalUsers: number
   completedLabs: number
+  deniedLabs: number
 }
 
 export interface CostOverview {
@@ -36,12 +37,64 @@ export interface RequestsByType {
   }>
 }
 
+// New analytics types
+export interface LabsByCompanyData {
+  readonly data: readonly { readonly company: string, readonly count: number }[]
+  readonly other: number
+}
+
+export interface ActiveByCompanyData {
+  readonly data: readonly { readonly company: string, readonly count: number }[]
+}
+
+export interface ExtensionStatsData {
+  readonly byStatus: {
+    readonly approved: number
+    readonly pending: number
+    readonly denied: number
+  }
+  readonly byDuration: readonly {
+    readonly duration: string
+    readonly label: string
+    readonly count: number
+  }[]
+  readonly byMonth: readonly {
+    readonly month: string
+    readonly approved: number
+    readonly pending: number
+    readonly denied: number
+  }[]
+}
+
+export interface AuditActivityData {
+  readonly byDate: readonly {
+    readonly date: string
+    readonly count: number
+  }[]
+  readonly byLoginType: { readonly [x: string]: number }
+  readonly byHour: readonly number[]
+}
+
+export interface RequestFunnelData {
+  readonly pending: number
+  readonly approved: number
+  readonly running: number
+  readonly completed: number
+  readonly denied: number
+}
+
 export interface DashboardData {
   stats: DashboardStats
   costOverview: CostOverview
   labsSummary: LabsSummary
   companies: Company[]
   requestsByType: RequestsByType
+  // Analytics data
+  labsByCompany: LabsByCompanyData | null
+  activeByCompany: ActiveByCompanyData | null
+  extensionStats: ExtensionStatsData | null
+  auditActivity: AuditActivityData | null
+  requestFunnel: RequestFunnelData | null
 }
 
 export const useDashboard = () => {
@@ -56,12 +109,28 @@ export const useDashboard = () => {
     error.value = null
 
     try {
-      const [stats, costOverview, labsSummary, companies, requestsByType] = await Promise.all([
+      const [
+        stats,
+        costOverview,
+        labsSummary,
+        companies,
+        requestsByType,
+        labsByCompany,
+        activeByCompany,
+        extensionStats,
+        auditActivity,
+        requestFunnel,
+      ] = await Promise.all([
         $fetch<DashboardStats>('/api/dashboard/stats'),
         $fetch<CostOverview>('/api/dashboard/cost-overview'),
         $fetch<LabsSummary>('/api/dashboard/labs-summary'),
         $fetch<Company[]>('/api/dashboard/companies'),
         $fetch<RequestsByType>('/api/dashboard/requests-by-type'),
+        $fetch<LabsByCompanyData>('/api/dashboard/labs-by-company'),
+        $fetch<ActiveByCompanyData>('/api/dashboard/active-by-company'),
+        $fetch<ExtensionStatsData>('/api/dashboard/extension-stats'),
+        $fetch<AuditActivityData>('/api/dashboard/audit-activity'),
+        $fetch<RequestFunnelData>('/api/dashboard/request-funnel'),
       ])
 
       data.value = {
@@ -70,6 +139,11 @@ export const useDashboard = () => {
         labsSummary,
         companies,
         requestsByType,
+        labsByCompany,
+        activeByCompany,
+        extensionStats,
+        auditActivity,
+        requestFunnel,
       }
     }
     catch (e) {
