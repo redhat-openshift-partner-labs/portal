@@ -34,6 +34,7 @@ export interface RequestsByType {
     requestType: string
     label: string
     count: number
+    byState: Array<{ state: string, count: number }>
   }>
 }
 

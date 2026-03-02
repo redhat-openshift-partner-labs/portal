@@ -1,8 +1,14 @@
 <script setup lang="ts">
+interface StateBreakdown {
+  readonly state: string
+  readonly count: number
+}
+
 interface RequestsByTypeBreakdown {
   readonly requestType: string
   readonly label: string
   readonly count: number
+  readonly byState: readonly StateBreakdown[]
 }
 
 interface RequestsByTypeData {
@@ -25,26 +31,65 @@ const typeColors: Record<string, string> = {
   rhoai: '#14b8a6', // teal-500
 }
 
+// Color palette for states (from LifecycleTimelineChart)
+const stateColors: Record<string, string> = {
+  Pending: '#f59e0b', // amber-500
+  Approved: '#0ea5e9', // sky-500
+  Running: '#8b5cf6', // violet-500
+  Hibernating: '#64748b', // slate-500
+}
+
 const chartOptions = computed(() => {
   if (!props.data || props.data.breakdown.length === 0) {
     return null
   }
 
-  // Build nodes
+  // Collect unique states from the data
+  const uniqueStates = new Set<string>()
+  for (const item of props.data.breakdown) {
+    for (const stateData of item.byState) {
+      uniqueStates.add(stateData.state)
+    }
+  }
+
+  // Calculate total count per state (for node labels)
+  const stateTotals = new Map<string, number>()
+  for (const item of props.data.breakdown) {
+    for (const stateData of item.byState) {
+      stateTotals.set(stateData.state, (stateTotals.get(stateData.state) ?? 0) + stateData.count)
+    }
+  }
+
+  // Build nodes: Layer 1 (OpenShift) + Layer 2 (Types) + Layer 3 (States)
   const nodes = [
     { name: 'OpenShift', itemStyle: { color: '#0ea5e9' } }, // sky-500
     ...props.data.breakdown.map(item => ({
       name: item.label,
       itemStyle: { color: typeColors[item.requestType] ?? '#6b7280' },
     })),
+    ...Array.from(uniqueStates).map(state => ({
+      name: state,
+      itemStyle: { color: stateColors[state] ?? '#6b7280' },
+    })),
   ]
 
-  // Build links from OpenShift to each request type
-  const links = props.data.breakdown.map(item => ({
-    source: 'OpenShift',
-    target: item.label,
-    value: item.count,
-  }))
+  // Build links: OpenShift → Types + Types → States
+  const links = [
+    // Layer 1 → Layer 2: OpenShift to each request type
+    ...props.data.breakdown.map(item => ({
+      source: 'OpenShift',
+      target: item.label,
+      value: item.count,
+    })),
+    // Layer 2 → Layer 3: Each request type to its states
+    ...props.data.breakdown.flatMap(item =>
+      item.byState.map(stateData => ({
+        source: item.label,
+        target: stateData.state,
+        value: stateData.count,
+      })),
+    ),
+  ]
 
   return {
     tooltip: {
@@ -88,6 +133,10 @@ const chartOptions = computed(() => {
             if (params.name === 'OpenShift') {
               return `OpenShift (${props.data?.total ?? 0})`
             }
+            // Check if it's a state node (third layer)
+            if (stateTotals.has(params.name)) {
+              return `${params.name} (${stateTotals.get(params.name)})`
+            }
             return `${params.name} (${params.value})`
           },
         },
@@ -100,7 +149,7 @@ const chartOptions = computed(() => {
 <template>
   <ClientOnly>
     <template v-if="pending && !data">
-      <div class="bg-muted-100 dark:bg-muted-800 flex h-[280px] items-center justify-center rounded-lg">
+      <div class="bg-muted-100 dark:bg-muted-800 flex h-[350px] items-center justify-center rounded-lg">
         <div class="flex items-center gap-2">
           <Icon
             name="ph:spinner"
@@ -113,7 +162,7 @@ const chartOptions = computed(() => {
       </div>
     </template>
     <template v-else-if="!chartOptions || data?.breakdown.length === 0">
-      <div class="bg-muted-100 dark:bg-muted-800 flex h-[280px] items-center justify-center rounded-lg">
+      <div class="bg-muted-100 dark:bg-muted-800 flex h-[350px] items-center justify-center rounded-lg">
         <p class="text-muted-400">
           No request data available
         </p>
@@ -121,7 +170,7 @@ const chartOptions = computed(() => {
     </template>
     <div
       v-else
-      class="h-[280px] w-full"
+      class="h-[350px] w-full"
     >
       <VChart
         :option="chartOptions"
@@ -130,7 +179,7 @@ const chartOptions = computed(() => {
       />
     </div>
     <template #fallback>
-      <div class="bg-muted-100 dark:bg-muted-800 flex h-[280px] items-center justify-center rounded-lg">
+      <div class="bg-muted-100 dark:bg-muted-800 flex h-[350px] items-center justify-center rounded-lg">
         <p class="text-muted-400">
           Loading chart...
         </p>
