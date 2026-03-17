@@ -503,33 +503,12 @@ const handleViewDenialReason = (request: { id: number, generatedName: string }) 
             spaced
             class="pe-4 text-end"
           >
-            <div class="flex items-center justify-end gap-2">
-              <BaseButton
-                v-if="request.status === 'Denied'"
-                size="sm"
-                rounded="lg"
-                variant="default"
-                @click="handleViewDenialReason(request)"
-              >
-                <Icon
-                  name="ph:x-circle-duotone"
-                  class="size-4"
-                />
-                <span>Denial Reason</span>
-              </BaseButton>
-              <BaseButton
-                size="sm"
-                rounded="lg"
-                variant="default"
-                @click="handleCreateNote(request.id)"
-              >
-                <Icon
-                  name="lucide:message-square-plus"
-                  class="size-4"
-                />
-                <span>Note</span>
-              </BaseButton>
-            </div>
+            <ArchiveActionsDropdown
+              :request-id="request.id"
+              :is-denied="request.status === 'Denied'"
+              @create-note="handleCreateNote(request.id)"
+              @view-denial-reason="handleViewDenialReason(request)"
+            />
           </TairoTableCell>
         </TairoTableRow>
       </TairoTable>
