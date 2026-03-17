@@ -493,37 +493,13 @@ const handleEditUpdated = () => {
             spaced
             class="pe-4 text-end"
           >
-            <div class="flex items-center justify-end gap-2">
-              <ExtendButton
-                :loading="extending === request.id"
-                @extend="(duration) => initiateExtend(request.id, duration)"
-              />
-              <BaseButton
-                size="sm"
-                rounded="lg"
-                variant="default"
-                @click="handleCreateNote(request.id)"
-              >
-                <Icon
-                  name="lucide:message-square-plus"
-                  class="size-4"
-                />
-                <span>Note</span>
-              </BaseButton>
-              <BaseButton
-                v-if="canEdit"
-                size="sm"
-                rounded="lg"
-                variant="default"
-                @click="handleEdit(request.id)"
-              >
-                <Icon
-                  name="lucide:pencil"
-                  class="size-4"
-                />
-                <span>Edit</span>
-              </BaseButton>
-            </div>
+            <RequestActionsDropdown
+              :request-id="request.id"
+              :can-edit="canEdit"
+              @extend="(duration) => initiateExtend(request.id, duration)"
+              @create-note="handleCreateNote(request.id)"
+              @edit="handleEdit(request.id)"
+            />
           </TairoTableCell>
         </TairoTableRow>
       </TairoTable>
