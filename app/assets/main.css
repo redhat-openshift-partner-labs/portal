@@ -49,6 +49,14 @@
     --color-info-500: #0066CC;
     --color-info-600: #004D99;
 
+    /* Chart Colors - PatternFly-aligned palette */
+    --color-chart-blue: #0066CC;
+    --color-chart-green: #3D7317;
+    --color-chart-gold: #F0AB00;
+    --color-chart-purple: #6753AC;
+    --color-chart-cyan: #009596;
+    --color-chart-orange: #EC7A08;
+
     --tairo-collapse-width-open: 16rem;
     --tairo-collapse-width-collapsed: 4rem;
 }
