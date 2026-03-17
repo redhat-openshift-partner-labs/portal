@@ -13,11 +13,13 @@ import {
 
 const props = defineProps<{
   requestId: number
+  canEdit?: boolean
 }>()
 
 const emit = defineEmits<{
   extend: [duration: '3d' | '1w' | '2w' | '1mo']
   createNote: []
+  edit: []
 }>()
 
 const handleExtend = (duration: '3d' | '1w' | '2w' | '1mo') => {
@@ -26,6 +28,10 @@ const handleExtend = (duration: '3d' | '1w' | '2w' | '1mo') => {
 
 const handleCreateNote = () => {
   emit('createNote')
+}
+
+const handleEdit = () => {
+  emit('edit')
 }
 
 const handleViewDetails = () => {
@@ -117,7 +123,19 @@ const handleViewDetails = () => {
             name="lucide:message-square-plus"
             class="size-4"
           />
-          <span>Create Note</span>
+          <span>Add Note</span>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem
+          v-if="props.canEdit"
+          class="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-500 transition-colors hover:bg-muted-100 hover:text-muted-700 dark:text-muted-400 dark:hover:bg-muted-700 dark:hover:text-muted-200"
+          @click="handleEdit"
+        >
+          <Icon
+            name="lucide:pencil"
+            class="size-4"
+          />
+          <span>Edit</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenuPortal>
