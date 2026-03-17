@@ -3,7 +3,7 @@
 export interface DashboardStats {
   totalLabs: number
   activeLabs: number
-  totalUsers: number
+  deniedLabs: number
   completedLabs: number
   deniedLabs: number
 }
