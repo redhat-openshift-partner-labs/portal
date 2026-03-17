@@ -62,3 +62,6 @@ coverage/
 
 # Development assets
 misc/
+
+# Internal planning documents
+docs/plans/
