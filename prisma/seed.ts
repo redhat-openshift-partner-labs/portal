@@ -109,7 +109,7 @@ async function main() {
   const generatedNames = new Set<string>()
 
   const labs = await Promise.all(
-    Array.from({ length: 50 }, (_, i) => {
+    Array.from({ length: 50 }, () => {
       const company = companies[Math.floor(Math.random() * companies.length)]!
       const state = states[Math.floor(Math.random() * states.length)]!
       const startDaysAgo = Math.floor(Math.random() * 60) + 1

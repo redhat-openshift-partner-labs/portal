@@ -1,6 +1,6 @@
 // plugins/auth.server.ts
 // Hydrates auth state during SSR to prevent flash of unauthenticated content
-export default defineNuxtPlugin(async (nuxtApp) => {
+export default defineNuxtPlugin(async () => {
   const user = useState<{
     sub: string
     email: string
