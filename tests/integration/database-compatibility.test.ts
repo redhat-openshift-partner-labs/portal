@@ -616,4 +616,172 @@ describe('Database Compatibility Tests', () => {
       expect(retrieved?.cost).toBeCloseTo(largeCost, 2)
     })
   })
+
+  describe('JSON/Catchall Handling', () => {
+    it('should store and retrieve catchall JSON correctly', async () => {
+      const catchallData = { customField: 'value', count: 42, enabled: true }
+
+      const lab = await db.lab.create({
+        data: {
+          clusterId: 'cluster-json',
+          generatedName: 'json-test-lab',
+          state: 'Running',
+          clusterName: 'JSON Test Lab',
+          openshiftVersion: '4.14',
+          clusterSize: 'medium',
+          companyName: 'Test Company',
+          requestType: 'Partner Lab',
+          sponsor: 'Test Sponsor',
+          cloudProvider: 'AWS',
+          primaryFirst: 'John',
+          primaryLast: 'Doe',
+          primaryEmail: 'john@test.com',
+          secondaryFirst: 'Jane',
+          secondaryLast: 'Doe',
+          secondaryEmail: 'jane@test.com',
+          region: 'us-east-1',
+          projectName: 'test-project',
+          leaseTime: '30 days',
+          description: 'Test lab for JSON catchall',
+          catchall: JSON.stringify(catchallData),
+          startDate: new Date(),
+          endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          updatedAt: new Date(),
+        },
+      })
+
+      const retrieved = await db.lab.findUnique({
+        where: { id: lab.id },
+      })
+
+      expect(retrieved?.catchall).toBe(JSON.stringify(catchallData))
+      expect(JSON.parse(retrieved?.catchall || '{}')).toEqual(catchallData)
+    })
+
+    it('should handle empty catchall (default {})', async () => {
+      const lab = await db.lab.create({
+        data: {
+          clusterId: 'cluster-empty-json',
+          generatedName: 'empty-json-lab',
+          state: 'Running',
+          clusterName: 'Empty JSON Lab',
+          openshiftVersion: '4.14',
+          clusterSize: 'medium',
+          companyName: 'Test Company',
+          requestType: 'Partner Lab',
+          sponsor: 'Test Sponsor',
+          cloudProvider: 'AWS',
+          primaryFirst: 'John',
+          primaryLast: 'Doe',
+          primaryEmail: 'john@test.com',
+          secondaryFirst: 'Jane',
+          secondaryLast: 'Doe',
+          secondaryEmail: 'jane@test.com',
+          region: 'us-east-1',
+          projectName: 'test-project',
+          leaseTime: '30 days',
+          description: 'Test lab with default catchall',
+          startDate: new Date(),
+          endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          updatedAt: new Date(),
+        },
+      })
+
+      const retrieved = await db.lab.findUnique({
+        where: { id: lab.id },
+      })
+
+      expect(retrieved?.catchall).toBe('{}')
+      expect(JSON.parse(retrieved?.catchall || '{}')).toEqual({})
+    })
+
+    it('should handle null catchall', async () => {
+      const lab = await db.lab.create({
+        data: {
+          clusterId: 'cluster-null-json',
+          generatedName: 'null-json-lab',
+          state: 'Running',
+          clusterName: 'Null JSON Lab',
+          openshiftVersion: '4.14',
+          clusterSize: 'medium',
+          companyName: 'Test Company',
+          requestType: 'Partner Lab',
+          sponsor: 'Test Sponsor',
+          cloudProvider: 'AWS',
+          primaryFirst: 'John',
+          primaryLast: 'Doe',
+          primaryEmail: 'john@test.com',
+          secondaryFirst: 'Jane',
+          secondaryLast: 'Doe',
+          secondaryEmail: 'jane@test.com',
+          region: 'us-east-1',
+          projectName: 'test-project',
+          leaseTime: '30 days',
+          description: 'Test lab with null catchall',
+          catchall: null,
+          startDate: new Date(),
+          endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          updatedAt: new Date(),
+        },
+      })
+
+      const retrieved = await db.lab.findUnique({
+        where: { id: lab.id },
+      })
+
+      expect(retrieved?.catchall).toBeNull()
+    })
+
+    it('should round-trip nested JSON values', async () => {
+      const nestedData = {
+        metadata: {
+          version: 1,
+          tags: ['prod', 'certified'],
+          config: {
+            autoScale: true,
+            maxNodes: 10,
+          },
+        },
+        history: [
+          { date: '2026-01-01', action: 'created' },
+          { date: '2026-02-01', action: 'updated' },
+        ],
+      }
+
+      const lab = await db.lab.create({
+        data: {
+          clusterId: 'cluster-nested-json',
+          generatedName: 'nested-json-lab',
+          state: 'Running',
+          clusterName: 'Nested JSON Lab',
+          openshiftVersion: '4.14',
+          clusterSize: 'medium',
+          companyName: 'Test Company',
+          requestType: 'Partner Lab',
+          sponsor: 'Test Sponsor',
+          cloudProvider: 'AWS',
+          primaryFirst: 'John',
+          primaryLast: 'Doe',
+          primaryEmail: 'john@test.com',
+          secondaryFirst: 'Jane',
+          secondaryLast: 'Doe',
+          secondaryEmail: 'jane@test.com',
+          region: 'us-east-1',
+          projectName: 'test-project',
+          leaseTime: '30 days',
+          description: 'Test lab with nested JSON',
+          catchall: JSON.stringify(nestedData),
+          startDate: new Date(),
+          endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          updatedAt: new Date(),
+        },
+      })
+
+      const retrieved = await db.lab.findUnique({
+        where: { id: lab.id },
+      })
+
+      expect(JSON.parse(retrieved?.catchall || '{}')).toEqual(nestedData)
+    })
+  })
 })

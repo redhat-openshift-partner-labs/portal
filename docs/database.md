@@ -142,6 +142,7 @@ erDiagram
         datetime startDate "start_date"
         datetime endDate "end_date"
         boolean hold
+        string catchall
         datetime createdAt "created_at"
         datetime updatedAt "updated_at"
     }
@@ -248,6 +249,7 @@ The main entity representing a cluster reservation request.
 | `start_date` | DateTime | | Reservation start |
 | `end_date` | DateTime | | Reservation end |
 | `hold` | Boolean | Default: false | Hold flag |
+| `catchall` | String? | Default: "{}" | JSON payload for arbitrary key/value pairs |
 | `created_at` | DateTime | Default: now() | Creation timestamp |
 | `updated_at` | DateTime | Auto-update | Last update timestamp |
 
