@@ -26,60 +26,91 @@ const statCards = computed(() => {
   ]
 })
 
-// Cost Overview Chart Options
-const costChartOptions = computed(() => ({
-  chart: {
-    id: 'cost-overview',
-    type: 'area' as const,
-    height: 280,
-    width: '100%',
-    toolbar: { show: false },
-    zoom: { enabled: false },
-    redrawOnParentResize: true,
-    redrawOnWindowResize: true,
-  },
-  colors: ['#0066CC', '#6753AC', '#3D7317'], // PatternFly: blue, purple, green
-  stroke: {
-    width: 2,
-    curve: 'smooth' as const,
-  },
-  fill: {
-    type: 'gradient',
-    gradient: {
-      shadeIntensity: 1,
-      opacityFrom: 0.4,
-      opacityTo: 0.1,
-      stops: [0, 90, 100],
-    },
-  },
-  dataLabels: { enabled: false },
-  xaxis: {
-    categories: data.value?.costOverview?.months ?? ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'],
-    labels: {
-      style: { cssClass: 'text-muted-500 dark:text-muted-400' },
-    },
-  },
-  yaxis: {
-    labels: {
-      formatter: (val: number) => `$${val}k`,
-      style: { cssClass: 'text-muted-500 dark:text-muted-400' },
-    },
-  },
-  legend: {
-    position: 'top' as const,
-    horizontalAlign: 'right' as const,
-    labels: { useSeriesColors: true },
-  },
-  tooltip: { theme: 'dark' },
-  grid: {
-    borderColor: 'rgba(0,0,0,0.05)',
-  },
-}))
+// ECharts gradient helper
+const { createAreaGradient } = useECharts()
 
-const costChartSeries = computed(() => [
-  { name: 'This Year', data: data.value?.costOverview?.thisYear ?? [] },
-  { name: 'Last Year', data: data.value?.costOverview?.lastYear ?? [] },
-])
+// Color definitions for charts
+const chartColors = {
+  skyBlue: '#0ea5e9',
+  purple: '#a855f7',
+  green: '#22c55e',
+}
+
+// Cost Overview Chart Options (ECharts line with area fill)
+const costChartOptions = computed(() => {
+  const months = data.value?.costOverview?.months ?? ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb']
+  const thisYearData = data.value?.costOverview?.thisYear ?? []
+  const lastYearData = data.value?.costOverview?.lastYear ?? []
+
+  return {
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+      textStyle: { color: '#fff' },
+      formatter: (params: Array<{ seriesName: string, value: number, marker: string, axisValue?: string }>) => {
+        let result = `<div style="font-weight: 600; margin-bottom: 4px;">${params[0]?.axisValue ?? ''}</div>`
+        for (const param of params) {
+          result += `<div>${param.marker} ${param.seriesName}: <strong>$${param.value}k</strong></div>`
+        }
+        return result
+      },
+    },
+    legend: {
+      show: true,
+      top: 0,
+      right: 0,
+      textStyle: { color: '#9ca3af' },
+      itemWidth: 12,
+      itemHeight: 12,
+    },
+    grid: {
+      left: 50,
+      right: 20,
+      top: 40,
+      bottom: 30,
+    },
+    xAxis: {
+      type: 'category',
+      data: months,
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: { color: '#9ca3af' },
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: {
+        color: '#9ca3af',
+        formatter: (val: number) => `$${val}k`,
+      },
+      splitLine: {
+        lineStyle: { color: 'rgba(0, 0, 0, 0.05)' },
+      },
+    },
+    series: [
+      {
+        name: 'This Year',
+        type: 'line',
+        smooth: true,
+        symbol: 'none',
+        data: thisYearData,
+        lineStyle: { color: chartColors.skyBlue, width: 2 },
+        areaStyle: { color: createAreaGradient(chartColors.skyBlue) },
+      },
+      {
+        name: 'Last Year',
+        type: 'line',
+        smooth: true,
+        symbol: 'none',
+        data: lastYearData,
+        lineStyle: { color: chartColors.purple, width: 2 },
+        areaStyle: { color: createAreaGradient(chartColors.purple) },
+      },
+    ],
+  }
+})
 
 // Cost Summary Stats (calculated from chart data)
 const costSummary = computed(() => {
@@ -89,58 +120,79 @@ const costSummary = computed(() => {
   const costPerLab = activeLabs > 0 ? (thisYearTotal / activeLabs) : 0
 
   return [
-    { label: 'This Year', value: `$${thisYearTotal.toFixed(1)}k`, color: 'text-[#0066CC]' },
-    { label: 'Last Year', value: `$${lastYearTotal.toFixed(1)}k`, color: 'text-[#6753AC]' },
-    { label: 'Cost/Lab', value: `$${costPerLab.toFixed(1)}k`, color: 'text-[#3D7317]' },
+    { label: 'This Year', value: `$${thisYearTotal.toFixed(1)}k`, color: 'text-sky-500' },
+    { label: 'Last Year', value: `$${lastYearTotal.toFixed(1)}k`, color: 'text-purple-500' },
+    { label: 'Cost/Lab', value: `$${costPerLab.toFixed(1)}k`, color: 'text-primary-500' },
   ]
 })
 
-// Labs Summary Chart Options
-const labsChartOptions = computed(() => ({
-  chart: {
-    id: 'labs-summary',
-    type: 'bar' as const,
-    height: 280,
-    width: '100%',
-    toolbar: { show: false },
-    redrawOnParentResize: true,
-    redrawOnWindowResize: true,
-  },
-  colors: ['#0066CC', '#3D7317'], // PatternFly: blue, green
-  plotOptions: {
-    bar: {
-      borderRadius: 4,
-      columnWidth: '55%',
-      dataLabels: { position: 'top' },
-    },
-  },
-  dataLabels: { enabled: false },
-  xaxis: {
-    categories: data.value?.labsSummary?.months ?? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-    labels: {
-      style: { cssClass: 'text-muted-500 dark:text-muted-400' },
-    },
-  },
-  yaxis: {
-    labels: {
-      style: { cssClass: 'text-muted-500 dark:text-muted-400' },
-    },
-  },
-  legend: {
-    position: 'top' as const,
-    horizontalAlign: 'right' as const,
-    labels: { useSeriesColors: true },
-  },
-  tooltip: { theme: 'dark' },
-  grid: {
-    borderColor: 'rgba(0,0,0,0.05)',
-  },
-}))
+// Labs Summary Chart Options (ECharts bar chart)
+const labsChartOptions = computed(() => {
+  const months = data.value?.labsSummary?.months ?? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+  const createdData = data.value?.labsSummary?.created ?? []
+  const completedData = data.value?.labsSummary?.completed ?? []
 
-const labsChartSeries = computed(() => [
-  { name: 'Created', data: data.value?.labsSummary?.created ?? [] },
-  { name: 'Completed', data: data.value?.labsSummary?.completed ?? [] },
-])
+  return {
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+      textStyle: { color: '#fff' },
+      axisPointer: { type: 'shadow' },
+    },
+    legend: {
+      show: true,
+      top: 0,
+      right: 0,
+      textStyle: { color: '#9ca3af' },
+      itemWidth: 12,
+      itemHeight: 12,
+    },
+    grid: {
+      left: 40,
+      right: 20,
+      top: 40,
+      bottom: 30,
+    },
+    xAxis: {
+      type: 'category',
+      data: months,
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: { color: '#9ca3af' },
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: { color: '#9ca3af' },
+      splitLine: {
+        lineStyle: { color: 'rgba(0, 0, 0, 0.05)' },
+      },
+    },
+    series: [
+      {
+        name: 'Created',
+        type: 'bar',
+        data: createdData,
+        itemStyle: {
+          color: chartColors.skyBlue,
+          borderRadius: [4, 4, 0, 0],
+        },
+        barGap: '10%',
+      },
+      {
+        name: 'Completed',
+        type: 'bar',
+        data: completedData,
+        itemStyle: {
+          color: chartColors.green,
+          borderRadius: [4, 4, 0, 0],
+        },
+      },
+    ],
+  }
+})
 
 // Labs summary totals
 const labsTotals = computed(() => ({
@@ -148,25 +200,6 @@ const labsTotals = computed(() => ({
   completed: data.value?.labsSummary?.totalCompleted ?? 0,
 }))
 
-// Dynamic welcome message based on stats
-const welcomeMessage = computed(() => {
-  const stats = data.value?.stats
-  if (!stats) return 'Loading your dashboard...'
-
-  const parts: string[] = []
-  if (stats.activeLabs > 0) {
-    parts.push(`${stats.activeLabs} active lab${stats.activeLabs === 1 ? '' : 's'}`)
-  }
-  if (stats.completedLabs > 0) {
-    parts.push(`${stats.completedLabs} completed`)
-  }
-
-  if (parts.length === 0) {
-    return 'No active labs at the moment.'
-  }
-
-  return `You have ${parts.join(' and ')}.`
-})
 </script>
 
 <template>
@@ -201,12 +234,7 @@ const welcomeMessage = computed(() => {
             </template>
           </ClientOnly>
           <p class="text-muted-500 dark:text-muted-400 mt-1">
-            <template v-if="pending && !data">
-              Loading your dashboard...
-            </template>
-            <template v-else>
-              {{ welcomeMessage }}
-            </template>
+            Happy to see you again on your dashboard.
           </p>
         </div>
       </div>
@@ -337,14 +365,12 @@ const welcomeMessage = computed(() => {
           </template>
           <div
             v-else
-            class="w-full"
+            class="h-[280px] w-full"
           >
-            <apexchart
-              type="area"
-              height="280"
-              width="100%"
-              :options="costChartOptions"
-              :series="costChartSeries"
+            <VChart
+              :option="costChartOptions"
+              autoresize
+              class="h-full w-full"
             />
           </div>
           <template #fallback>
@@ -382,7 +408,7 @@ const welcomeMessage = computed(() => {
                 <p class="text-muted-400 text-xs">
                   Total Created
                 </p>
-                <p class="font-semibold text-[#0066CC]">
+                <p class="font-semibold text-sky-500">
                   {{ labsTotals.created }}
                 </p>
               </div>
@@ -390,7 +416,7 @@ const welcomeMessage = computed(() => {
                 <p class="text-muted-400 text-xs">
                   Total Completed
                 </p>
-                <p class="font-semibold text-[#3D7317]">
+                <p class="font-semibold text-green-500">
                   {{ labsTotals.completed }}
                 </p>
               </div>
@@ -413,14 +439,12 @@ const welcomeMessage = computed(() => {
           </template>
           <div
             v-else
-            class="w-full"
+            class="h-[280px] w-full"
           >
-            <apexchart
-              type="bar"
-              height="280"
-              width="100%"
-              :options="labsChartOptions"
-              :series="labsChartSeries"
+            <VChart
+              :option="labsChartOptions"
+              autoresize
+              class="h-full w-full"
             />
           </div>
           <template #fallback>
@@ -432,17 +456,40 @@ const welcomeMessage = computed(() => {
           </template>
         </ClientOnly>
       </BaseCard>
+
+      <!-- Request Flow Sankey -->
+      <BaseCard
+        rounded="lg"
+        class="min-w-0 overflow-hidden p-5"
+      >
+        <div class="mb-4 flex items-center justify-between">
+          <h3 class="text-muted-800 dark:text-white text-lg font-semibold">
+            Request Distribution
+          </h3>
+          <div class="text-end">
+            <p class="text-muted-400 text-xs">
+              Total Requests
+            </p>
+            <p class="font-semibold text-sky-500">
+              {{ data?.requestsByType?.total ?? 0 }}
+            </p>
+          </div>
+        </div>
+        <RequestFlowSankey
+          :data="data?.requestsByType ?? null"
+          :pending="pending"
+        />
+      </BaseCard>
+
+      <!-- Analytics Insights -->
+      <DashboardAnalyticsInsights
+        :labs-by-company="data?.labsByCompany ?? null"
+        :active-by-company="data?.activeByCompany ?? null"
+        :extension-stats="data?.extensionStats ?? null"
+        :audit-activity="data?.auditActivity ?? null"
+        :request-funnel="data?.requestFunnel ?? null"
+        :pending="pending"
+      />
     </div>
   </div>
 </template>
-
-<style scoped>
-/* Constrain ApexCharts to prevent overflow */
-:deep(.apexcharts-canvas) {
-  max-width: 100% !important;
-}
-
-:deep(.apexcharts-svg) {
-  max-width: 100% !important;
-}
-</style>
