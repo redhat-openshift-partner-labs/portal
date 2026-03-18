@@ -42,7 +42,7 @@ model Lab {
   endDate          DateTime  @map("end_date")
   completedAt      DateTime? @map("completed_at") // Set when status changes to Completed
   hold             Boolean   @default(false)
-  catchall         String?   @default("{}")
+  extras           String?   @default("{}")
   createdAt        DateTime  @default(now()) @map("created_at")
   updatedAt        DateTime  @updatedAt @map("updated_at")
 

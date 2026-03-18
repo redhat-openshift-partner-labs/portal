@@ -618,8 +618,8 @@ describe('Database Compatibility Tests', () => {
   })
 
   describe('JSON/Catchall Handling', () => {
-    it('should store and retrieve catchall JSON correctly', async () => {
-      const catchallData = { customField: 'value', count: 42, enabled: true }
+    it('should store and retrieve extras JSON correctly', async () => {
+      const extrasData = { customField: 'value', count: 42, enabled: true }
 
       const lab = await db.lab.create({
         data: {
@@ -642,8 +642,8 @@ describe('Database Compatibility Tests', () => {
           region: 'us-east-1',
           projectName: 'test-project',
           leaseTime: '30 days',
-          description: 'Test lab for JSON catchall',
-          catchall: JSON.stringify(catchallData),
+          description: 'Test lab for JSON extras',
+          extras: JSON.stringify(extrasData),
           startDate: new Date(),
           endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           updatedAt: new Date(),
@@ -654,11 +654,11 @@ describe('Database Compatibility Tests', () => {
         where: { id: lab.id },
       })
 
-      expect(retrieved?.catchall).toBe(JSON.stringify(catchallData))
-      expect(JSON.parse(retrieved?.catchall || '{}')).toEqual(catchallData)
+      expect(retrieved?.extras).toBe(JSON.stringify(extrasData))
+      expect(JSON.parse(retrieved?.extras || '{}')).toEqual(extrasData)
     })
 
-    it('should handle empty catchall (default {})', async () => {
+    it('should handle empty extras (default {})', async () => {
       const lab = await db.lab.create({
         data: {
           clusterId: 'cluster-empty-json',
@@ -680,7 +680,7 @@ describe('Database Compatibility Tests', () => {
           region: 'us-east-1',
           projectName: 'test-project',
           leaseTime: '30 days',
-          description: 'Test lab with default catchall',
+          description: 'Test lab with default extras',
           startDate: new Date(),
           endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           updatedAt: new Date(),
@@ -691,11 +691,11 @@ describe('Database Compatibility Tests', () => {
         where: { id: lab.id },
       })
 
-      expect(retrieved?.catchall).toBe('{}')
-      expect(JSON.parse(retrieved?.catchall || '{}')).toEqual({})
+      expect(retrieved?.extras).toBe('{}')
+      expect(JSON.parse(retrieved?.extras || '{}')).toEqual({})
     })
 
-    it('should handle null catchall', async () => {
+    it('should handle null extras', async () => {
       const lab = await db.lab.create({
         data: {
           clusterId: 'cluster-null-json',
@@ -717,8 +717,8 @@ describe('Database Compatibility Tests', () => {
           region: 'us-east-1',
           projectName: 'test-project',
           leaseTime: '30 days',
-          description: 'Test lab with null catchall',
-          catchall: null,
+          description: 'Test lab with null extras',
+          extras: null,
           startDate: new Date(),
           endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           updatedAt: new Date(),
@@ -729,7 +729,7 @@ describe('Database Compatibility Tests', () => {
         where: { id: lab.id },
       })
 
-      expect(retrieved?.catchall).toBeNull()
+      expect(retrieved?.extras).toBeNull()
     })
 
     it('should round-trip nested JSON values', async () => {
@@ -770,7 +770,7 @@ describe('Database Compatibility Tests', () => {
           projectName: 'test-project',
           leaseTime: '30 days',
           description: 'Test lab with nested JSON',
-          catchall: JSON.stringify(nestedData),
+          extras: JSON.stringify(nestedData),
           startDate: new Date(),
           endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           updatedAt: new Date(),
@@ -781,7 +781,7 @@ describe('Database Compatibility Tests', () => {
         where: { id: lab.id },
       })
 
-      expect(JSON.parse(retrieved?.catchall || '{}')).toEqual(nestedData)
+      expect(JSON.parse(retrieved?.extras || '{}')).toEqual(nestedData)
     })
   })
 })
