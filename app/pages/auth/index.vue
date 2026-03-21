@@ -47,7 +47,7 @@ const handleGoogleLogin = () => {
                 class="size-4 text-primary-500"
               />
             </div>
-            <span class="text-muted-600 dark:text-muted-300 text-sm">Request and manage lab environments</span>
+            <span class="text-muted-600 dark:text-muted-300 text-sm">Manage lab environments</span>
           </div>
           <div class="flex items-center gap-3">
             <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-500/10">
@@ -65,7 +65,7 @@ const handleGoogleLogin = () => {
                 class="size-4 text-primary-500"
               />
             </div>
-            <span class="text-muted-600 dark:text-muted-300 text-sm">Track usage and costs</span>
+            <span class="text-muted-600 dark:text-muted-300 text-sm">Gain valuable insights</span>
           </div>
         </div>
 
