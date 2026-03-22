@@ -1,7 +1,16 @@
 # syntax=docker/dockerfile:1
 # Multi-stage Containerfile for Nuxt 4 application on Red Hat UBI
-# Build: podman build -t portal:latest -f Containerfile .
-# Run:   podman run -p 3000:3000 --env-file .env.production portal:latest
+#
+# Build:
+#   podman build -t portal:latest -f Containerfile .
+#
+# NOTE: On Fedora 42+ (kernel 6.19+), you may need additional security options
+# due to glibc memory protection features:
+#   podman build --security-opt seccomp=unconfined --security-opt label=disable \
+#     -t portal:latest -f Containerfile .
+#
+# Run:
+#   podman run -p 3000:3000 --env-file .env.production portal:latest
 
 # =============================================================================
 # Stage 1: Dependencies
