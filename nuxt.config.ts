@@ -137,6 +137,16 @@ export default defineNuxtConfig({
     logging: {
       compressedSizes: false,
     },
+    // SSL configuration for production (re-encrypt termination on OpenShift)
+    // Set NITRO_SSL_CERT and NITRO_SSL_KEY env vars pointing to certificate files
+    ...(process.env.NITRO_SSL_CERT && process.env.NITRO_SSL_KEY
+      ? {
+          https: {
+            cert: process.env.NITRO_SSL_CERT,
+            key: process.env.NITRO_SSL_KEY,
+          },
+        }
+      : {}),
     // Disable prerendering during container builds (no DB available)
     prerender: {
       crawlLinks: false,
