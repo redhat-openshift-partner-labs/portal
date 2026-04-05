@@ -30,14 +30,17 @@ export default defineEventHandler(async (event) => {
     access_token: string
     id_token: string
     refresh_token?: string
-  }>('https://oauth2.googleapis.com/token', {
+  }>(config.oauthTokenUrl, {
     method: 'POST',
-    body: {
-      code,
-      client_id: config.public.googleClientId,
-      client_secret: config.googleClientSecret,
+    body: new URLSearchParams({
+      code: code as string,
+      client_id: config.public.oauthClientId,
+      client_secret: config.oauthClientSecret,
       redirect_uri: `${config.public.appUrl}/api/auth/callback`,
       grant_type: 'authorization_code',
+    }),
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
   }).catch(() => null)
 

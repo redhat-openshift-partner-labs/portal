@@ -43,25 +43,43 @@ export const useAuth = () => {
     return initPromise.value
   }
 
+  // const login = (returnUrl?: string) => {
+  //   // Create state parameter with CSRF protection and return URL
+  //   const state = {
+  //     nonce: Math.random().toString(36).substring(2),
+  //     returnUrl: returnUrl || '/dashboard',
+  //   }
+  //   // Use browser-compatible base64 encoding
+  //   const stateParam = btoa(JSON.stringify(state))
+  //
+  //   const params = new URLSearchParams({
+  //     client_id: config.public.googleClientId,
+  //     redirect_uri: `${config.public.appUrl}/api/auth/callback`,
+  //     response_type: 'code',
+  //     scope: 'openid email profile',
+  //     access_type: 'offline', // get refresh token
+  //     prompt: 'consent',
+  //     state: stateParam,
+  //   })
+  //   navigateTo(`https://accounts.google.com/o/oauth2/v2/auth?${params}`, { external: true })
+  // }
+
   const login = (returnUrl?: string) => {
-    // Create state parameter with CSRF protection and return URL
     const state = {
       nonce: Math.random().toString(36).substring(2),
       returnUrl: returnUrl || '/dashboard',
     }
-    // Use browser-compatible base64 encoding
     const stateParam = btoa(JSON.stringify(state))
 
     const params = new URLSearchParams({
-      client_id: config.public.googleClientId,
+      client_id: config.public.oauthClientId,
       redirect_uri: `${config.public.appUrl}/api/auth/callback`,
       response_type: 'code',
-      scope: 'openid email profile',
-      access_type: 'offline', // get refresh token
-      prompt: 'consent',
+      scope: 'openid email profile offline_access',
       state: stateParam,
     })
-    navigateTo(`https://accounts.google.com/o/oauth2/v2/auth?${params}`, { external: true })
+
+    navigateTo(`${config.public.oauthAuthUrl}?${params}`, { external: true })
   }
 
   const logout = async () => {

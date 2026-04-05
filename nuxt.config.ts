@@ -46,13 +46,15 @@ export default defineNuxtConfig({
   ],
 
   runtimeConfig: {
-    googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    oauthClientSecret: process.env.OAUTH_CLIENT_SECRET,
+    oauthTokenUrl: process.env.OAUTH_TOKEN_URL, // e.g., https://dex.example.com/token
     authSecret: process.env.AUTH_SECRET,
     public: {
       // mapbox config
       mapboxToken: '', // set it via NUXT_PUBLIC_MAPBOX_TOKEN env
       siteUrl: '', // set it via NUXT_PUBLIC_SITE_URL
-      googleClientId: process.env.GOOGLE_CLIENT_ID,
+      oauthClientId: process.env.OAUTH_CLIENT_ID,
+      oauthAuthUrl: process.env.OAUTH_AUTH_URL, // e.g., https://dex.example.com/auth
       appUrl: process.env.APP_URL || 'http://localhost:3000',
     },
   },
