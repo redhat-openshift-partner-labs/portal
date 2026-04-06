@@ -1,0 +1,70 @@
+name: Deploy Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Image tag to deploy (e.g., 1.0.0)'
+        required: true
+        type: string
+  workflow_run:
+    workflows: [Deploy Staging]
+    types: [completed]
+
+env:
+  OVERLAY: deploy/overlays/prod
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install oc CLI
+        uses: redhat-actions/oc-installer@v1
+
+      - name: Log in to OpenShift
+        uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          insecure_skip_tls_verify: true
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            VERSION=$(echo "${{ github.event.workflow_run.head_branch }}" | sed 's/^v//')
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update image tag
+        run: |
+          cd ${{ env.OVERLAY }}
+          kustomize edit set image portal=quay.io/rhopl/portal:${{ steps.version.outputs.version }}
+
+      - name: Deploy to OpenShift
+        run: |
+          oc apply -k ${{ env.OVERLAY }}
+          oc rollout status deployment/portal -n opl-prod --timeout=300s
+
+      - name: Verify deployment
+        run: |
+          URL=$(oc get route portal -n opl-prod -o jsonpath='{.spec.host}')
+          curl --fail --retry 5 --retry-delay 10 "https://$URL/api/health"
+
+      - name: Report status
+        if: always()
+        run: |
+          URL=$(oc get route portal -n opl-prod -o jsonpath='{.spec.host}' 2>/dev/null || echo "unknown")
+          echo "## Production Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL**: https://$URL" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY

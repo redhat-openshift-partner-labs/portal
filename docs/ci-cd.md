@@ -8,8 +8,8 @@
 2. [Workflows](#workflows)
 3. [Pipeline Architecture](#pipeline-architecture)
 4. [PR Checks](#pr-checks)
-5. [Local Testing](#local-testing)
-6. [Planned Workflows](#planned-workflows)
+5. [Creating Releases](#creating-releases)
+6. [Local Testing](#local-testing)
 7. [Configuration](#configuration)
 
 ## Overview
@@ -25,7 +25,7 @@ The CI/CD pipeline uses GitHub Actions to automate testing, building, and deploy
 | Release | `release.yml` | Tag push (`v*`) | Generate changelog, create GitHub release |
 | Build Image | `build-image.yml` | Release published | Build and push to Quay.io |
 | Deploy Staging | `deploy-staging.yml` | Build Image completes | Deploy to OpenShift staging, smoke tests |
-| Deploy Prod | `deploy-prod.yml` | Manual | Production deployment (planned) |
+| Deploy Prod | `deploy-prod.yml` | Manual or staging success | Deploy to OpenShift production |
 
 ## Pipeline Architecture
 
@@ -172,16 +172,6 @@ systemctl --user start podman.socket
 - Some GitHub Actions features may not work identically in act
 - Secrets must be provided via `.secrets` file or `-s` flag
 - Caching behavior differs from GitHub-hosted runners
-
-## Planned Workflows
-
-The following workflows are planned for future implementation:
-
-### Production Deployment (`deploy-prod.yml`)
-
-- Triggered manually or by successful staging tests
-- Deploys to OpenShift production project
-- Requires approval for production changes
 
 ## Configuration
 
