@@ -25,11 +25,11 @@ Uses Keycloak to exchange GitHub OIDC tokens for OpenShift-compatible tokens. No
    |---------|-------|
    | Alias | `github-actions` |
    | Display Name | `GitHub Actions` |
-   | Discovery URL | `https://token.actions.githubusercontent.com/.well-known/openid-configuration` |
-   | Client ID | `keycloak` (or any identifier) |
-   | Client Authentication | Off (GitHub OIDC is public) |
-   | Validate Signatures | On |
-   | Use JWKS URL | On |
+   | Use discovery endpoint | On |
+   | Discovery endpoint | `https://token.actions.githubusercontent.com/.well-known/openid-configuration` |
+   | Client authentication | `Client secret sent in the request body` (any option works - not used for GitHub) |
+   | Client ID | `keycloak` (this becomes the expected `aud` claim) |
+   | Client Secret | `unused` (any value - GitHub OIDC is public, doesn't require secret) |
 
 2. **Create Client for Token Exchange**
 
