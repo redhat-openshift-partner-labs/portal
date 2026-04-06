@@ -22,7 +22,7 @@ The CI/CD pipeline uses GitHub Actions to automate testing, building, and deploy
 |----------|------|---------|---------|
 | CI | `ci.yml` | PR to main | Lint, typecheck, test, build |
 | Main | `main.yml` | Push to main | Post-merge validation (calls CI) |
-| Release | `release.yml` | Tag push | Version and changelog (planned) |
+| Release | `release.yml` | Tag push (`v*`) | Generate changelog, create GitHub release |
 | Build Image | `build-image.yml` | Release | Container build (planned) |
 | Deploy Staging | `deploy-staging.yml` | Image push | Staging deployment (planned) |
 | Deploy Prod | `deploy-prod.yml` | Manual | Production deployment (planned) |
@@ -108,6 +108,22 @@ concurrency:
   cancel-in-progress: true
 ```
 
+## Creating Releases
+
+To create a release, push a version tag:
+
+```bash
+# Update version in package.json, then:
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The release workflow will:
+1. Generate a changelog from conventional commits using [git-cliff](https://git-cliff.org)
+2. Create a GitHub release with the changelog as the body
+
+Changelog categories are derived from commit prefixes (`feat:`, `fix:`, `docs:`, etc.).
+
 ## Local Testing
 
 Workflows can be tested locally using [nektos/act](https://github.com/nektos/act), which runs GitHub Actions in Docker/Podman containers.
@@ -160,12 +176,6 @@ systemctl --user start podman.socket
 ## Planned Workflows
 
 The following workflows are planned for future implementation:
-
-### Release (`release.yml`)
-
-- Triggered by version tags (e.g., `v1.2.3`)
-- Generates changelog from conventional commits
-- Creates GitHub release with release notes
 
 ### Container Build (`build-image.yml`)
 
