@@ -23,8 +23,8 @@ The CI/CD pipeline uses GitHub Actions to automate testing, building, and deploy
 | CI | `ci.yml` | PR to main | Lint, typecheck, test, build |
 | Main | `main.yml` | Push to main | Post-merge validation (calls CI) |
 | Release | `release.yml` | Tag push (`v*`) | Generate changelog, create GitHub release |
-| Build Image | `build-image.yml` | Release published | Build and push to Quay.io |
-| Deploy Staging | `deploy-staging.yml` | Build Image completes | Deploy to OpenShift staging, smoke tests |
+| Build Image | `build-image.yml` | Tag push (`v*`) | Build and push to Quay.io |
+| Deploy Staging | `deploy-staging.yml` | Build Image completes | Deploy database, run migrations, deploy app, smoke tests |
 | Deploy Prod | `deploy-prod.yml` | Manual or staging success | Deploy to OpenShift production |
 
 ## Pipeline Architecture
@@ -43,23 +43,30 @@ flowchart TB
         Validate[Validate]
     end
 
-    subgraph Release["Release Phase"]
+    subgraph Release["Release Phase (tag push)"]
         Tag[Create Release]
         Image[Build Container]
-        Push[Push to Quay.io]
     end
 
-    subgraph Deploy["Deployment Phase"]
-        Staging[Deploy to Staging]
+    subgraph Staging["Staging Deployment"]
+        DB[Deploy PostgreSQL]
+        App[Deploy App]
+        Migrate[Run Migrations]
         Smoke[Smoke Tests]
-        Prod[Deploy to Production]
+    end
+
+    subgraph Prod["Production Deployment"]
+        ProdApp[Deploy App]
+        Verify[Verify Health]
     end
 
     PR -->|merged| Merge
     Merge -->|tag created| Release
-    Release --> Deploy
-    Staging --> Smoke
+    Tag & Image -->|parallel| Release
+    Image -->|completes| Staging
+    DB --> App --> Migrate --> Smoke
     Smoke -->|pass| Prod
+    ProdApp --> Verify
 ```
 
 ## PR Checks
@@ -173,18 +180,109 @@ systemctl --user start podman.socket
 - Secrets must be provided via `.secrets` file or `-s` flag
 - Caching behavior differs from GitHub-hosted runners
 
+## Pre-Deployment Setup
+
+Before the first deployment, set up the OpenShift environments. All sensitive values
+are injected from GitHub secrets at deploy time — no secrets are stored in version control.
+
+### Staging Environment
+
+```bash
+# Create staging namespace
+oc new-project staging
+
+# Apply CI service account and RBAC
+oc apply -f deploy/ci/service-account.yaml
+
+# Get token for GitHub Actions (3-month expiry)
+oc create token github-actions -n staging --duration=2190h
+```
+
+The staging workflow automatically:
+1. Deploys PostgreSQL from `deploy/datastore/overlays/staging/`
+2. Configures database credentials from GitHub secrets
+3. Creates `portal-secrets` from GitHub secrets
+4. Configures route and URLs from GitHub secrets
+
+### Production Environment
+
+```bash
+# Create production namespace
+oc new-project portal
+
+# Apply CI service account and RBAC
+oc apply -f deploy/ci/service-account.yaml
+
+# Get token for GitHub Actions
+oc create token github-actions -n portal --duration=2190h
+```
+
+Production uses an external database, so only the application is deployed.
+All secrets are injected from GitHub secrets at deploy time.
+
+### OIDC Provider Configuration
+
+Add these redirect URIs to your identity provider:
+- Staging: `https://<STAGING_URL>/api/auth/callback`
+- Production: `https://<PROD_URL>/api/auth/callback`
+
+### Seeding Test Data (Staging Only)
+
+After initial deployment, optionally seed the staging database:
+
+```bash
+POD=$(oc get pod -l app=portal -n staging -o jsonpath='{.items[0].metadata.name}')
+oc exec -n staging "$POD" -- npx tsx prisma/seed.postgresql.ts
+```
+
 ## Configuration
 
 ### Required Secrets
 
-Configure these secrets in GitHub repository settings:
+Configure these secrets in GitHub repository settings.
 
-| Secret | Purpose |
-|--------|---------|
-| `QUAY_USERNAME` | Quay.io registry username |
-| `QUAY_PASSWORD` | Quay.io registry password |
-| `OPENSHIFT_SERVER` | OpenShift API server URL |
-| `OPENSHIFT_TOKEN` | OpenShift service account token |
+#### Build Secrets
+
+| Secret | Purpose | Example |
+|--------|---------|---------|
+| `QUAY_USERNAME` | Quay.io registry username | `myorg+robot` |
+| `QUAY_PASSWORD` | Quay.io registry password | Robot account token |
+
+#### OpenShift Connection
+
+| Secret | Purpose | Example |
+|--------|---------|---------|
+| `OPENSHIFT_SERVER` | OpenShift API server URL | `https://api.mycluster.com:6443` |
+| `OPENSHIFT_TOKEN` | Service account token | From `oc create token github-actions` |
+
+#### Staging Environment Secrets
+
+| Secret | Purpose | Example |
+|--------|---------|---------|
+| `STAGING_URL` | Route hostname | `portal-staging.apps.mycluster.com` |
+| `STAGING_DB_NAME` | Database name | `portal_staging` |
+| `STAGING_DB_USER` | Database username | `portal` |
+| `STAGING_DB_PASSWORD` | Database password | Secure random string |
+| `STAGING_OAUTH_CLIENT_ID` | OIDC client ID | From identity provider |
+| `STAGING_OAUTH_CLIENT_SECRET` | OIDC client secret | From identity provider |
+| `STAGING_OAUTH_AUTH_URL` | OIDC authorization endpoint | `https://idp.example.com/auth` |
+| `STAGING_OAUTH_TOKEN_URL` | OIDC token endpoint | `https://idp.example.com/token` |
+| `STAGING_AUTH_SECRET` | JWT signing secret | `openssl rand -base64 32` |
+
+#### Production Environment Secrets
+
+| Secret | Purpose | Example |
+|--------|---------|---------|
+| `PROD_URL` | Route hostname | `portal.apps.mycluster.com` |
+| `PROD_DATABASE_URL` | Full PostgreSQL connection string | `postgresql://user:pass@host:5432/db?schema=public` |
+| `PROD_OAUTH_CLIENT_ID` | OIDC client ID | From identity provider |
+| `PROD_OAUTH_CLIENT_SECRET` | OIDC client secret | From identity provider |
+| `PROD_OAUTH_AUTH_URL` | OIDC authorization endpoint | `https://idp.example.com/auth` |
+| `PROD_OAUTH_TOKEN_URL` | OIDC token endpoint | `https://idp.example.com/token` |
+| `PROD_AUTH_SECRET` | JWT signing secret | `openssl rand -base64 32` |
+
+> **Note:** Production uses a full `DATABASE_URL` instead of separate components because
+> the production database is typically managed externally (e.g., RDS, Cloud SQL, managed PostgreSQL).
 
 ### Node.js Version
 

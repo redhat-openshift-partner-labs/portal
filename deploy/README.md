@@ -6,24 +6,39 @@ Kustomize-based deployment manifests for the Portal application.
 
 ```
 deploy/
-├── base/                    # Base manifests
+├── base/                    # Base app manifests
 │   ├── deployment.yaml      # Deployment with probes and security context
 │   ├── service.yaml         # ClusterIP service
 │   ├── route.yaml           # OpenShift route with TLS
 │   ├── configmap.yaml       # Non-sensitive configuration
 │   ├── secret.yaml          # Secret template (not deployed via kustomize)
 │   └── kustomization.yaml
-└── overlays/
-    ├── dev/                 # Development environment
-    │   ├── kustomization.yaml
-    │   ├── deployment-patch.yaml
-    │   ├── configmap-patch.yaml
-    │   └── route-patch.yaml
-    └── prod/                # Production environment
-        ├── kustomization.yaml
-        ├── deployment-patch.yaml
-        ├── configmap-patch.yaml
-        └── route-patch.yaml
+├── overlays/
+│   ├── dev/                 # Development/staging environment
+│   │   ├── kustomization.yaml
+│   │   ├── deployment-patch.yaml
+│   │   ├── configmap-patch.yaml
+│   │   ├── route-patch.yaml
+│   │   ├── migration-job.yaml   # Optional: standalone migration job
+│   │   └── seed-job.yaml        # Optional: seed data job
+│   └── prod/                # Production environment
+│       ├── kustomization.yaml
+│       ├── deployment-patch.yaml
+│       ├── configmap-patch.yaml
+│       └── route-patch.yaml
+├── datastore/               # PostgreSQL database manifests
+│   ├── base/                # Base PostgreSQL resources
+│   │   ├── deployment.yaml
+│   │   ├── service.yaml
+│   │   ├── pvc.yaml
+│   │   ├── secret.yaml
+│   │   └── kustomization.yaml
+│   ├── overlays/
+│   │   └── staging/         # Staging database instance
+│   │       └── kustomization.yaml
+│   └── README.md
+└── ci/
+    └── service-account.yaml # GitHub Actions RBAC
 ```
 
 ## Prerequisites
