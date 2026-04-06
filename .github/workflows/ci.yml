@@ -54,6 +54,8 @@ jobs:
 
       - name: Generate Prisma client
         run: pnpm prisma generate
+        env:
+          DATABASE_URL: file:./dev.db
 
       - name: Run type check
         run: pnpm typecheck
@@ -79,6 +81,8 @@ jobs:
 
       - name: Generate Prisma client
         run: pnpm prisma generate
+        env:
+          DATABASE_URL: file:./dev.db
 
       - name: Run tests
         run: pnpm test
@@ -104,6 +108,8 @@ jobs:
 
       - name: Generate Prisma client
         run: pnpm prisma generate
+        env:
+          DATABASE_URL: file:./dev.db
 
       - name: Build application
         run: pnpm build
