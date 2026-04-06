@@ -28,7 +28,7 @@ Uses Keycloak to exchange GitHub OIDC tokens for OpenShift-compatible tokens. No
    | Use discovery endpoint | On |
    | Discovery endpoint | `https://token.actions.githubusercontent.com/.well-known/openid-configuration` |
    | Client authentication | `Client secret sent in the request body` (any option works - not used for GitHub) |
-   | Client ID | `keycloak` (this becomes the expected `aud` claim) |
+   | Client ID | `redhat-openshift-partner-labs` (must match workflow audience) |
    | Client Secret | `unused` (any value - GitHub OIDC is public, doesn't require secret) |
 
 2. **Create Client for Token Exchange**
