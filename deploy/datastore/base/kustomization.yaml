@@ -1,0 +1,15 @@
+# Base kustomization — apply all resources, label them uniformly
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+labels:
+  - pairs:
+      app.kubernetes.io/managed-by: kustomize
+      app.kubernetes.io/part-of: portal
+    includeSelectors: true
+
+resources:
+  - secret.yaml
+  - pvc.yaml
+  - deployment.yaml
+  - service.yaml

@@ -1,0 +1,47 @@
+# Instance: portal-staging
+# Deploy with: oc apply -k deploy/datastore/overlays/staging
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: staging
+
+namePrefix: portal-
+
+labels:
+  - pairs:
+      app.kubernetes.io/instance: portal-staging
+    includeSelectors: true
+
+resources:
+  - ../../base
+
+patches:
+  - target:
+      kind: Secret
+      name: postgresql
+    patch: |-
+      - op: replace
+        path: /stringData/database-user
+        value: "portal"
+      - op: replace
+        path: /stringData/database-password
+        value: "Lohtieyiexoo8Te2yeiTahYa8eiwejap"
+      - op: replace
+        path: /stringData/database-name
+        value: "portal_staging"
+
+  - target:
+      kind: PersistentVolumeClaim
+      name: postgresql
+    patch: |-
+      - op: replace
+        path: /spec/resources/requests/storage
+        value: "5Gi"
+
+  - target:
+      kind: Deployment
+      name: postgresql
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: "1Gi"
