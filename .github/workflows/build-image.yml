@@ -1,8 +1,9 @@
 name: Build Image
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v*'
 
 env:
   REGISTRY: quay.io
