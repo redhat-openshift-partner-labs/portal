@@ -37,10 +37,10 @@ deploy/
 
 ```bash
 # Build the image
-podman build -t quay.io/opl/portal:latest -f Containerfile .
+podman build -t quay.io/rhopl/portal:latest -f Containerfile .
 
 # Push to registry
-podman push quay.io/opl/portal:latest
+podman push quay.io/rhopl/portal:latest
 ```
 
 ## Deploy

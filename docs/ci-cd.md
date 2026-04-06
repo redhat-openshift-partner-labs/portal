@@ -181,7 +181,7 @@ The following workflows are planned for future implementation:
 
 - Triggered by release creation
 - Builds container image using `Containerfile`
-- Pushes to `quay.io/opl/portal`
+- Pushes to `quay.io/rhopl/portal`
 - Tags with version and `latest`
 
 ### Staging Deployment (`deploy-staging.yml`)
