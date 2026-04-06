@@ -1,0 +1,47 @@
+# One-shot Job to run Prisma migrations before app deployment
+# This job uses the same portal image to run migrations
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: portal-migrate
+  labels:
+    app.kubernetes.io/name: portal
+    app.kubernetes.io/component: migration
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: portal
+        app.kubernetes.io/component: migration
+    spec:
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: migrate
+          image: quay.io/rhopl/portal:latest
+          command:
+            - npx
+            - prisma
+            - migrate
+            - deploy
+            - --config=prisma.config.postgresql.ts
+          envFrom:
+            - secretRef:
+                name: portal-secrets
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL

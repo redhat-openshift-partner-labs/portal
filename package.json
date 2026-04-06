@@ -32,6 +32,7 @@
     "db:pg:migrate": "prisma migrate dev --config=prisma.config.postgresql.ts",
     "db:pg:deploy": "prisma migrate deploy --config=prisma.config.postgresql.ts",
     "db:pg:studio": "prisma studio --config=prisma.config.postgresql.ts",
+    "db:pg:seed": "tsx prisma/seed.postgresql.ts",
     "db:validate": "tsx scripts/validate-schemas.ts",
     "test": "vitest run",
     "test:watch": "vitest",

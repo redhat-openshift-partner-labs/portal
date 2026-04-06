@@ -88,6 +88,7 @@ COPY --from=builder --chown=1001:0 /app/.output ./.output
 # Copy Prisma schema files (needed for runtime client)
 COPY --from=builder --chown=1001:0 /app/prisma/schema.postgresql.prisma ./prisma/
 COPY --from=builder --chown=1001:0 /app/prisma/migrations-pg ./prisma/migrations-pg
+COPY --from=builder --chown=1001:0 /app/prisma/seed.postgresql.ts ./prisma/
 
 # Copy prisma config for potential runtime migrations
 COPY --from=builder --chown=1001:0 /app/prisma.config.postgresql.ts ./
