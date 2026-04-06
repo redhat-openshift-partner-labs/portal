@@ -42,7 +42,7 @@ jobs:
       - name: Deploy to OpenShift
         run: |
           oc apply -k ${{ env.OVERLAY }}
-          oc rollout status deployment/portal -n opl-dev --timeout=300s
+          oc rollout status deployment/portal -n staging --timeout=300s
 
   smoke-test:
     name: Smoke Tests
@@ -65,7 +65,7 @@ jobs:
       - name: Get route URL
         id: route
         run: |
-          URL=$(oc get route portal -n opl-dev -o jsonpath='{.spec.host}')
+          URL=$(oc get route portal -n staging -o jsonpath='{.spec.host}')
           echo "url=https://$URL" >> $GITHUB_OUTPUT
 
       - name: Health check

@@ -52,7 +52,7 @@ Create them manually or use External Secrets Operator:
 
 ```bash
 # Create namespace first
-oc new-project opl-prod
+oc new-project portal
 
 # Create secret from literal values
 oc create secret generic portal-secrets \
@@ -84,16 +84,16 @@ oc apply -k deploy/overlays/dev
 
 ```bash
 # Check rollout status
-oc rollout status deployment/portal -n opl-prod
+oc rollout status deployment/portal -n portal
 
 # Get route URL
-oc get route portal -n opl-prod -o jsonpath='{.spec.host}'
+oc get route portal -n portal -o jsonpath='{.spec.host}'
 
 # View logs
-oc logs -f deployment/portal -n opl-prod
+oc logs -f deployment/portal -n portal
 
 # Check health
-curl https://$(oc get route portal -n opl-prod -o jsonpath='{.spec.host}')/api/health
+curl https://$(oc get route portal -n portal -o jsonpath='{.spec.host}')/api/health
 ```
 
 ## Configuration

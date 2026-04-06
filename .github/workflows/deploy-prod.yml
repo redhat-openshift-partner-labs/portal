@@ -52,17 +52,17 @@ jobs:
       - name: Deploy to OpenShift
         run: |
           oc apply -k ${{ env.OVERLAY }}
-          oc rollout status deployment/portal -n opl-prod --timeout=300s
+          oc rollout status deployment/portal -n portal --timeout=300s
 
       - name: Verify deployment
         run: |
-          URL=$(oc get route portal -n opl-prod -o jsonpath='{.spec.host}')
+          URL=$(oc get route portal -n portal -o jsonpath='{.spec.host}')
           curl --fail --retry 5 --retry-delay 10 "https://$URL/api/health"
 
       - name: Report status
         if: always()
         run: |
-          URL=$(oc get route portal -n opl-prod -o jsonpath='{.spec.host}' 2>/dev/null || echo "unknown")
+          URL=$(oc get route portal -n portal -o jsonpath='{.spec.host}' 2>/dev/null || echo "unknown")
           echo "## Production Deployment" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **URL**: https://$URL" >> $GITHUB_STEP_SUMMARY
