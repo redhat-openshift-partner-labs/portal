@@ -21,7 +21,7 @@ The CI/CD pipeline uses GitHub Actions to automate testing, building, and deploy
 | Workflow | File | Trigger | Purpose |
 |----------|------|---------|---------|
 | CI | `ci.yml` | PR to main | Lint, typecheck, test, build |
-| Main | `main.yml` | Push to main | Post-merge validation |
+| Main | `main.yml` | Push to main | Post-merge validation (calls CI) |
 | Release | `release.yml` | Tag push | Version and changelog (planned) |
 | Build Image | `build-image.yml` | Release | Container build (planned) |
 | Deploy Staging | `deploy-staging.yml` | Image push | Staging deployment (planned) |
@@ -160,10 +160,6 @@ systemctl --user start podman.socket
 ## Planned Workflows
 
 The following workflows are planned for future implementation:
-
-### Post-Merge Validation (`main.yml`)
-
-Re-runs all CI checks on merged code to ensure integrity. Can trigger downstream release workflows.
 
 ### Release (`release.yml`)
 
