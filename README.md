@@ -5,16 +5,16 @@ A modern web application for managing OpenShift cluster reservation requests acr
 ```mermaid
 graph LR
     subgraph Features
-        Dashboard["📊 Dashboard"]
-        Requests["📋 Requests"]
-        Archive["📁 Archive"]
-        Auth["🔐 Authentication"]
+        Dashboard["Dashboard"]
+        Requests["Requests"]
+        Archive["Archive"]
+        Auth["Authentication"]
     end
 
     Dashboard --> Stats["Statistics & Charts"]
     Requests --> Manage["Manage Reservations"]
     Archive --> History["View History"]
-    Auth --> Google["Google OAuth"]
+    Auth --> OIDC["OpenID Connect"]
 ```
 
 ## Quick Start
@@ -51,7 +51,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 | **Styling** | Tailwind CSS + LightningCSS |
 | **UI Components** | Shuriken UI + Tairo + Reka UI |
 | **Database** | Prisma ORM (SQLite / PostgreSQL) |
-| **Authentication** | Google OAuth + JWT |
+| **Authentication** | OIDC + JWT |
 | **Charts** | ECharts |
 | **Icons** | Iconify (Phosphor, Lucide) |
 
@@ -117,9 +117,11 @@ portal/
 ## Environment Variables
 
 ```env
-# Required
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
+# Required - OIDC Provider
+OAUTH_CLIENT_ID=your-oidc-client-id
+OAUTH_CLIENT_SECRET=your-oidc-client-secret
+OAUTH_AUTH_URL=https://your-provider.com/auth
+OAUTH_TOKEN_URL=https://your-provider.com/token
 AUTH_SECRET=your-secure-secret
 
 # Application
@@ -150,13 +152,13 @@ flowchart TB
     end
 
     subgraph External["External Services"]
-        Google["Google OAuth"]
+        OIDC["OIDC Provider"]
     end
 
     Vue --> Composables
     Composables --> API
     API --> Auth
-    Auth --> Google
+    Auth --> OIDC
     API --> Prisma
     Prisma --> DB
 ```
