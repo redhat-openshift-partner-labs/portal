@@ -77,6 +77,7 @@ export async function getTestDb(): Promise<PrismaClient> {
       "completed_at" DATETIME,
       "hold" INTEGER NOT NULL DEFAULT 0,
       "extras" TEXT DEFAULT '{}',
+      "request_id" TEXT,
       "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       "updated_at" DATETIME NOT NULL,
       FOREIGN KEY ("company_id") REFERENCES "companies"("id")
