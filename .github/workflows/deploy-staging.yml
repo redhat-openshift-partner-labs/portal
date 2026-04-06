@@ -5,8 +5,13 @@ on:
     workflows: [Build Image]
     types: [completed]
 
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
 env:
   OVERLAY: deploy/overlays/dev
+  NAMESPACE: staging
 
 jobs:
   deploy:
@@ -21,12 +26,64 @@ jobs:
       - name: Install oc CLI
         uses: redhat-actions/oc-installer@v1
 
-      - name: Log in to OpenShift
+      - name: Detect auth method
+        id: auth
+        run: |
+          if [ -n "${{ secrets.KEYCLOAK_URL }}" ]; then
+            echo "method=oidc" >> $GITHUB_OUTPUT
+          else
+            echo "method=token" >> $GITHUB_OUTPUT
+          fi
+
+      # Token-based authentication
+      - name: Login with token
+        if: steps.auth.outputs.method == 'token'
         uses: redhat-actions/oc-login@v1
         with:
           openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
           insecure_skip_tls_verify: true
+          namespace: ${{ env.NAMESPACE }}
+
+      # OIDC authentication via Keycloak
+      - name: Get GitHub OIDC token
+        if: steps.auth.outputs.method == 'oidc'
+        id: github-oidc
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token = await core.getIDToken('keycloak');
+            core.setSecret(token);
+            core.setOutput('token', token);
+
+      - name: Exchange token via Keycloak
+        if: steps.auth.outputs.method == 'oidc'
+        id: keycloak
+        run: |
+          RESPONSE=$(curl -s -X POST \
+            "${{ secrets.KEYCLOAK_URL }}/realms/${{ secrets.KEYCLOAK_REALM }}/protocol/openid-connect/token" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "grant_type=urn:ietf:params:oauth:grant-type:token-exchange" \
+            -d "client_id=${{ secrets.KEYCLOAK_CLIENT_ID }}" \
+            -d "client_secret=${{ secrets.KEYCLOAK_CLIENT_SECRET }}" \
+            -d "subject_token=${{ steps.github-oidc.outputs.token }}" \
+            -d "subject_token_type=urn:ietf:params:oauth:token-type:jwt" \
+            -d "requested_token_type=urn:ietf:params:oauth:token-type:access_token")
+          TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
+          if [ "$TOKEN" == "null" ] || [ -z "$TOKEN" ]; then
+            echo "::error::Token exchange failed"
+            exit 1
+          fi
+          echo "::add-mask::$TOKEN"
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+
+      - name: Login with Keycloak token
+        if: steps.auth.outputs.method == 'oidc'
+        run: |
+          oc login "${{ secrets.OPENSHIFT_SERVER }}" \
+            --token="${{ steps.keycloak.outputs.token }}" \
+            --insecure-skip-tls-verify=true
+          oc project ${{ env.NAMESPACE }}
 
       - name: Extract version from release
         id: version
@@ -42,7 +99,7 @@ jobs:
       - name: Deploy to OpenShift
         run: |
           oc apply -k ${{ env.OVERLAY }}
-          oc rollout status deployment/portal -n staging --timeout=300s
+          oc rollout status deployment/portal -n ${{ env.NAMESPACE }} --timeout=300s
 
   smoke-test:
     name: Smoke Tests
@@ -55,7 +112,7 @@ jobs:
       - name: Install oc CLI
         uses: redhat-actions/oc-installer@v1
 
-      - name: Log in to OpenShift
+      - name: Login to OpenShift
         uses: redhat-actions/oc-login@v1
         with:
           openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
@@ -65,7 +122,7 @@ jobs:
       - name: Get route URL
         id: route
         run: |
-          URL=$(oc get route portal -n staging -o jsonpath='{.spec.host}')
+          URL=$(oc get route portal -n ${{ env.NAMESPACE }} -o jsonpath='{.spec.host}')
           echo "url=https://$URL" >> $GITHUB_OUTPUT
 
       - name: Health check
@@ -78,4 +135,3 @@ jobs:
           echo "## Staging Deployment" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **URL**: ${{ steps.route.outputs.url }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Version**: ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
