@@ -23,7 +23,7 @@ The CI/CD pipeline uses GitHub Actions to automate testing, building, and deploy
 | CI | `ci.yml` | PR to main | Lint, typecheck, test, build |
 | Main | `main.yml` | Push to main | Post-merge validation (calls CI) |
 | Release | `release.yml` | Tag push (`v*`) | Generate changelog, create GitHub release |
-| Build Image | `build-image.yml` | Release | Container build (planned) |
+| Build Image | `build-image.yml` | Release published | Build and push to Quay.io |
 | Deploy Staging | `deploy-staging.yml` | Image push | Staging deployment (planned) |
 | Deploy Prod | `deploy-prod.yml` | Manual | Production deployment (planned) |
 
@@ -177,13 +177,6 @@ systemctl --user start podman.socket
 
 The following workflows are planned for future implementation:
 
-### Container Build (`build-image.yml`)
-
-- Triggered by release creation
-- Builds container image using `Containerfile`
-- Pushes to `quay.io/rhopl/portal`
-- Tags with version and `latest`
-
 ### Staging Deployment (`deploy-staging.yml`)
 
 - Triggered by image push to registry
@@ -205,8 +198,8 @@ Configure these secrets in GitHub repository settings:
 
 | Secret | Purpose |
 |--------|---------|
-| `QUAY_USERNAME` | Quay.io registry username (planned) |
-| `QUAY_PASSWORD` | Quay.io registry password (planned) |
+| `QUAY_USERNAME` | Quay.io registry username |
+| `QUAY_PASSWORD` | Quay.io registry password |
 | `OPENSHIFT_SERVER` | OpenShift API server URL (planned) |
 | `OPENSHIFT_TOKEN` | OpenShift service account token (planned) |
 
