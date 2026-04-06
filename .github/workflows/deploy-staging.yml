@@ -5,10 +5,6 @@ on:
     workflows: [Build Image]
     types: [completed]
 
-permissions:
-  id-token: write  # Required for OIDC
-  contents: read
-
 env:
   OVERLAY: deploy/overlays/dev
   NAMESPACE: staging
@@ -30,13 +26,40 @@ jobs:
         id: auth
         run: |
           if [ -n "${{ secrets.KEYCLOAK_URL }}" ]; then
-            echo "method=oidc" >> $GITHUB_OUTPUT
+            echo "method=keycloak" >> $GITHUB_OUTPUT
           else
             echo "method=token" >> $GITHUB_OUTPUT
           fi
 
-      # Token-based authentication
-      - name: Login with token
+      # Keycloak client credentials authentication
+      - name: Get Keycloak token
+        if: steps.auth.outputs.method == 'keycloak'
+        id: keycloak
+        run: |
+          RESPONSE=$(curl -s -X POST \
+            "${{ secrets.KEYCLOAK_URL }}/realms/${{ secrets.KEYCLOAK_REALM }}/protocol/openid-connect/token" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "grant_type=client_credentials" \
+            -d "client_id=${{ secrets.KEYCLOAK_CLIENT_ID }}" \
+            -d "client_secret=${{ secrets.KEYCLOAK_CLIENT_SECRET }}")
+          TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
+          if [ "$TOKEN" == "null" ] || [ -z "$TOKEN" ]; then
+            echo "::error::Failed to get Keycloak token: $RESPONSE"
+            exit 1
+          fi
+          echo "::add-mask::$TOKEN"
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+
+      - name: Login with Keycloak token
+        if: steps.auth.outputs.method == 'keycloak'
+        run: |
+          oc login "${{ secrets.OPENSHIFT_SERVER }}" \
+            --token="${{ steps.keycloak.outputs.token }}" \
+            --insecure-skip-tls-verify=true
+          oc project ${{ env.NAMESPACE }}
+
+      # ServiceAccount token authentication
+      - name: Login with ServiceAccount token
         if: steps.auth.outputs.method == 'token'
         uses: redhat-actions/oc-login@v1
         with:
@@ -44,46 +67,6 @@ jobs:
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
           insecure_skip_tls_verify: true
           namespace: ${{ env.NAMESPACE }}
-
-      # OIDC authentication via Keycloak
-      - name: Get GitHub OIDC token
-        if: steps.auth.outputs.method == 'oidc'
-        id: github-oidc
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const token = await core.getIDToken('redhat-openshift-partner-labs');
-            core.setSecret(token);
-            core.setOutput('token', token);
-
-      - name: Exchange token via Keycloak
-        if: steps.auth.outputs.method == 'oidc'
-        id: keycloak
-        run: |
-          RESPONSE=$(curl -s -X POST \
-            "${{ secrets.KEYCLOAK_URL }}/realms/${{ secrets.KEYCLOAK_REALM }}/protocol/openid-connect/token" \
-            -H "Content-Type: application/x-www-form-urlencoded" \
-            -d "grant_type=urn:ietf:params:oauth:grant-type:token-exchange" \
-            -d "client_id=${{ secrets.KEYCLOAK_CLIENT_ID }}" \
-            -d "client_secret=${{ secrets.KEYCLOAK_CLIENT_SECRET }}" \
-            -d "subject_token=${{ steps.github-oidc.outputs.token }}" \
-            -d "subject_token_type=urn:ietf:params:oauth:token-type:jwt" \
-            -d "requested_token_type=urn:ietf:params:oauth:token-type:access_token")
-          TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
-          if [ "$TOKEN" == "null" ] || [ -z "$TOKEN" ]; then
-            echo "::error::Token exchange failed"
-            exit 1
-          fi
-          echo "::add-mask::$TOKEN"
-          echo "token=$TOKEN" >> $GITHUB_OUTPUT
-
-      - name: Login with Keycloak token
-        if: steps.auth.outputs.method == 'oidc'
-        run: |
-          oc login "${{ secrets.OPENSHIFT_SERVER }}" \
-            --token="${{ steps.keycloak.outputs.token }}" \
-            --insecure-skip-tls-verify=true
-          oc project ${{ env.NAMESPACE }}
 
       - name: Extract version from release
         id: version
@@ -106,23 +89,29 @@ jobs:
     runs-on: ubuntu-latest
     needs: deploy
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
       - name: Install oc CLI
         uses: redhat-actions/oc-installer@v1
 
       - name: Login to OpenShift
-        uses: redhat-actions/oc-login@v1
-        with:
-          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
-          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
-          insecure_skip_tls_verify: true
+        id: login
+        run: |
+          if [ -n "${{ secrets.KEYCLOAK_URL }}" ]; then
+            RESPONSE=$(curl -s -X POST \
+              "${{ secrets.KEYCLOAK_URL }}/realms/${{ secrets.KEYCLOAK_REALM }}/protocol/openid-connect/token" \
+              -H "Content-Type: application/x-www-form-urlencoded" \
+              -d "grant_type=client_credentials" \
+              -d "client_id=${{ secrets.KEYCLOAK_CLIENT_ID }}" \
+              -d "client_secret=${{ secrets.KEYCLOAK_CLIENT_SECRET }}")
+            TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
+            oc login "${{ secrets.OPENSHIFT_SERVER }}" --token="$TOKEN" --insecure-skip-tls-verify=true
+          else
+            oc login "${{ secrets.OPENSHIFT_SERVER }}" --token="${{ secrets.OPENSHIFT_TOKEN }}" --insecure-skip-tls-verify=true
+          fi
 
       - name: Get route URL
         id: route
         run: |
-          URL=$(oc get route portal -n ${{ env.NAMESPACE }} -o jsonpath='{.spec.host}')
+          URL=$(oc get route portal -n staging -o jsonpath='{.spec.host}')
           echo "url=https://$URL" >> $GITHUB_OUTPUT
 
       - name: Health check

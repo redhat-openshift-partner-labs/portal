@@ -1,87 +1,97 @@
 # CI/CD Authentication Setup
 
-GitHub Actions needs to authenticate to OpenShift for deployments. This document covers the setup options.
+GitHub Actions needs to authenticate to OpenShift for deployments.
 
 ## Options
 
 | Option | Complexity | Token Management | Security |
 |--------|-----------|------------------|----------|
-| [Keycloak Token Exchange](#option-1-keycloak-token-exchange) | Medium | None (OIDC) | High |
+| [Keycloak Client Credentials](#option-1-keycloak-client-credentials) | Low | None (short-lived tokens) | High |
 | [ServiceAccount + Expiry Alert](#option-2-serviceaccount-with-expiry-alert) | Low | Annual renewal | Medium |
 
 ---
 
-## Option 1: Keycloak Token Exchange
+## Option 1: Keycloak Client Credentials
 
-Uses Keycloak to exchange GitHub OIDC tokens for OpenShift-compatible tokens. No long-lived secrets to manage.
+Uses Keycloak client credentials to get short-lived tokens. No long-lived secrets to rotate.
 
 ### Keycloak Configuration
 
-1. **Create Identity Provider for GitHub Actions**
-
-   In Keycloak Admin Console → Identity Providers → Add provider → OpenID Connect v1.0:
-
-   | Setting | Value |
-   |---------|-------|
-   | Alias | `github-actions` |
-   | Display Name | `GitHub Actions` |
-   | Use discovery endpoint | On |
-   | Discovery endpoint | `https://token.actions.githubusercontent.com/.well-known/openid-configuration` |
-   | Client authentication | `Client secret sent in the request body` (any option works - not used for GitHub) |
-   | Client ID | `redhat-openshift-partner-labs` (must match workflow audience) |
-   | Client Secret | `unused` (any value - GitHub OIDC is public, doesn't require secret) |
-
-2. **Create Client for Token Exchange**
+1. **Create Client**
 
    Clients → Create client:
 
    | Setting | Value |
    |---------|-------|
-   | Client ID | `github-actions-openshift` |
-   | Client Authentication | On |
-   | Authentication flow | Service accounts roles, Standard flow (off) |
+   | Client ID | `github-actions` |
+   | Name | `GitHub Actions CI/CD` |
 
-   After creation, go to Service Account Roles → Assign role → `token-exchange`
-
-3. **Configure Token Exchange Permission**
-
-   Clients → `github-actions-openshift` → Authorization → Policies:
+   Next page:
    
-   Create a client policy allowing token exchange from the GitHub Actions IdP.
+   | Setting | Value |
+   |---------|-------|
+   | Client authentication | On |
+   | Authorization | Off |
+   | Standard flow | Off |
+   | Direct access grants | Off |
+   | Service accounts roles | On |
 
-4. **Create Mapper for OpenShift Groups**
+2. **Get Client Secret**
 
-   Identity Providers → `github-actions` → Mappers → Add mapper:
+   After creation: Clients → `github-actions` → Credentials → Copy **Client secret**
+
+3. **Assign Roles**
+
+   Clients → `github-actions` → Service account roles → Assign role:
+   
+   - Filter by clients → select roles that allow OpenShift access
+   - Or assign a realm role that maps to OpenShift groups
+
+4. **Configure OpenShift Group Mapping** (if using Keycloak for OpenShift auth)
+
+   If OpenShift uses Keycloak for authentication, add a group mapper:
+   
+   Clients → `github-actions` → Client scopes → `github-actions-dedicated` → Add mapper:
 
    | Setting | Value |
    |---------|-------|
-   | Name | `github-repo-to-group` |
-   | Mapper Type | Hardcoded Group |
-   | Group | `github-actions-deployers` |
+   | Mapper type | Hardcoded group |
+   | Name | `deployer-group` |
+   | Group | `/github-actions-deployers` |
 
 ### OpenShift Configuration
 
 ```bash
-# Create group that maps to Keycloak group
+# If using Keycloak groups, create matching group and bind role
 oc adm groups new github-actions-deployers
+oc adm policy add-role-to-group edit github-actions-deployers -n staging
+oc adm policy add-role-to-group edit github-actions-deployers -n portal
 
-# Bind deployer role to the group
-oc adm policy add-role-to-group github-actions-deployer github-actions-deployers -n staging
-oc adm policy add-role-to-group github-actions-deployer github-actions-deployers -n portal
+# Or apply the ServiceAccount RBAC (for token-based auth)
+oc apply -f service-account.yaml
 ```
 
-### Workflow Configuration
+### GitHub Secrets
 
-The workflows use a two-step auth process:
-1. Get GitHub OIDC token
-2. Exchange it via Keycloak for an OpenShift token
+| Secret | Value |
+|--------|-------|
+| `KEYCLOAK_URL` | `https://your-keycloak.example.com` |
+| `KEYCLOAK_REALM` | Your realm name (e.g., `openshift`) |
+| `KEYCLOAK_CLIENT_ID` | `github-actions` |
+| `KEYCLOAK_CLIENT_SECRET` | From step 2 |
+| `OPENSHIFT_SERVER` | `https://api.cluster.example.com:6443` |
 
-GitHub Secrets required:
-- `KEYCLOAK_URL` - e.g., `https://keycloak.example.com`
-- `KEYCLOAK_REALM` - e.g., `openshift`
-- `KEYCLOAK_CLIENT_ID` - `github-actions-openshift`
-- `KEYCLOAK_CLIENT_SECRET` - From Keycloak client credentials
-- `OPENSHIFT_SERVER` - e.g., `https://api.cluster.example.com:6443`
+### How It Works
+
+```
+GitHub Actions                    Keycloak                      OpenShift
+     |                               |                              |
+     |-- client_credentials grant -->|                              |
+     |<-- access_token --------------|                              |
+     |                               |                              |
+     |-- oc login --token=... ---------------------------------->  |
+     |<-- authenticated session ----------------------------------|
+```
 
 ---
 
@@ -105,21 +115,16 @@ oc create token github-actions -n staging --duration=8760h > token.txt
 
 The `check-token-expiry.yml` workflow runs monthly and creates an issue 30 days before token expiration.
 
-GitHub Secrets required:
-- `OPENSHIFT_SERVER`
-- `OPENSHIFT_TOKEN`
-- `OPENSHIFT_TOKEN_EXPIRY` - ISO date when token expires (e.g., `2027-04-05`)
+### GitHub Secrets
+
+| Secret | Value |
+|--------|-------|
+| `OPENSHIFT_SERVER` | `https://api.cluster.example.com:6443` |
+| `OPENSHIFT_TOKEN` | Token from step above |
+| `OPENSHIFT_TOKEN_EXPIRY` | ISO date (e.g., `2027-04-05`) |
 
 ---
 
-## Recommended Approach
+## Recommendation
 
-**Use Option 1 (Keycloak)** if:
-- You want zero token management
-- You need audit trails for CI/CD authentication
-- You want to restrict deployments to specific repos/branches
-
-**Use Option 2 (ServiceAccount)** if:
-- You want simpler setup
-- Annual token rotation is acceptable
-- Keycloak configuration access is limited
+**Use Option 1 (Keycloak)** - simpler than token exchange, no tokens to rotate, works with existing Keycloak setup.
