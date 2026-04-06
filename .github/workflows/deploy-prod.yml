@@ -42,31 +42,79 @@ jobs:
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
           else
-            VERSION=$(echo "${{ github.event.workflow_run.head_branch }}" | sed 's/^v//')
+            # Get the tag from staging workflow's triggering run
+            # Navigate back: Deploy Staging -> Build Image -> tag
+            BUILD_RUN_ID=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }} --jq '.referenced_workflows[0].run_id // empty')
+            if [ -n "$BUILD_RUN_ID" ]; then
+              TAG=$(gh api repos/${{ github.repository }}/actions/runs/$BUILD_RUN_ID --jq '.head_branch' | head -1)
+            else
+              # Fallback: get from git
+              TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "latest")
+            fi
+            VERSION="${TAG#v}"
             echo "version=$VERSION" >> $GITHUB_OUTPUT
           fi
+          echo "Deploying version: ${{ steps.version.outputs.version || env.VERSION }}"
+        env:
+          GH_TOKEN: ${{ github.token }}
 
-      - name: Update image tag
+      - name: Update image tag and set replicas to 0
         run: |
           cd ${{ env.OVERLAY }}
           kustomize edit set image portal=quay.io/rhopl/portal:${{ steps.version.outputs.version }}
+          kustomize edit set replicas portal=0
 
-      - name: Deploy to OpenShift
+      - name: Deploy to OpenShift (paused)
         run: |
           oc apply -k ${{ env.OVERLAY }}
+
+      - name: Configure application secrets
+        run: |
+          # Create or update portal-secrets with production values
+          oc create secret generic portal-secrets -n ${{ env.NAMESPACE }} \
+            --from-literal=DATABASE_URL="${{ secrets.PROD_DATABASE_URL }}" \
+            --from-literal=OAUTH_CLIENT_ID="${{ secrets.PROD_OAUTH_CLIENT_ID }}" \
+            --from-literal=OAUTH_CLIENT_SECRET="${{ secrets.PROD_OAUTH_CLIENT_SECRET }}" \
+            --from-literal=OAUTH_AUTH_URL="${{ secrets.PROD_OAUTH_AUTH_URL }}" \
+            --from-literal=OAUTH_TOKEN_URL="${{ secrets.PROD_OAUTH_TOKEN_URL }}" \
+            --from-literal=AUTH_SECRET="${{ secrets.PROD_AUTH_SECRET }}" \
+            --dry-run=client -o yaml | oc apply -f -
+
+      - name: Configure route and app URLs
+        run: |
+          # Patch route hostname
+          oc patch route portal -n ${{ env.NAMESPACE }} \
+            --type=merge -p '{"spec":{"host":"${{ secrets.PROD_URL }}"}}'
+
+          # Patch configmap with site URLs
+          oc patch configmap portal-config -n ${{ env.NAMESPACE }} \
+            --type=merge -p '{
+              "data": {
+                "NUXT_PUBLIC_SITE_URL": "https://${{ secrets.PROD_URL }}",
+                "APP_URL": "https://${{ secrets.PROD_URL }}"
+              }
+            }'
+
+      - name: Scale up deployment
+        run: |
+          oc scale deployment/portal -n ${{ env.NAMESPACE }} --replicas=1
           oc rollout status deployment/portal -n ${{ env.NAMESPACE }} --timeout=300s
+
+      - name: Run database migrations
+        run: |
+          # Run migrations from the deployed pod
+          POD=$(oc get pod -l app=portal -n ${{ env.NAMESPACE }} -o jsonpath='{.items[0].metadata.name}')
+          oc exec -n ${{ env.NAMESPACE }} "$POD" -- npx prisma migrate deploy --config=prisma.config.postgresql.ts
 
       - name: Verify deployment
         run: |
-          URL=$(oc get route portal -n ${{ env.NAMESPACE }} -o jsonpath='{.spec.host}')
-          curl --fail --retry 5 --retry-delay 10 "https://$URL/api/health"
+          curl --fail --retry 5 --retry-delay 10 "https://${{ secrets.PROD_URL }}/api/health"
 
       - name: Report status
         if: always()
         run: |
-          URL=$(oc get route portal -n ${{ env.NAMESPACE }} -o jsonpath='{.spec.host}' 2>/dev/null || echo "unknown")
           echo "## Production Deployment" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **URL**: https://$URL" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL**: https://${{ secrets.PROD_URL }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Version**: ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY

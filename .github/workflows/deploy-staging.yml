@@ -7,11 +7,12 @@ on:
 
 env:
   OVERLAY: deploy/overlays/dev
+  DATASTORE_OVERLAY: deploy/datastore/overlays/staging
   NAMESPACE: staging
 
 jobs:
-  deploy:
-    name: Deploy to Staging
+  deploy-database:
+    name: Deploy Database
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     environment: staging
@@ -30,26 +31,143 @@ jobs:
           insecure_skip_tls_verify: true
           namespace: ${{ env.NAMESPACE }}
 
-      - name: Extract version from release
+      - name: Deploy PostgreSQL (idempotent)
+        run: |
+          oc apply -k ${{ env.DATASTORE_OVERLAY }}
+          oc rollout status deployment/portal-postgresql -n ${{ env.NAMESPACE }} --timeout=120s
+
+      - name: Configure database credentials
+        run: |
+          # Patch database secret with values from GitHub secrets
+          oc patch secret portal-postgresql -n ${{ env.NAMESPACE }} \
+            --type=merge -p '{
+              "stringData": {
+                "database-name": "${{ secrets.STAGING_DB_NAME }}",
+                "database-user": "${{ secrets.STAGING_DB_USER }}",
+                "database-password": "${{ secrets.STAGING_DB_PASSWORD }}"
+              }
+            }'
+
+          # Restart database to pick up new credentials (only needed on first setup)
+          oc rollout restart deployment/portal-postgresql -n ${{ env.NAMESPACE }} || true
+          oc rollout status deployment/portal-postgresql -n ${{ env.NAMESPACE }} --timeout=120s
+
+  deploy:
+    name: Deploy Application
+    runs-on: ubuntu-latest
+    needs: deploy-database
+    environment: staging
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install oc CLI
+        uses: redhat-actions/oc-installer@v1
+
+      - name: Login to OpenShift
+        uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          insecure_skip_tls_verify: true
+          namespace: ${{ env.NAMESPACE }}
+
+      - name: Extract version from tag
         id: version
         run: |
-          VERSION=$(echo "${{ github.event.workflow_run.head_branch }}" | sed 's/^v//')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          # Get the tag that triggered Build Image workflow
+          # workflow_run.head_branch is empty for tag triggers, so use the API
+          TAG=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }} --jq '.head_branch // .head_sha' | head -1)
 
-      - name: Update image tag
+          # If it looks like a version tag, extract version; otherwise use SHA
+          if [[ "$TAG" =~ ^v[0-9] ]]; then
+            VERSION="${TAG#v}"
+          else
+            # Fallback: get the latest tag from the commit
+            VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "latest")
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Deploying version: $VERSION"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Update image tag and set replicas to 0
         run: |
           cd ${{ env.OVERLAY }}
           kustomize edit set image portal=quay.io/rhopl/portal:${{ steps.version.outputs.version }}
+          kustomize edit set replicas portal=0
 
-      - name: Deploy to OpenShift
+      - name: Deploy to OpenShift (paused)
         run: |
           oc apply -k ${{ env.OVERLAY }}
+
+      - name: Configure application secrets
+        run: |
+          # Build DATABASE_URL from components
+          DB_URL="postgresql://${{ secrets.STAGING_DB_USER }}:${{ secrets.STAGING_DB_PASSWORD }}@portal-postgresql.${{ env.NAMESPACE }}.svc:5432/${{ secrets.STAGING_DB_NAME }}?schema=public"
+
+          # Create or update portal-secrets
+          oc create secret generic portal-secrets -n ${{ env.NAMESPACE }} \
+            --from-literal=DATABASE_URL="$DB_URL" \
+            --from-literal=OAUTH_CLIENT_ID="${{ secrets.STAGING_OAUTH_CLIENT_ID }}" \
+            --from-literal=OAUTH_CLIENT_SECRET="${{ secrets.STAGING_OAUTH_CLIENT_SECRET }}" \
+            --from-literal=OAUTH_AUTH_URL="${{ secrets.STAGING_OAUTH_AUTH_URL }}" \
+            --from-literal=OAUTH_TOKEN_URL="${{ secrets.STAGING_OAUTH_TOKEN_URL }}" \
+            --from-literal=AUTH_SECRET="${{ secrets.STAGING_AUTH_SECRET }}" \
+            --dry-run=client -o yaml | oc apply -f -
+
+      - name: Configure route and app URLs
+        run: |
+          # Patch route hostname
+          oc patch route portal -n ${{ env.NAMESPACE }} \
+            --type=merge -p '{"spec":{"host":"${{ secrets.STAGING_URL }}"}}'
+
+          # Patch configmap with site URLs
+          oc patch configmap portal-config -n ${{ env.NAMESPACE }} \
+            --type=merge -p '{
+              "data": {
+                "NUXT_PUBLIC_SITE_URL": "https://${{ secrets.STAGING_URL }}",
+                "APP_URL": "https://${{ secrets.STAGING_URL }}"
+              }
+            }'
+
+      - name: Scale up deployment
+        run: |
+          oc scale deployment/portal -n ${{ env.NAMESPACE }} --replicas=1
           oc rollout status deployment/portal -n ${{ env.NAMESPACE }} --timeout=300s
+
+  migrate:
+    name: Run Migrations
+    runs-on: ubuntu-latest
+    needs: deploy
+    environment: staging
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install oc CLI
+        uses: redhat-actions/oc-installer@v1
+
+      - name: Login to OpenShift
+        uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          insecure_skip_tls_verify: true
+          namespace: ${{ env.NAMESPACE }}
+
+      - name: Run database migrations
+        run: |
+          # Run migrations from the deployed pod
+          POD=$(oc get pod -l app=portal -n ${{ env.NAMESPACE }} -o jsonpath='{.items[0].metadata.name}')
+          oc exec -n ${{ env.NAMESPACE }} "$POD" -- npx prisma migrate deploy --config=prisma.config.postgresql.ts
 
   smoke-test:
     name: Smoke Tests
     runs-on: ubuntu-latest
-    needs: deploy
+    needs: migrate
+    environment: staging
     steps:
       - name: Install oc CLI
         uses: redhat-actions/oc-installer@v1
@@ -64,7 +182,7 @@ jobs:
       - name: Get route URL
         id: route
         run: |
-          URL=$(oc get route portal -n staging -o jsonpath='{.spec.host}')
+          URL=$(oc get route portal -n ${{ env.NAMESPACE }} -o jsonpath='{.spec.host}')
           echo "url=https://$URL" >> $GITHUB_OUTPUT
 
       - name: Health check
