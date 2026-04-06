@@ -31,7 +31,7 @@ deploy/
 1. OpenShift cluster access with `oc` CLI
 2. Container image built and pushed to registry
 3. PostgreSQL database provisioned
-4. Google OAuth credentials configured
+4. OIDC provider credentials configured
 
 ## Build and Push Image
 
@@ -57,8 +57,10 @@ oc new-project opl-prod
 # Create secret from literal values
 oc create secret generic portal-secrets \
   --from-literal=DATABASE_URL='postgresql://user:pass@db-host:5432/dbname?schema=public' \
-  --from-literal=GOOGLE_CLIENT_ID='your-client-id' \
-  --from-literal=GOOGLE_CLIENT_SECRET='your-client-secret' \
+  --from-literal=OAUTH_CLIENT_ID='your-client-id' \
+  --from-literal=OAUTH_CLIENT_SECRET='your-client-secret' \
+  --from-literal=OAUTH_AUTH_URL='https://your-provider.com/auth' \
+  --from-literal=OAUTH_TOKEN_URL='https://your-provider.com/token' \
   --from-literal=AUTH_SECRET="$(openssl rand -base64 32)"
 
 # Or from a file
@@ -101,8 +103,10 @@ curl https://$(oc get route portal -n opl-prod -o jsonpath='{.spec.host}')/api/h
 | Variable | Source | Description |
 |----------|--------|-------------|
 | `DATABASE_URL` | Secret | PostgreSQL connection string |
-| `GOOGLE_CLIENT_ID` | Secret | Google OAuth client ID |
-| `GOOGLE_CLIENT_SECRET` | Secret | Google OAuth client secret |
+| `OAUTH_CLIENT_ID` | Secret | OIDC client ID |
+| `OAUTH_CLIENT_SECRET` | Secret | OIDC client secret |
+| `OAUTH_AUTH_URL` | Secret | OIDC authorization endpoint |
+| `OAUTH_TOKEN_URL` | Secret | OIDC token endpoint |
 | `AUTH_SECRET` | Secret | JWT signing secret |
 | `NUXT_PUBLIC_SITE_URL` | ConfigMap | Public URL for the site |
 | `APP_URL` | ConfigMap | Application URL |
