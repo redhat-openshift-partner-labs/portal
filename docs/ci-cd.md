@@ -24,7 +24,7 @@ The CI/CD pipeline uses GitHub Actions to automate testing, building, and deploy
 | Main | `main.yml` | Push to main | Post-merge validation (calls CI) |
 | Release | `release.yml` | Tag push (`v*`) | Generate changelog, create GitHub release |
 | Build Image | `build-image.yml` | Release published | Build and push to Quay.io |
-| Deploy Staging | `deploy-staging.yml` | Image push | Staging deployment (planned) |
+| Deploy Staging | `deploy-staging.yml` | Build Image completes | Deploy to OpenShift staging, smoke tests |
 | Deploy Prod | `deploy-prod.yml` | Manual | Production deployment (planned) |
 
 ## Pipeline Architecture
@@ -177,13 +177,6 @@ systemctl --user start podman.socket
 
 The following workflows are planned for future implementation:
 
-### Staging Deployment (`deploy-staging.yml`)
-
-- Triggered by image push to registry
-- Deploys to OpenShift staging project
-- Runs smoke tests against staging environment
-- Reports test results
-
 ### Production Deployment (`deploy-prod.yml`)
 
 - Triggered manually or by successful staging tests
@@ -200,8 +193,8 @@ Configure these secrets in GitHub repository settings:
 |--------|---------|
 | `QUAY_USERNAME` | Quay.io registry username |
 | `QUAY_PASSWORD` | Quay.io registry password |
-| `OPENSHIFT_SERVER` | OpenShift API server URL (planned) |
-| `OPENSHIFT_TOKEN` | OpenShift service account token (planned) |
+| `OPENSHIFT_SERVER` | OpenShift API server URL |
+| `OPENSHIFT_TOKEN` | OpenShift service account token |
 
 ### Node.js Version
 
