@@ -8,8 +8,9 @@
 2. [Workflows](#workflows)
 3. [Pipeline Architecture](#pipeline-architecture)
 4. [PR Checks](#pr-checks)
-5. [Planned Workflows](#planned-workflows)
-6. [Configuration](#configuration)
+5. [Local Testing](#local-testing)
+6. [Planned Workflows](#planned-workflows)
+7. [Configuration](#configuration)
 
 ## Overview
 
@@ -106,6 +107,55 @@ concurrency:
   group: ci-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 ```
+
+## Local Testing
+
+Workflows can be tested locally using [nektos/act](https://github.com/nektos/act), which runs GitHub Actions in Docker/Podman containers.
+
+### Installation
+
+```bash
+# Fedora/RHEL
+sudo dnf install act
+
+# macOS
+brew install act
+
+# Other platforms: https://nektosact.com/installation/
+```
+
+### Usage
+
+```bash
+# List jobs for an event
+act pull_request --list
+
+# Run all jobs for pull_request event
+act pull_request
+
+# Run a specific job
+act pull_request -j lint
+act pull_request -j typecheck
+act pull_request -j test
+act pull_request -j build
+
+# Run with verbose output
+act pull_request -j lint -v
+```
+
+### Podman Configuration
+
+If using Podman instead of Docker, act auto-detects the Podman socket. Ensure the Podman socket is running:
+
+```bash
+systemctl --user start podman.socket
+```
+
+### Limitations
+
+- Some GitHub Actions features may not work identically in act
+- Secrets must be provided via `.secrets` file or `-s` flag
+- Caching behavior differs from GitHub-hosted runners
 
 ## Planned Workflows
 
