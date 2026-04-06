@@ -5,7 +5,6 @@ export interface DashboardStats {
   activeLabs: number
   deniedLabs: number
   completedLabs: number
-  deniedLabs: number
 }
 
 export interface CostOverview {

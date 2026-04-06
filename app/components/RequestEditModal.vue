@@ -395,7 +395,7 @@ watch(open, (isOpen) => {
                   :disabled="submitting || note.immutable"
                   :rows="2"
                   :class="{ 'opacity-60 cursor-not-allowed': note.immutable }"
-                  @update:model-value="(val: string) => handleNoteEdit(note.id, val)"
+                  @update:model-value="(val: string | undefined) => handleNoteEdit(note.id, val ?? '')"
                 />
                 <div
                   v-if="!note.immutable"
@@ -406,7 +406,7 @@ watch(open, (isOpen) => {
                     :disabled="submitting"
                     color="primary"
                     label="Make Immutable"
-                    @update:model-value="(val: boolean) => handleMakeImmutable(note.id, val)"
+                    @update:model-value="(val: boolean | 'indeterminate') => handleMakeImmutable(note.id, val === true)"
                   />
                 </div>
                 <p
