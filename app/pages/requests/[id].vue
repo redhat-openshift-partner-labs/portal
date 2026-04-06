@@ -95,8 +95,8 @@ const handleExtendConfirmed = async () => {
   try {
     await extendRequest(pendingExtensionDuration.value)
   }
-  catch (e) {
-    console.error('Failed to extend:', e)
+  catch {
+    // Error handled silently - extension failed
   }
   finally {
     extending.value = false
@@ -111,14 +111,8 @@ const handleExtendCancelled = () => {
 
 // Handle add note
 const handleAddNote = async (content: string) => {
-  try {
-    await addNote(content)
-    noteModalOpen.value = false
-  }
-  catch (e) {
-    console.error('Failed to add note:', e)
-    throw e
-  }
+  await addNote(content)
+  noteModalOpen.value = false
 }
 
 // Format date for display

@@ -117,8 +117,8 @@ const handleExtendConfirmed = async () => {
   try {
     await extendRequest(pendingExtensionRequestId.value, pendingExtensionDuration.value)
   }
-  catch (e) {
-    console.error('Failed to extend request:', e)
+  catch {
+    // Error handled silently - extension failed
   }
   finally {
     extending.value = null
