@@ -80,6 +80,7 @@ Comprehensive documentation is available in the [`docs/`](./docs) folder:
 | [Authentication](./docs/authentication.md) | OAuth flow and session management |
 | [Database](./docs/database.md) | Schema, models, and Prisma usage |
 | [Components](./docs/components.md) | UI component reference |
+| [CI/CD](./docs/ci-cd.md) | GitHub Actions workflows and deployment pipeline |
 
 ## Project Structure
 
