@@ -1,4 +1,4 @@
-name: Deploy Staging
+name: "Deploy: Staging"
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ on:
         required: false
         type: string
   workflow_run:
-    workflows: [Build Image]
+    workflows: ["Release: Build Image"]
     types: [completed]
 
 env:
