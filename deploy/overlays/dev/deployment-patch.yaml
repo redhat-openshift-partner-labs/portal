@@ -6,6 +6,8 @@ spec:
   replicas: 1
   template:
     spec:
+      serviceAccountName: github-actions-staging
+      serviceAccount: github-actions-staging
       containers:
         - name: portal
           resources:
