@@ -104,8 +104,8 @@ jobs:
 
       - name: Configure application secrets
         run: |
-          # Build DATABASE_URL from components
-          DB_URL="postgresql://${{ secrets.STAGING_DB_USER }}:${{ secrets.STAGING_DB_PASSWORD }}@portal-postgresql.${{ env.NAMESPACE }}.svc:5432/${{ secrets.STAGING_DB_NAME }}?schema=public"
+          # Build DATABASE_URL from components (sslmode=disable for in-cluster DB)
+          DB_URL="postgresql://${{ secrets.STAGING_DB_USER }}:${{ secrets.STAGING_DB_PASSWORD }}@portal-postgresql.${{ env.NAMESPACE }}.svc:5432/${{ secrets.STAGING_DB_NAME }}?schema=public&sslmode=disable"
 
           # Create or update portal-secrets (NUXT_ prefix for runtime override)
           oc create secret generic portal-secrets -n ${{ env.NAMESPACE }} \
