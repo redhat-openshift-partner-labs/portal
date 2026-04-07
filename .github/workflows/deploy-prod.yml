@@ -91,10 +91,27 @@ jobs:
 
       - name: Configure route and app URLs
         run: |
-          # Patch route hostname
+          # Patch route hostname and TLS certificate
           oc patch route portal -n ${{ env.NAMESPACE }} \
-            --type=merge -p '{"spec":{"host":"${{ secrets.PROD_URL }}"}}'
+            --type=merge \
+            --patch-file=/dev/stdin <<EOF
+          {
+            "spec": {
+              "host": "${{ secrets.PROD_URL }}",
+              "tls": {
+                "termination": "edge",
+                "certificate": $(echo "$ROUTE_CERT" | jq -Rs .),
+                "key": $(echo "$ROUTE_KEY" | jq -Rs .)
+              }
+            }
+          }
+          EOF
+        env:
+          ROUTE_CERT: ${{ secrets.PROD_ROUTE_SSL_CERTIFICATE }}
+          ROUTE_KEY: ${{ secrets.PROD_ROUTE_SSL_KEY }}
 
+      - name: Configure app URLs
+        run: |
           # Patch configmap with site URLs (NUXT_PUBLIC_* for runtime override)
           oc patch configmap portal-config -n ${{ env.NAMESPACE }} \
             --type=merge -p '{
