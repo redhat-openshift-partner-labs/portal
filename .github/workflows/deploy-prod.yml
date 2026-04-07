@@ -92,7 +92,8 @@ jobs:
               "data": {
                 "NUXT_PUBLIC_SITE_URL": "https://${{ secrets.PROD_URL }}",
                 "NUXT_PUBLIC_APP_URL": "https://${{ secrets.PROD_URL }}",
-                "NUXT_PUBLIC_OAUTH_CLIENT_ID": "${{ secrets.PROD_OAUTH_CLIENT_ID }}"
+                "NUXT_PUBLIC_OAUTH_CLIENT_ID": "${{ secrets.PROD_OAUTH_CLIENT_ID }}",
+                "NUXT_PUBLIC_OAUTH_AUTH_URL": "${{ secrets.PROD_OAUTH_AUTH_URL }}"
               }
             }'
 
