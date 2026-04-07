@@ -61,6 +61,10 @@ RUN pnpm db:pg:generate
 # Build the Nuxt application
 RUN pnpm build
 
+# Deploy production dependencies to a clean flat node_modules (resolves pnpm symlinks)
+# This ensures all transitive deps (e.g. @prisma/engines) are present without pnpm store tricks
+RUN pnpm deploy --filter portal --prod /app/deploy
+
 # =============================================================================
 # Stage 3: Production
 # =============================================================================
@@ -93,11 +97,8 @@ COPY --from=builder --chown=1001:0 /app/prisma/seed.postgresql.ts ./prisma/
 # Copy prisma config for potential runtime migrations
 COPY --from=builder --chown=1001:0 /app/prisma.config.postgresql.ts ./
 
-# Copy Prisma CLI and its required dependencies for runtime migrations
-# pnpm stores these in .pnpm/ without top-level symlinks, so copy explicitly
-COPY --from=builder --chown=1001:0 /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder --chown=1001:0 /app/node_modules/.pnpm/@prisma+engines@7.4.1/node_modules/@prisma/engines ./node_modules/@prisma/engines
-COPY --from=builder --chown=1001:0 /app/node_modules/.pnpm/@prisma+config@7.4.1_magicast@0.5.2/node_modules/@prisma/config ./node_modules/@prisma/config
+# Copy flat node_modules from pnpm deploy (includes prisma CLI + all transitive deps)
+COPY --from=builder --chown=1001:0 /app/deploy/node_modules ./node_modules
 
 # Environment variables
 ENV NODE_ENV=production \
