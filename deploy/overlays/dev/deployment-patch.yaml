@@ -8,6 +8,8 @@ spec:
     spec:
       serviceAccountName: github-actions-staging
       serviceAccount: github-actions-staging
+      imagePullSecrets:
+        - name: quay-pull-secret
       containers:
         - name: portal
           resources:

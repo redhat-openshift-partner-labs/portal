@@ -109,6 +109,15 @@ jobs:
           kustomize edit set image portal=quay.io/rhopl/portal:${{ steps.version.outputs.version }}
           kustomize edit set replicas portal=0
 
+      - name: Create image pull secret
+        run: |
+          oc create secret docker-registry quay-pull-secret \
+            --docker-server=quay.io \
+            --docker-username="${{ secrets.QUAY_USERNAME }}" \
+            --docker-password="${{ secrets.QUAY_PASSWORD }}" \
+            -n ${{ env.NAMESPACE }} \
+            --dry-run=client -o yaml | oc apply -f -
+
       - name: Deploy to OpenShift (paused)
         run: |
           oc apply -k ${{ env.OVERLAY }}
