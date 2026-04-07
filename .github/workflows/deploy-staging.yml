@@ -107,14 +107,12 @@ jobs:
           # Build DATABASE_URL from components
           DB_URL="postgresql://${{ secrets.STAGING_DB_USER }}:${{ secrets.STAGING_DB_PASSWORD }}@portal-postgresql.${{ env.NAMESPACE }}.svc:5432/${{ secrets.STAGING_DB_NAME }}?schema=public"
 
-          # Create or update portal-secrets
+          # Create or update portal-secrets (NUXT_ prefix for runtime override)
           oc create secret generic portal-secrets -n ${{ env.NAMESPACE }} \
             --from-literal=DATABASE_URL="$DB_URL" \
-            --from-literal=OAUTH_CLIENT_ID="${{ secrets.STAGING_OAUTH_CLIENT_ID }}" \
-            --from-literal=OAUTH_CLIENT_SECRET="${{ secrets.STAGING_OAUTH_CLIENT_SECRET }}" \
-            --from-literal=OAUTH_AUTH_URL="${{ secrets.STAGING_OAUTH_AUTH_URL }}" \
-            --from-literal=OAUTH_TOKEN_URL="${{ secrets.STAGING_OAUTH_TOKEN_URL }}" \
-            --from-literal=AUTH_SECRET="${{ secrets.STAGING_AUTH_SECRET }}" \
+            --from-literal=NUXT_OAUTH_CLIENT_SECRET="${{ secrets.STAGING_OAUTH_CLIENT_SECRET }}" \
+            --from-literal=NUXT_OAUTH_TOKEN_URL="${{ secrets.STAGING_OAUTH_TOKEN_URL }}" \
+            --from-literal=NUXT_AUTH_SECRET="${{ secrets.STAGING_AUTH_SECRET }}" \
             --dry-run=client -o yaml | oc apply -f -
 
       - name: Configure route and app URLs
