@@ -1,31 +1,34 @@
 # CI/CD Authentication Setup
 
-GitHub Actions authenticates to OpenShift using ServiceAccount tokens.
+GitHub Actions authenticates to OpenShift using dedicated ServiceAccount tokens, one per namespace:
+
+| Service Account | Namespace | Used By |
+|----------------|-----------|---------|
+| `github-actions-staging` | `staging` | Deploy: Staging |
+| `github-actions-portal` | `portal` | Deploy: Production |
 
 ## Setup
 
 ### 1. Create ServiceAccounts and RBAC
 
 ```bash
-oc apply -f service-account.yaml
+oc apply -f deploy/ci/service-account.yaml
 ```
 
-Or manually:
+This creates:
+- `github-actions-staging` ServiceAccount in `staging` namespace
+- `github-actions-portal` ServiceAccount in `portal` namespace
+- `github-actions-deploy` ClusterRole with deploy permissions
+- RoleBindings scoping each SA to its own namespace
+
+### 2. Generate Tokens (3-month expiry)
 
 ```bash
-# Create ServiceAccounts
-oc create sa github-actions -n staging
-oc create sa github-actions -n portal
+# Staging token
+oc create token github-actions-staging -n staging --duration=2190h
 
-# Grant permissions
-oc adm policy add-role-to-user edit -z github-actions -n staging
-oc adm policy add-role-to-user edit -z github-actions -n portal
-```
-
-### 2. Generate Token (3-month expiry)
-
-```bash
-oc create token github-actions -n staging --duration=2190h
+# Production token
+oc create token github-actions-portal -n portal --duration=2190h
 ```
 
 ### 3. Configure GitHub Secrets
@@ -33,28 +36,32 @@ oc create token github-actions -n staging --duration=2190h
 | Secret | Value |
 |--------|-------|
 | `OPENSHIFT_SERVER` | `https://api.prod.openshiftpartnerlabs.com:6443` |
-| `OPENSHIFT_TOKEN` | Token from step 2 |
-| `OPENSHIFT_TOKEN_EXPIRY` | ISO date when token expires (e.g., `2026-07-05`) |
+| `OPENSHIFT_TOKEN_STAGING` | Token for `github-actions-staging` |
+| `OPENSHIFT_TOKEN_STAGING_EXPIRY` | ISO date when staging token expires (e.g., `2026-07-07`) |
+| `OPENSHIFT_TOKEN_PORTAL` | Token for `github-actions-portal` |
+| `OPENSHIFT_TOKEN_PORTAL_EXPIRY` | ISO date when portal token expires (e.g., `2026-07-07`) |
 
-### 4. Configure GitHub Environments (optional)
+### 4. Configure GitHub Environments
 
 Settings → Environments:
-- `staging` - optional protection rules
-- `production` - add required reviewers for approval gate
+- `staging` — optional protection rules
+- `production` — add required reviewers for approval gate
 
 ## Token Expiry Monitoring
 
-The `check-token-expiry.yml` workflow runs monthly and creates a GitHub issue 30 days before token expiration.
+The `check-token-expiry.yml` workflow runs monthly and creates a GitHub issue (labelled
+`token-expiry-staging` or `token-expiry-portal`) 30 days before either token expires.
 
 ## Token Rotation
 
-Every 3 months:
+Every 3 months, rotate each token:
 
-1. Generate new token:
-   ```bash
-   oc create token github-actions -n staging --duration=2190h
-   ```
+```bash
+# Rotate staging token
+oc create token github-actions-staging -n staging --duration=2190h
+# → update OPENSHIFT_TOKEN_STAGING and OPENSHIFT_TOKEN_STAGING_EXPIRY in GitHub
 
-2. Update GitHub Secret `OPENSHIFT_TOKEN`
-
-3. Update GitHub Secret `OPENSHIFT_TOKEN_EXPIRY` with new date
+# Rotate portal token
+oc create token github-actions-portal -n portal --duration=2190h
+# → update OPENSHIFT_TOKEN_PORTAL and OPENSHIFT_TOKEN_PORTAL_EXPIRY in GitHub
+```

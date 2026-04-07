@@ -10,14 +10,22 @@ jobs:
   check:
     name: Check OpenShift Token Expiry
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: staging
+            expiry_secret: OPENSHIFT_TOKEN_STAGING_EXPIRY
+          - name: portal
+            expiry_secret: OPENSHIFT_TOKEN_PORTAL_EXPIRY
     steps:
-      - name: Check expiry date
+      - name: Check expiry date (${{ matrix.name }})
         id: check
         env:
-          EXPIRY_DATE: ${{ secrets.OPENSHIFT_TOKEN_EXPIRY }}
+          EXPIRY_DATE: ${{ secrets[matrix.expiry_secret] }}
+          SA_NAME: github-actions-${{ matrix.name }}
         run: |
           if [ -z "$EXPIRY_DATE" ]; then
-            echo "::warning::OPENSHIFT_TOKEN_EXPIRY secret not set"
+            echo "::warning::${{ matrix.expiry_secret }} secret not set"
             echo "expired=unknown" >> $GITHUB_OUTPUT
             exit 0
           fi
@@ -37,21 +45,26 @@ jobs:
             echo "expired=no" >> $GITHUB_OUTPUT
           fi
 
-      - name: Create issue if expiring soon
+      - name: Create issue if expiring soon (${{ matrix.name }})
         if: steps.check.outputs.expired == 'soon' || steps.check.outputs.expired == 'yes'
         uses: actions/github-script@v7
         with:
           script: |
+            const saName = 'github-actions-${{ matrix.name }}';
+            const namespace = '${{ matrix.name }}';
+            const tokenSecret = 'OPENSHIFT_TOKEN_${{ matrix.name }}'.toUpperCase();
+            const expirySecret = '${{ matrix.expiry_secret }}';
             const expired = '${{ steps.check.outputs.expired }}';
             const daysLeft = parseInt('${{ steps.check.outputs.days_left }}');
             const expiryDate = '${{ steps.check.outputs.expiry_date }}';
 
             const title = expired === 'yes'
-              ? '🚨 OpenShift token has EXPIRED'
-              : `⚠️ OpenShift token expires in ${daysLeft} days`;
+              ? `🚨 OpenShift token has EXPIRED (${namespace})`
+              : `⚠️ OpenShift token expires in ${daysLeft} days (${namespace})`;
 
             const body = `## OpenShift Token Expiry Alert
 
+            **Service Account**: \`${saName}\` in namespace \`${namespace}\`
             **Status**: ${expired === 'yes' ? 'EXPIRED' : 'Expiring Soon'}
             **Expiry Date**: ${expiryDate}
             **Days Remaining**: ${daysLeft}
@@ -60,22 +73,24 @@ jobs:
 
             1. Generate a new token:
                \`\`\`bash
-               oc create token github-actions -n staging --duration=8760h
+               oc create token ${saName} -n ${namespace} --duration=2190h
                \`\`\`
 
-            2. Update GitHub Secret \`OPENSHIFT_TOKEN\` with the new token
+            2. Update GitHub Secret \`${tokenSecret}\` with the new token
 
-            3. Update GitHub Secret \`OPENSHIFT_TOKEN_EXPIRY\` with the new expiry date (1 year from now)
+            3. Update GitHub Secret \`${expirySecret}\` with the new expiry date
 
             ---
             *This issue was automatically created by the token expiry check workflow.*`;
+
+            const label = `token-expiry-${namespace}`;
 
             // Check for existing open issue
             const issues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
-              labels: 'token-expiry'
+              labels: label
             });
 
             if (issues.data.length === 0) {
@@ -84,14 +99,15 @@ jobs:
                 repo: context.repo.repo,
                 title: title,
                 body: body,
-                labels: ['token-expiry', 'ops']
+                labels: [label, 'ops']
               });
             }
 
-      - name: Summary
+      - name: Summary (${{ matrix.name }})
         run: |
-          echo "## Token Expiry Check" >> $GITHUB_STEP_SUMMARY
+          echo "## Token Expiry Check: ${{ matrix.name }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Service Account**: github-actions-${{ matrix.name }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Status**: ${{ steps.check.outputs.expired }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Expiry Date**: ${{ steps.check.outputs.expiry_date }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Days Remaining**: ${{ steps.check.outputs.days_left }}" >> $GITHUB_STEP_SUMMARY

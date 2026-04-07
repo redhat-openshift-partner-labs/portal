@@ -191,11 +191,11 @@ are injected from GitHub secrets at deploy time — no secrets are stored in ver
 # Create staging namespace
 oc new-project staging
 
-# Apply CI service account and RBAC
+# Apply CI service accounts and RBAC
 oc apply -f deploy/ci/service-account.yaml
 
-# Get token for GitHub Actions (3-month expiry)
-oc create token github-actions -n staging --duration=2190h
+# Generate token for github-actions-staging (3-month expiry)
+oc create token github-actions-staging -n staging --duration=2190h
 ```
 
 The staging workflow automatically:
@@ -210,11 +210,11 @@ The staging workflow automatically:
 # Create production namespace
 oc new-project portal
 
-# Apply CI service account and RBAC
+# Apply CI service accounts and RBAC (if not already applied)
 oc apply -f deploy/ci/service-account.yaml
 
-# Get token for GitHub Actions
-oc create token github-actions -n portal --duration=2190h
+# Generate token for github-actions-portal (3-month expiry)
+oc create token github-actions-portal -n portal --duration=2190h
 ```
 
 Production uses an external database, so only the application is deployed.
@@ -253,7 +253,10 @@ Configure these secrets in GitHub repository settings.
 | Secret | Purpose | Example |
 |--------|---------|---------|
 | `OPENSHIFT_SERVER` | OpenShift API server URL | `https://api.mycluster.com:6443` |
-| `OPENSHIFT_TOKEN` | Service account token | From `oc create token github-actions` |
+| `OPENSHIFT_TOKEN_STAGING` | Token for `github-actions-staging` SA | From `oc create token github-actions-staging -n staging` |
+| `OPENSHIFT_TOKEN_STAGING_EXPIRY` | Expiry date for staging token | `2026-07-07` |
+| `OPENSHIFT_TOKEN_PORTAL` | Token for `github-actions-portal` SA | From `oc create token github-actions-portal -n portal` |
+| `OPENSHIFT_TOKEN_PORTAL_EXPIRY` | Expiry date for portal token | `2026-07-07` |
 
 #### Staging Environment Secrets
 
