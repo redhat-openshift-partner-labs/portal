@@ -40,7 +40,9 @@ jobs:
         id: version
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+            # Strip v prefix for semver compliance
+            INPUT_VERSION="${{ inputs.version }}"
+            echo "version=${INPUT_VERSION#v}" >> $GITHUB_OUTPUT
           else
             # Get the tag from staging workflow's triggering run
             # Navigate back: Deploy Staging -> Build Image -> tag

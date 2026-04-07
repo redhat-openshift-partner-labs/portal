@@ -82,8 +82,9 @@ jobs:
         id: version
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ -n "${{ inputs.version }}" ]; then
-            # Manual trigger with explicit version
-            VERSION="${{ inputs.version }}"
+            # Manual trigger with explicit version (strip v prefix for semver compliance)
+            INPUT_VERSION="${{ inputs.version }}"
+            VERSION="${INPUT_VERSION#v}"
           elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             # Manual trigger without version - use latest tag
             VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "latest")
