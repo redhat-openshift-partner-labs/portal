@@ -86,12 +86,13 @@ jobs:
           oc patch route portal -n ${{ env.NAMESPACE }} \
             --type=merge -p '{"spec":{"host":"${{ secrets.PROD_URL }}"}}'
 
-          # Patch configmap with site URLs
+          # Patch configmap with site URLs (NUXT_PUBLIC_* for runtime override)
           oc patch configmap portal-config -n ${{ env.NAMESPACE }} \
             --type=merge -p '{
               "data": {
                 "NUXT_PUBLIC_SITE_URL": "https://${{ secrets.PROD_URL }}",
-                "APP_URL": "https://${{ secrets.PROD_URL }}"
+                "NUXT_PUBLIC_APP_URL": "https://${{ secrets.PROD_URL }}",
+                "NUXT_PUBLIC_OAUTH_CLIENT_ID": "${{ secrets.PROD_OAUTH_CLIENT_ID }}"
               }
             }'
 
