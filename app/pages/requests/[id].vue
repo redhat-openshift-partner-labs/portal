@@ -44,7 +44,7 @@ watch(timezone, async (tz) => {
     const data = await $fetch<{ time: string, day_of_week: string }>('/api/timezone/current', {
       query: { timezone: tz },
     })
-    const [h, m, s] = data.time.split(':').map((v: string) => parseInt(v))
+    const [h, m, s] = data.time.split(':').map((v: string) => parseInt(v)) as [number, number, number]
     let seconds = h * 3600 + m * 60 + s
     const dayOfWeek = data.day_of_week
 
