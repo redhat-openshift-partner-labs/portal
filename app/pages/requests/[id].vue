@@ -25,38 +25,44 @@ useHead({
   title: computed(() => request.value ? `${request.value.generatedName} - Requests` : 'Request Details'),
 })
 
+// Refresh on mount
+onMounted(() => {
+  refresh()
+})
+
 // Local time for the request's timezone
 const localTime = ref('')
 let localTimeTimer: ReturnType<typeof setInterval> | undefined
 
-onMounted(async () => {
-  refresh()
+const timezone = computed(() => request.value?.timezone)
 
-  if (request.value?.timezone) {
-    try {
-      const data = await $fetch<{ time: string, day_of_week: string }>('https://timeapi.io/api/v1/time/current/zone', {
-        query: { timezone: request.value.timezone },
-      })
-      const [h, m, s] = data.time.split(':').map((v: string) => parseInt(v))
-      let seconds = h * 3600 + m * 60 + s
-      const dayOfWeek = data.day_of_week
+watch(timezone, async (tz) => {
+  clearInterval(localTimeTimer)
+  if (!tz) return
 
-      const formatTime = (totalSec: number) => {
-        const hh = String(Math.floor(totalSec / 3600) % 24).padStart(2, '0')
-        const mm = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0')
-        const ss = String(totalSec % 60).padStart(2, '0')
-        return `${dayOfWeek}, ${hh}:${mm}:${ss}`
-      }
+  try {
+    const data = await $fetch<{ time: string, day_of_week: string }>('/api/timezone/current', {
+      query: { timezone: tz },
+    })
+    const [h, m, s] = data.time.split(':').map((v: string) => parseInt(v))
+    let seconds = h * 3600 + m * 60 + s
+    const dayOfWeek = data.day_of_week
 
+    const formatTime = (totalSec: number) => {
+      const hh = String(Math.floor(totalSec / 3600) % 24).padStart(2, '0')
+      const mm = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0')
+      const ss = String(totalSec % 60).padStart(2, '0')
+      return `${dayOfWeek}, ${hh}:${mm}:${ss}`
+    }
+
+    localTime.value = formatTime(seconds)
+    localTimeTimer = setInterval(() => {
+      seconds = (seconds + 1) % 86400
       localTime.value = formatTime(seconds)
-      localTimeTimer = setInterval(() => {
-        seconds = (seconds + 1) % 86400
-        localTime.value = formatTime(seconds)
-      }, 1000)
-    }
-    catch {
-      localTime.value = 'Current time unavailable, reload to try again'
-    }
+    }, 1000)
+  }
+  catch {
+    localTime.value = 'Current time unavailable, reload to try again'
   }
 })
 
