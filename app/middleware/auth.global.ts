@@ -1,5 +1,6 @@
 // middleware/auth.global.ts
 export default defineNuxtRouteMiddleware(async (to) => {
+  if (useRuntimeConfig().public.skipAuth && import.meta.dev) return
   // Skip for API auth callbacks
   if (to.path.startsWith('/api/auth/callback')) {
     return

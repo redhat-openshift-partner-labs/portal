@@ -42,6 +42,10 @@ export const getAuthSession = (event: H3Event): SessionPayload | null => {
 }
 
 export const requireAuth = (event: H3Event): SessionPayload => {
+  const config = useRuntimeConfig()
+  if (config.public.skipAuth && process.dev) {
+    return { sub: 'dev', email: 'dev@localhost', name: 'Dev User', picture: '', exp: 0 }
+  }
   const session = getAuthSession(event)
   if (!session) {
     throw createError({ statusCode: 401, message: 'Unauthorized' })

@@ -56,6 +56,7 @@ export default defineNuxtConfig({
       oauthClientId: process.env.OAUTH_CLIENT_ID,
       oauthAuthUrl: process.env.OAUTH_AUTH_URL, // e.g., https://dex.example.com/auth
       appUrl: process.env.APP_URL || 'http://localhost:3000',
+      skipAuth: false, // set via NUXT_PUBLIC_SKIP_AUTH=true in .env
     },
   },
 
