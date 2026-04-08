@@ -75,16 +75,17 @@ watch(open, (isOpen) => {
             Deny Request
           </DialogTitle>
           <DialogClose as-child>
-            <BaseButtonIcon
-              size="sm"
+            <BaseButton
+              size="icon-sm"
               rounded="full"
+              variant="ghost"
               @click="handleCancel"
             >
               <Icon
                 name="lucide:x"
                 class="size-4"
               />
-            </BaseButtonIcon>
+            </BaseButton>
           </DialogClose>
         </div>
 

@@ -38,7 +38,6 @@ graph TB
     subgraph ShurikenLayer["Shuriken UI"]
         BaseCard
         BaseButton
-        BaseButtonIcon
         BaseTag
         BaseTextarea
         BaseCheckbox
@@ -451,14 +450,14 @@ Primary button component.
 
 ---
 
-### BaseButtonIcon
+### BaseButton (icon-only)
 
-Icon-only button.
+Icon-only button using `icon-sm`/`icon-md`/`icon-lg` sizes.
 
 ```vue
-<BaseButtonIcon size="sm" rounded="lg">
+<BaseButton size="icon-sm" rounded="lg">
   <Icon name="lucide:more-horizontal" class="size-4" />
-</BaseButtonIcon>
+</BaseButton>
 ```
 
 ---

@@ -42,15 +42,15 @@ const handleViewDetails = () => {
 <template>
   <DropdownMenuRoot>
     <DropdownMenuTrigger as-child>
-      <BaseButtonIcon
-        size="sm"
+      <BaseButton
+        size="icon-sm"
         rounded="lg"
       >
         <Icon
           name="lucide:more-horizontal"
           class="size-4"
         />
-      </BaseButtonIcon>
+      </BaseButton>
     </DropdownMenuTrigger>
 
     <DropdownMenuPortal>

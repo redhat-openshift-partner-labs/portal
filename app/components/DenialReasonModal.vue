@@ -79,16 +79,17 @@ watch(open, (isOpen) => {
             Denial Reason
           </DialogTitle>
           <DialogClose as-child>
-            <BaseButtonIcon
-              size="sm"
+            <BaseButton
+              size="icon-sm"
               rounded="full"
+              variant="ghost"
               @click="handleClose"
             >
               <Icon
                 name="lucide:x"
                 class="size-4"
               />
-            </BaseButtonIcon>
+            </BaseButton>
           </DialogClose>
         </div>
 
