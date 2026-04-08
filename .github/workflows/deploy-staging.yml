@@ -90,12 +90,19 @@ jobs:
             VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "latest")
           else
             # Automatic trigger from Build Image workflow
-            TAG=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }} --jq '.head_branch // .head_sha' | head -1)
+            # Use head_sha to anchor tag resolution to the exact commit, not HEAD on main.
+            # referenced_workflows[0].run_id is only populated for reusable workflows (uses:)
+            # and must not be used to navigate workflow_run chains.
+            SHA=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }} --jq '.head_sha')
+            TAG=$(git tag --points-at "$SHA" | head -1)
+            if [ -z "$TAG" ]; then
+              TAG=$(git describe --tags "$SHA" --abbrev=0 2>/dev/null || echo "")
+            fi
 
             if [[ "$TAG" =~ ^v[0-9] ]]; then
               VERSION="${TAG#v}"
             else
-              VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "latest")
+              VERSION=$(echo "$SHA" | head -c 7)
             fi
           fi
 

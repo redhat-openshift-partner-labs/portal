@@ -235,6 +235,50 @@ POD=$(oc get pod -l app=portal -n staging -o jsonpath='{.items[0].metadata.name}
 oc exec -n staging "$POD" -- npx tsx prisma/seed.postgresql.ts
 ```
 
+## Version Propagation
+
+When a tag (e.g., `v1.2.3`) is pushed, the version must be reliably threaded through the
+workflow chain: **Build Image → Deploy Staging → Deploy Production**.
+
+### How `workflow_run` behaves
+
+`workflow_run`-triggered workflows always execute against the **repository default branch**
+(`main`), regardless of the branch or tag that triggered the parent workflow. This means:
+
+- `git describe --tags --abbrev=0` with no SHA argument resolves against `main`, not the tag.
+- `github.event.workflow_run.head_branch` reflects the triggering commit's branch/tag name
+  for the *immediate* parent — but becomes unreliable as the chain deepens.
+- `referenced_workflows[0].run_id` from the GitHub Actions API is only populated for
+  **reusable workflows** (`uses:` syntax). It is always empty for regular `workflow_run`
+  chains and must not be used to navigate the workflow ancestry.
+
+### Correct approach
+
+Use the parent run's `head_sha` to anchor tag resolution to the exact commit:
+
+```bash
+SHA=$(gh api repos/$REPO/actions/runs/$RUN_ID --jq '.head_sha')
+TAG=$(git tag --points-at "$SHA" | head -1)
+# Fallback: nearest tag reachable from that commit (not from HEAD on main)
+if [ -z "$TAG" ]; then
+  TAG=$(git describe --tags "$SHA" --abbrev=0 2>/dev/null || echo "")
+fi
+```
+
+`git tag --points-at <sha>` returns only tags that point directly at that commit.
+`git describe --tags <sha>` finds the nearest reachable ancestor tag, both anchored to the
+correct SHA rather than `HEAD` on `main`.
+
+### Workflow chain version lookup
+
+| Workflow | Parent run lookup |
+|----------|------------------|
+| Deploy Staging | `github.event.workflow_run.id` → Build Image run → `head_sha` |
+| Deploy Production | `github.event.workflow_run.id` → Deploy Staging run → `head_sha` |
+
+Both workflows use the same SHA-based resolution so that the version is always derived from
+the tagged commit, not from whatever `HEAD` on `main` happens to describe.
+
 ## Configuration
 
 ### Required Secrets

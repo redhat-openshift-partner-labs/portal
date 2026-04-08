@@ -44,19 +44,23 @@ jobs:
             INPUT_VERSION="${{ inputs.version }}"
             echo "version=${INPUT_VERSION#v}" >> $GITHUB_OUTPUT
           else
-            # Get the tag from staging workflow's triggering run
-            # Navigate back: Deploy Staging -> Build Image -> tag
-            BUILD_RUN_ID=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }} --jq '.referenced_workflows[0].run_id // empty')
-            if [ -n "$BUILD_RUN_ID" ]; then
-              TAG=$(gh api repos/${{ github.repository }}/actions/runs/$BUILD_RUN_ID --jq '.head_branch' | head -1)
-            else
-              # Fallback: get from git
-              TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "latest")
+            # Use head_sha from the staging workflow run to anchor tag resolution to the
+            # exact commit, not HEAD on main. referenced_workflows[0].run_id is only
+            # populated for reusable workflows (uses:) and must not be used here.
+            SHA=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }} --jq '.head_sha')
+            TAG=$(git tag --points-at "$SHA" | head -1)
+            if [ -z "$TAG" ]; then
+              TAG=$(git describe --tags "$SHA" --abbrev=0 2>/dev/null || echo "")
             fi
-            VERSION="${TAG#v}"
+
+            if [[ "$TAG" =~ ^v[0-9] ]]; then
+              VERSION="${TAG#v}"
+            else
+              VERSION=$(echo "$SHA" | head -c 7)
+            fi
             echo "version=$VERSION" >> $GITHUB_OUTPUT
           fi
-          echo "Deploying version: ${{ steps.version.outputs.version || env.VERSION }}"
+          echo "Deploying version: ${{ steps.version.outputs.version }}"
         env:
           GH_TOKEN: ${{ github.token }}
 
